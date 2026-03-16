@@ -263,6 +263,58 @@ input:not(.bvr-inp):not(.param-inp):focus,textarea:focus{border-color:var(--blue
   <span id="sync-txt">Synchronisé</span>
 </div>
 
+<!-- ── EDIT MODAL ── -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg1);border:1px solid var(--border2);border-radius:18px;padding:28px;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.7)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">
+      <div style="font-size:17px;font-weight:800;letter-spacing:-.03em">✏️ Modifier la transaction</div>
+      <button onclick="closeEditModal()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:13px;font-family:inherit">✕</button>
+    </div>
+
+    <!-- Libellé -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Libellé</label>
+      <input id="edit-label" type="text" style="width:100%">
+    </div>
+
+    <!-- Date + Montant -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Date</label>
+        <input id="edit-date" type="date" style="width:100%">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Montant (€)</label>
+        <input id="edit-amount" type="text" style="width:100%">
+      </div>
+    </div>
+
+    <!-- Compte analytique -->
+    <div style="margin-bottom:20px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Compte analytique</label>
+      <select id="edit-account" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none"></select>
+    </div>
+
+    <!-- Règle permanente -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:20px">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+        <input type="checkbox" id="edit-rule" style="width:16px;height:16px;margin-top:2px;accent-color:var(--blue);flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:2px">Créer une règle permanente</div>
+          <div style="font-size:12px;color:var(--text2)">Les prochaines transactions avec ce libellé seront automatiquement classées dans ce compte</div>
+        </div>
+      </label>
+      <div id="edit-rule-preview" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);border-radius:6px;font-size:11px;font-family:monospace;color:var(--blue)"></div>
+    </div>
+
+    <!-- Boutons -->
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-blue" style="flex:1;padding:12px" onclick="saveEdit()">💾 Sauvegarder</button>
+      <button class="btn btn-ghost" onclick="closeEditModal()" style="padding:12px 18px">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── NAV ── -->
 <nav id="nav">
   <a class="logo" href="#" onclick="showTab('dashboard');return false">
@@ -422,12 +474,30 @@ input:not(.bvr-inp):not(.param-inp):focus,textarea:focus{border-color:var(--blue
     <button class="btn btn-red btn-sm" onclick="clearAll()">🗑 Tout effacer</button>
   </div>
   <div class="card" style="margin-bottom:14px">
-    <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--text2)">➕ Ajouter manuellement</div>
-    <div class="form-row">
-      <input type="date" id="m-date" style="flex:0 0 140px">
-      <input type="text" id="m-label" placeholder="Libellé de l'opération">
-      <input type="text" id="m-amt" placeholder="Montant (− = débit)" style="flex:0 0 148px">
-      <button class="btn btn-blue btn-sm" onclick="addManual()">Ajouter</button>
+    <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:var(--text2)">➕ Ajouter manuellement</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Date</label>
+        <input type="date" id="m-date">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Montant (€)</label>
+        <input type="text" id="m-amt" placeholder="Ex: -58.90 ou 750">
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Libellé</label>
+      <input type="text" id="m-label" placeholder="Description de la transaction">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Compte analytique</label>
+      <select id="m-account" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none" onchange="updateManualClass()">
+        <option value="">— Sélectionne un compte —</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-blue" style="flex:1" onclick="addManual()">➕ Ajouter la transaction</button>
+      <div style="font-size:12px;color:var(--text3)" id="m-class-preview"></div>
     </div>
   </div>
   <input type="text" id="search" placeholder="🔍 Rechercher dans les libellés…" style="margin-bottom:12px" oninput="renderTX()">
@@ -502,7 +572,51 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
 
 <!-- ════════════════════ COMPTES ════════════════════ -->
 <div id="page-comptes" class="page">
-  <div class="page-hd"><h1>Plan de Comptes</h1><p>Règles de catégorisation automatique par mot-clé</p></div>
+  <div class="page-hd"><h1>Plan de Comptes</h1><p>Comptes prédéfinis + tes comptes personnalisés</p></div>
+
+  <!-- Ajouter un compte personnalisé -->
+  <div class="card" style="margin-bottom:18px;border-color:rgba(77,159,255,.3)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:32px;height:32px;background:rgba(77,159,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">➕</div>
+      <div style="font-weight:700;font-size:14px">Créer un compte analytique personnalisé</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Code (ex: CV300)</label>
+        <input type="text" id="new-code" placeholder="Ex: CV300, CF300, P400…" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Classe</label>
+        <select id="new-cls" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none">
+          <option value="P">💵 Produits</option>
+          <option value="CV" selected>📉 Charges Variables</option>
+          <option value="CF">📌 Charges Fixes</option>
+          <option value="I">💎 Investissements</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Libellé</label>
+      <input type="text" id="new-lib" placeholder="Ex: Courses bio, Remboursement médical…">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Mots-clés de reconnaissance (séparés par |)</label>
+      <input type="text" id="new-kw" placeholder="Ex: BIOCOOP | NATURALIA | BIO C BON">
+    </div>
+    <button class="btn btn-blue" onclick="addCustomAccount()" style="width:100%">➕ Créer ce compte</button>
+    <div id="new-acc-msg" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Règles permanentes -->
+  <div class="card" style="margin-bottom:18px" id="rules-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:700;font-size:14px">🔧 Règles de catégorisation personnalisées</div>
+      <span style="font-size:12px;color:var(--text3)" id="rules-count">0 règle</span>
+    </div>
+    <div id="rules-list"></div>
+  </div>
+
+  <!-- Plan de comptes complet -->
   <div id="comptes-content"></div>
 </div>
 
@@ -548,6 +662,7 @@ const PLAN=[
   {code:"I220",lib:"Crypto-monnaies",cls:"I",sub:"Investissements",kw:["CRYPTO","BINANCE","COINBASE","KRAKEN"]},
   {code:"I300",lib:"Capital amorti prêt (BNP Crédit)",cls:"I",sub:"Immobilier",kw:["AMORTISSEMENT PRET 01812","AMORTISSEMENT PRET BNP"]},
 ];
+const PLAN_BASE_LENGTH = PLAN.length; // Used to reset custom accounts on merge
 
 const DEFAULT_BUDGETS={
   P100:1500,P110:769,P120:1384,P130:0,P200:1500,P210:200,P300:0,
@@ -601,11 +716,12 @@ async function doLogin(){
   err.style.display="none";
   USER_ID = await hashPassphrase(pass);
   localStorage.setItem("tra_pm_uid", USER_ID);
-  // Init Supabase
   SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById("login-screen").style.display="none";
+  loadAnnualGoals(); loadRules(); loadCustomAccounts();
   syncShow("syncing","Chargement des données…");
   await loadFromSupabase();
+  populateAccountDropdowns();
   syncShow("ok","Synchronisé ✓");
 }
 
@@ -1078,19 +1194,40 @@ function renderTX(){
       <td class="hide-sm"><span style="font-family:monospace;font-size:10px;color:var(--text3)">${t.code}</span><span style="margin-left:6px;font-size:11px;color:var(--text2)">${esc(t.lib)}</span></td>
       <td><span class="badge b-${t.cls||"q"}">${t.cls||"?"}</span></td>
       <td class="r" style="font-weight:700;white-space:nowrap;color:${t.amount>0?"var(--green)":"var(--red)"}">${fmt(t.amount)}</td>
-      <td><button class="btn btn-red btn-sm" onclick="delTx('${t.id}')">✕</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal('${t.id}')" style="margin-right:4px" title="Modifier">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="delTx('${t.id}')" title="Supprimer">✕</button>
+      </td>
     </tr>`).join("");
 }
 
 // ─── COMPTES ──────────────────────────────────────────────────────────────────
 function renderComptes(A){
+  renderRulesList();
   let h="";
   for(const cls of["P","CV","CF","I"]){
     const accs=PLAN.filter(a=>a.cls===cls),total=A.byClass[cls]||0;
-    h+=`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div style="font-weight:800;font-size:14px;color:${CC[cls]}">${CI[cls]} ${CL[cls]}</div><span style="font-weight:700;color:${CC[cls]}">${fmt(total)}</span></div>`;
+    h+=`<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <div style="font-weight:800;font-size:14px;color:${CC[cls]}">${CI[cls]} ${CL[cls]}</div>
+        <span style="font-weight:700;color:${CC[cls]}">${fmt(total)}</span>
+      </div>`;
     for(const acc of accs){
       const v=A.totals[acc.code]||0;
-      h+=`<div class="cpt-row"><span class="cpt-code">${acc.code}</span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:${v>0?"var(--text)":"var(--text3)"}">${esc(acc.lib)}</div><div class="cpt-kw">${acc.kw.slice(0,5).join(" · ")}</div></div><span style="font-weight:700;font-size:12px;color:${CC[cls]};white-space:nowrap">${v>0?fmt(v):"—"}</span></div>`;
+      h+=`<div class="cpt-row" style="${acc.custom?"border-left:2px solid rgba(77,159,255,.4);":""}">
+        <span class="cpt-code">${acc.code}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:${v>0?"var(--text)":"var(--text3)"}">
+            ${esc(acc.lib)}
+            ${acc.custom?'<span style="font-size:10px;background:rgba(77,159,255,.15);color:var(--blue);padding:1px 6px;border-radius:4px;margin-left:6px">★ perso</span>':''}
+          </div>
+          <div class="cpt-kw">${acc.kw.slice(0,6).join(" · ")||"(aucun mot-clé)"}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:700;font-size:12px;color:${CC[cls]};white-space:nowrap">${v>0?fmt(v):"—"}</span>
+          ${acc.custom?`<button class="btn btn-red btn-sm" onclick="deleteCustomAccount('${acc.code}')" title="Supprimer ce compte">✕</button>`:''}
+        </div>
+      </div>`;
     }
     h+=`</div>`;
   }
@@ -1112,14 +1249,142 @@ function importCSV(){
   showMsg(`✅ ${parsed.length} transactions importées (${detail})${ncat?` · ${ncat} non catégorisées`:""}`, "ok");
 }
 function showMsg(msg,t){document.getElementById("imp-msg").innerHTML=`<div class="alert a-${t==="ok"?"ok":"err"}">${msg}</div>`}
+// ─── COMPTES PERSONNALISÉS ────────────────────────────────────────────────────
+let CUSTOM_ACCOUNTS = []; // [{code, lib, cls, sub, kw:[]}]
+
+function loadCustomAccounts(){
+  try{ CUSTOM_ACCOUNTS=JSON.parse(localStorage.getItem("tra_custom_accs")||"[]"); }catch(e){ CUSTOM_ACCOUNTS=[]; }
+  // Merge into PLAN dynamically
+  mergeCustomInPlan();
+}
+function saveCustomAccounts(){
+  localStorage.setItem("tra_custom_accs",JSON.stringify(CUSTOM_ACCOUNTS));
+  mergeCustomInPlan();
+}
+function mergeCustomInPlan(){
+  // Remove previously merged custom accounts
+  while(PLAN.length > PLAN_BASE_LENGTH) PLAN.pop();
+  // Add current custom accounts
+  CUSTOM_ACCOUNTS.forEach(acc=>{
+    if(!PLAN.find(a=>a.code===acc.code)){
+      PLAN.push({code:acc.code, lib:acc.lib, cls:acc.cls, sub:acc.sub||"Personnalisé", kw:acc.kw||[], custom:true});
+    }
+  });
+  // Also update DEFAULT_BUDGETS
+  CUSTOM_ACCOUNTS.forEach(acc=>{ if(DEFAULT_BUDGETS[acc.code]===undefined) DEFAULT_BUDGETS[acc.code]=0; });
+}
+
+function addCustomAccount(){
+  const code = document.getElementById("new-code").value.trim().toUpperCase();
+  const lib  = document.getElementById("new-lib").value.trim();
+  const cls  = document.getElementById("new-cls").value;
+  const kwRaw= document.getElementById("new-kw").value.trim();
+  const kw   = kwRaw ? kwRaw.split("|").map(k=>k.trim()).filter(Boolean) : [];
+  const msgEl= document.getElementById("new-acc-msg");
+
+  if(!code||!lib){ msgEl.innerHTML='<div class="alert a-err">Code et libellé obligatoires.</div>'; return; }
+  if(!/^[PCVI]/.test(code)){ msgEl.innerHTML='<div class="alert a-err">Le code doit commencer par P, CV, CF ou I (ex: CV300).</div>'; return; }
+  if(PLAN.find(a=>a.code===code)){ msgEl.innerHTML='<div class="alert a-err">Ce code existe déjà.</div>'; return; }
+
+  const newAcc = {code, lib, cls, sub:"Personnalisé", kw, custom:true};
+  CUSTOM_ACCOUNTS.push(newAcc);
+  saveCustomAccounts();
+
+  // Clear form
+  ["new-code","new-lib","new-kw"].forEach(id=>document.getElementById(id).value="");
+  msgEl.innerHTML=`<div class="alert a-ok">✅ Compte ${code} — ${lib} créé ! Il apparaît maintenant dans tous les menus.</div>`;
+  setTimeout(()=>msgEl.innerHTML="", 3000);
+
+  // Refresh dropdowns + comptes page
+  populateAccountDropdowns();
+  render();
+}
+
+function deleteCustomAccount(code){
+  if(!confirm(`Supprimer le compte ${code} ? Les transactions associées garderont ce code mais il n'apparaîtra plus dans les menus.`)) return;
+  CUSTOM_ACCOUNTS=CUSTOM_ACCOUNTS.filter(a=>a.code!==code);
+  saveCustomAccounts();
+  populateAccountDropdowns();
+  render();
+}
+
+// ─── POPULATE ACCOUNT DROPDOWNS ──────────────────────────────────────────────
+function populateAccountDropdowns(){
+  const grpLabels={P:"💵 Produits",CV:"📉 Charges Variables",CF:"📌 Charges Fixes",I:"💎 Investissements"};
+  ["m-account","edit-account"].forEach(selId=>{
+    const sel=document.getElementById(selId); if(!sel) return;
+    const current=sel.value;
+    sel.innerHTML=selId==="m-account"?'<option value="">— Sélectionne un compte —</option>':'';
+    ["P","CV","CF","I"].forEach(cls=>{
+      const grp=document.createElement("optgroup"); grp.label=grpLabels[cls];
+      PLAN.filter(a=>a.cls===cls).forEach(acc=>{
+        const opt=document.createElement("option");
+        opt.value=acc.code;
+        opt.textContent=`${acc.code} — ${acc.lib}${acc.custom?" ★":""}`;
+        if(acc.code===current) opt.selected=true;
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
+    });
+  });
+}
+
+function updateManualClass(){
+  const code=document.getElementById("m-account").value;
+  const acc=PLAN.find(a=>a.code===code);
+  const preview=document.getElementById("m-class-preview");
+  if(acc) preview.innerHTML=`<span class="badge b-${acc.cls}">${acc.cls}</span> <span style="font-size:12px">${acc.lib}</span>`;
+  else preview.innerHTML="";
+}
+
+// ─── RENDER RULES LIST ────────────────────────────────────────────────────────
+function renderRulesList(){
+  const el=document.getElementById("rules-list");
+  const cnt=document.getElementById("rules-count");
+  if(!el||!cnt) return;
+  cnt.textContent=RULES.length+" règle"+(RULES.length>1?"s":"");
+  if(!RULES.length){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px 0">Aucune règle pour l\'instant. Utilise le bouton ✏️ sur une transaction et coche "Créer une règle permanente".</div>';
+    return;
+  }
+  el.innerHTML=RULES.map((r,i)=>{
+    const acc=PLAN.find(a=>a.code===r.code);
+    return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <div style="flex:1">
+        <span style="font-family:monospace;font-size:12px;background:var(--bg2);padding:2px 7px;border-radius:4px;color:var(--blue)">"${esc(r.keyword)}"</span>
+        <span style="color:var(--text3);margin:0 8px">→</span>
+        <span class="badge b-${r.cls}">${r.cls}</span>
+        <span style="margin-left:6px;font-size:13px">${esc(r.lib)}</span>
+        <span style="font-family:monospace;font-size:10px;color:var(--text3);margin-left:6px">${r.code}</span>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="deleteRule(${i})">✕</button>
+    </div>`;
+  }).join("");
+}
+
+function deleteRule(i){
+  RULES.splice(i,1); saveRules(); renderRulesList();
+}
+
+// ─── MANUAL ADD ──────────────────────────────────────────────────────────────
 function addManual(){
-  const date=document.getElementById("m-date").value,label=document.getElementById("m-label").value.trim();
+  const date=document.getElementById("m-date").value;
+  const label=document.getElementById("m-label").value.trim();
   const amount=parseFloat(document.getElementById("m-amt").value.replace(",","."));
-  if(!date||!label||isNaN(amount))return;
-  const acc=categorize(label,amount);
+  const selCode=document.getElementById("m-account").value;
+  if(!date||!label||isNaN(amount)){ alert("Date, libellé et montant obligatoires."); return; }
+  // Use selected account if chosen, otherwise auto-categorize
+  let acc;
+  if(selCode){
+    acc=PLAN.find(a=>a.code===selCode)||{code:selCode,lib:"Personnalisé",cls:"?"};
+  } else {
+    acc=categorize(label,amount);
+  }
   TXS.push({id:Date.now()+Math.random(),date,label,amount,code:acc.code,lib:acc.lib,cls:acc.cls});
   save();
   ["m-date","m-label","m-amt"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("m-account").value="";
+  document.getElementById("m-class-preview").innerHTML="";
 }
 function delTx(id){TXS=TXS.filter(t=>String(t.id)!==String(id));save()}
 function clearAll(){if(!confirm("Supprimer TOUTES les transactions ?"))return;TXS=[];save()}
@@ -1394,6 +1659,101 @@ function renderAnnualGoals(){
   }).join("");
 }
 
+// ─── RÈGLES PERMANENTES ──────────────────────────────────────────────────────
+let RULES = [];
+function loadRules(){ try{ RULES=JSON.parse(localStorage.getItem("tra_pm_rules")||"[]"); }catch(e){ RULES=[]; } }
+function saveRules(){ localStorage.setItem("tra_pm_rules",JSON.stringify(RULES)); }
+
+// ─── EDIT MODAL ──────────────────────────────────────────────────────────────
+let editingId = null;
+
+function openEditModal(id){
+  const t=TXS.find(x=>String(x.id)===String(id)); if(!t) return;
+  editingId=id;
+  document.getElementById("edit-label").value=t.label||"";
+  document.getElementById("edit-date").value=t.date||"";
+  document.getElementById("edit-amount").value=t.amount||"";
+  document.getElementById("edit-rule").checked=false;
+  document.getElementById("edit-rule-preview").style.display="none";
+
+  const sel=document.getElementById("edit-account");
+  sel.innerHTML="";
+  const grpLabels={P:"💵 Produits",CV:"📉 Charges Variables",CF:"📌 Charges Fixes",I:"💎 Investissements"};
+  ["P","CV","CF","I"].forEach(cls=>{
+    const grp=document.createElement("optgroup"); grp.label=grpLabels[cls];
+    PLAN.filter(a=>a.cls===cls).forEach(acc=>{
+      const opt=document.createElement("option");
+      opt.value=acc.code; opt.textContent=`${acc.code} — ${acc.lib}`;
+      if(acc.code===t.code) opt.selected=true;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+  document.getElementById("edit-rule").onchange=updateRulePreview;
+  sel.onchange=updateRulePreview;
+  document.getElementById("edit-modal").style.display="flex";
+  setTimeout(()=>document.getElementById("edit-label").focus(),100);
+}
+
+function updateRulePreview(){
+  const checked=document.getElementById("edit-rule").checked;
+  const label=document.getElementById("edit-label").value.trim();
+  const code=document.getElementById("edit-account").value;
+  const acc=PLAN.find(a=>a.code===code);
+  const preview=document.getElementById("edit-rule-preview");
+  if(checked&&label&&acc){
+    const kw=label.split(/\s+/).slice(0,3).join(" ").toUpperCase();
+    preview.textContent=`"${kw}" → ${code} (${acc.lib})`;
+    preview.style.display="block";
+  } else { preview.style.display="none"; }
+}
+
+function closeEditModal(){
+  document.getElementById("edit-modal").style.display="none";
+  editingId=null;
+}
+
+async function saveEdit(){
+  if(!editingId) return;
+  const t=TXS.find(x=>String(x.id)===String(editingId)); if(!t) return;
+  const newLabel=document.getElementById("edit-label").value.trim();
+  const newDate=document.getElementById("edit-date").value;
+  const newAmount=parseFloat(document.getElementById("edit-amount").value.replace(",","."));
+  const newCode=document.getElementById("edit-account").value;
+  const acc=PLAN.find(a=>a.code===newCode)||{code:newCode,lib:"Non catégorisé",cls:"?"};
+  const createRule=document.getElementById("edit-rule").checked;
+  if(!newLabel||!newDate||isNaN(newAmount)){alert("Remplis tous les champs.");return;}
+
+  // Update the transaction
+  t.label=newLabel; t.date=newDate; t.amount=newAmount;
+  t.code=newCode; t.lib=acc.lib; t.cls=acc.cls;
+
+  // Create + apply permanent rule
+  if(createRule&&newLabel){
+    const kw=newLabel.split(/\s+/).slice(0,3).join(" ").toUpperCase();
+    RULES=RULES.filter(r=>r.keyword.toUpperCase()!==kw);
+    RULES.unshift({keyword:kw,code:newCode,lib:acc.lib,cls:acc.cls});
+    saveRules();
+    let fixed=0;
+    TXS.forEach(tx=>{
+      if(String(tx.id)!==String(editingId)&&tx.label.toUpperCase().includes(kw)){
+        tx.code=newCode; tx.lib=acc.lib; tx.cls=acc.cls; fixed++;
+      }
+    });
+    if(fixed>0) syncShow("syncing",`Règle appliquée à ${fixed+1} transactions…`);
+  }
+  closeEditModal();
+  await save();
+  syncShow("ok","Modification sauvegardée ✓");
+}
+
+// Backdrop click closes modal
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("edit-modal").addEventListener("click",function(e){
+    if(e.target===this) closeEditModal();
+  });
+});
+
 load();
 function logout(){
   if(!confirm("Se déconnecter ? Tes données restent en sécurité sur Supabase.")) return;
@@ -1422,8 +1782,13 @@ function load(){
     SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById("login-screen").style.display="none";
     loadAnnualGoals();
+    loadRules();
+    loadCustomAccounts();
     syncShow("syncing","Chargement…");
-    loadFromSupabase().then(()=>syncShow("ok","Synchronisé ✓"));
+    loadFromSupabase().then(()=>{
+      populateAccountDropdowns();
+      syncShow("ok","Synchronisé ✓");
+    });
   }
   // Otherwise login screen stays visible
 }
