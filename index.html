@@ -1402,7 +1402,7 @@ function logout(){
 }
 function load(){
   // Check if Supabase is configured
-  if(SUPABASE_URL==="https://xbdcghiphgahfztjregb.supabase.co"){
+  if(!SUPABASE_URL||SUPABASE_URL.length<10){
     // Not configured yet — show a clear message
     document.getElementById("login-screen").innerHTML=`
       <div class="login-box">
