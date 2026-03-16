@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#050912">
 <title>TRA·PM — Pascal Massolin</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ── RESET & BASE ─────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -200,9 +201,67 @@ input:not(.bvr-inp):not(.param-inp):focus,textarea:focus{border-color:var(--blue
   .card{padding:14px}
   .two-col{gap:10px}
 }
+
+/* ── LOGIN SCREEN ────────────────────────────────────────── */
+#login-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.login-box{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:20px;padding:40px 36px;
+  width:100%;max-width:420px;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);
+  text-align:center;
+}
+.login-logo{width:56px;height:56px;background:linear-gradient(135deg,#1a6fe8,#7c3aed);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:white;margin:0 auto 20px;box-shadow:0 4px 20px rgba(100,80,240,.4)}
+.login-title{font-size:22px;font-weight:800;letter-spacing:-.04em;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.5}
+.login-err{background:rgba(255,92,122,.08);border:1px solid rgba(255,92,122,.2);color:var(--red);padding:10px 14px;border-radius:var(--rs);font-size:13px;margin-top:10px;display:none}
+
+/* ── SYNC INDICATOR ──────────────────────────────────────── */
+#sync-bar{
+  position:fixed;bottom:16px;right:16px;z-index:500;
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:30px;padding:8px 14px;
+  font-size:12px;display:flex;align-items:center;gap:7px;
+  box-shadow:var(--sh);opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+#sync-bar.visible{opacity:1}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.sync-dot.syncing{background:var(--amber);animation:pulse .8s infinite}
+.sync-dot.error{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
 <body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">₱</div>
+    <div class="login-title">TRA·PM</div>
+    <div class="login-sub">Tableau de Résultats Analytique Personnel<br>Connecte-toi pour accéder à tes données sur tous tes appareils</div>
+    <div style="text-align:left;margin-bottom:8px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase">Ton code d'accès personnel</label>
+    </div>
+    <input type="password" id="passphrase-input" placeholder="Entre ton code d'accès…" style="margin-bottom:8px;font-size:16px;letter-spacing:.1em" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-blue" style="width:100%;padding:12px;font-size:15px;margin-top:4px" onclick="doLogin()">Accéder à mon TRA →</button>
+    <div class="login-err" id="login-err">Code incorrect ou vide. Entre ton code d'accès.</div>
+    <div style="margin-top:20px;padding:12px;background:var(--bg2);border-radius:var(--rs);font-size:11px;color:var(--text3);text-align:left">
+      💡 <strong>Première utilisation ?</strong> Choisis un code d'accès et retiens-le bien — c'est lui qui lie tes données sur tous tes appareils. Il n'y a pas de récupération par email.
+    </div>
+  </div>
+</div>
+
+<!-- ── SYNC BAR ── -->
+<div id="sync-bar">
+  <div class="sync-dot" id="sync-dot"></div>
+  <span id="sync-txt">Synchronisé</span>
+</div>
 
 <!-- ── NAV ── -->
 <nav id="nav">
@@ -223,6 +282,7 @@ input:not(.bvr-inp):not(.param-inp):focus,textarea:focus{border-color:var(--blue
     <select class="month-sel" id="filter-month" onchange="render()">
       <option value="all">Toute période</option>
     </select>
+    <button class="btn btn-ghost btn-sm" onclick="logout()" title="Se déconnecter" style="padding:5px 10px;font-size:11px">⎋</button>
   </div>
 </nav>
 
@@ -507,9 +567,107 @@ const MONTHS=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov
 
 let TXS=[],BUDGETS={},chartPie=null,chartBar=null,chartProj=null;
 
-// ─── STORAGE ──────────────────────────────────────────────────────────────────
-function save(){localStorage.setItem("tra_pm_txs",JSON.stringify(TXS));updateMonthFilter();render()}
-function saveBudget(code,val){BUDGETS[code]=val;localStorage.setItem("tra_pm_bud",JSON.stringify(BUDGETS));renderBVR()}
+// ─── SUPABASE CONFIG ─────────────────────────────────────────────────────────
+// ⚠️  Remplace ces deux valeurs par tes vraies clés Supabase
+const SUPABASE_URL  = "https://xbdcghiphgahfztjregb.supabase.co";
+const SUPABASE_ANON = "sb_publishable_s5PMwvFL0wTB4sjgL5_UMA_IhnR6UAu";
+let SB = null;   // Supabase client
+let USER_ID = ""; // Identifiant unique de l'utilisateur
+
+// ─── SYNC INDICATOR ──────────────────────────────────────────────────────────
+let syncTimer=null;
+function syncShow(state, txt){
+  const bar=document.getElementById("sync-bar");
+  const dot=document.getElementById("sync-dot");
+  const label=document.getElementById("sync-txt");
+  dot.className="sync-dot"+(state==="syncing"?" syncing":state==="error"?" error":"");
+  label.textContent=txt;
+  bar.classList.add("visible");
+  clearTimeout(syncTimer);
+  if(state==="ok") syncTimer=setTimeout(()=>bar.classList.remove("visible"),2500);
+}
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+async function hashPassphrase(pass){
+  // SHA-256 of passphrase → hex string → used as user_id
+  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(pass.trim().toLowerCase()));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,32);
+}
+
+async function doLogin(){
+  const pass=document.getElementById("passphrase-input").value;
+  const err=document.getElementById("login-err");
+  if(!pass.trim()){ err.style.display="block"; return; }
+  err.style.display="none";
+  USER_ID = await hashPassphrase(pass);
+  localStorage.setItem("tra_pm_uid", USER_ID);
+  // Init Supabase
+  SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  document.getElementById("login-screen").style.display="none";
+  syncShow("syncing","Chargement des données…");
+  await loadFromSupabase();
+  syncShow("ok","Synchronisé ✓");
+}
+
+// ─── SUPABASE: LOAD ──────────────────────────────────────────────────────────
+async function loadFromSupabase(){
+  try{
+    // Load transactions
+    const {data:txData,error:txErr}=await SB.from("transactions").select("*").eq("user_id",USER_ID);
+    if(!txErr&&txData) TXS=txData.map(r=>({id:r.id,date:r.date,label:r.label,amount:r.amount,bank:r.bank,code:r.code,lib:r.lib,cls:r.cls}));
+    // Load budgets
+    const {data:bData,error:bErr}=await SB.from("budgets").select("*").eq("user_id",USER_ID);
+    if(!bErr&&bData){ BUDGETS={}; bData.forEach(r=>BUDGETS[r.code]=r.value); }
+    // Load annual goals
+    const {data:gData,error:gErr}=await SB.from("annual_goals").select("*").eq("user_id",USER_ID);
+    if(!gErr&&gData){ ANNUAL_GOALS={}; gData.forEach(r=>ANNUAL_GOALS[r.key]=r.value); }
+    // Fill defaults
+    for(const k in DEFAULT_BUDGETS) if(BUDGETS[k]===undefined) BUDGETS[k]=DEFAULT_BUDGETS[k];
+    for(const k in DEFAULT_ANNUAL) if(ANNUAL_GOALS[k]===undefined) ANNUAL_GOALS[k]=DEFAULT_ANNUAL[k].val;
+    updateMonthFilter(); render();
+  }catch(e){ console.error("Erreur chargement:",e); syncShow("error","Erreur de connexion"); }
+}
+
+// ─── SUPABASE: SAVE ──────────────────────────────────────────────────────────
+async function save(){
+  updateMonthFilter(); render();
+  if(!SB||!USER_ID) return;
+  syncShow("syncing","Synchronisation…");
+  try{
+    // Upsert all transactions (delete all then insert — simple approach)
+    await SB.from("transactions").delete().eq("user_id",USER_ID);
+    if(TXS.length>0){
+      const rows=TXS.map(t=>({id:t.id.toString(),user_id:USER_ID,date:t.date,label:t.label,amount:t.amount,bank:t.bank||null,code:t.code,lib:t.lib,cls:t.cls}));
+      // Insert by batches of 200
+      for(let i=0;i<rows.length;i+=200){
+        await SB.from("transactions").insert(rows.slice(i,i+200));
+      }
+    }
+    syncShow("ok","Synchronisé ✓");
+  }catch(e){ console.error("Erreur sauvegarde:",e); syncShow("error","Erreur sync — réessaie"); }
+}
+
+async function saveBudget(code,val){
+  BUDGETS[code]=val; renderBVR();
+  if(!SB||!USER_ID) return;
+  syncShow("syncing","Sync…");
+  try{
+    await SB.from("budgets").upsert({user_id:USER_ID,code,value:val},{onConflict:"user_id,code"});
+    syncShow("ok","Synchronisé ✓");
+  }catch(e){ syncShow("error","Erreur sync"); }
+}
+
+async function saveAnnualGoals(){
+  localStorage.setItem("tra_annual_goals",JSON.stringify(ANNUAL_GOALS));
+  if(!SB||!USER_ID) return;
+  syncShow("syncing","Sync…");
+  try{
+    const rows=Object.entries(ANNUAL_GOALS).map(([key,value])=>({user_id:USER_ID,key,value}));
+    await SB.from("annual_goals").delete().eq("user_id",USER_ID);
+    if(rows.length>0) await SB.from("annual_goals").insert(rows);
+    syncShow("ok","Synchronisé ✓");
+  }catch(e){ syncShow("error","Erreur sync"); }
+}
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 function fmt(n){return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n||0)}
@@ -1237,12 +1395,37 @@ function renderAnnualGoals(){
 }
 
 load();
+function logout(){
+  if(!confirm("Se déconnecter ? Tes données restent en sécurité sur Supabase.")) return;
+  localStorage.removeItem("tra_pm_uid");
+  location.reload();
+}
 function load(){
-  try{TXS=JSON.parse(localStorage.getItem("tra_pm_txs")||"[]")}catch(e){TXS=[]}
-  try{BUDGETS=JSON.parse(localStorage.getItem("tra_pm_bud")||"{}")}catch(e){BUDGETS={}}
-  for(const k in DEFAULT_BUDGETS) if(BUDGETS[k]===undefined) BUDGETS[k]=DEFAULT_BUDGETS[k];
-  loadAnnualGoals();
-  updateMonthFilter(); render();
+  // Check if Supabase is configured
+  if(SUPABASE_URL==="https://xbdcghiphgahfztjregb.supabase.co"){
+    // Not configured yet — show a clear message
+    document.getElementById("login-screen").innerHTML=`
+      <div class="login-box">
+        <div class="login-logo">⚙️</div>
+        <div class="login-title">Configuration requise</div>
+        <div class="login-sub" style="color:var(--red)">Les clés Supabase ne sont pas encore configurées dans le fichier HTML.</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:12px;color:var(--text2);text-align:left;margin-top:16px;font-family:monospace">
+          Remplace SUPABASE_URL et SUPABASE_ANON<br>par tes vraies clés (lignes 570-571)
+        </div>
+      </div>`;
+    return;
+  }
+  // Check if user was already logged in
+  const savedUID = localStorage.getItem("tra_pm_uid");
+  if(savedUID){
+    USER_ID = savedUID;
+    SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    document.getElementById("login-screen").style.display="none";
+    loadAnnualGoals();
+    syncShow("syncing","Chargement…");
+    loadFromSupabase().then(()=>syncShow("ok","Synchronisé ✓"));
+  }
+  // Otherwise login screen stays visible
 }
 
 </script>
