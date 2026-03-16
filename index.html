@@ -2,168 +2,225 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050912">
 <title>TRA·PM — Pascal Massolin</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:#070b14; --bg1:#0f1729; --bg2:#0a0e1a; --bg3:#090e1c;
-  --border:#1e2d4a; --text:#e2e8f0; --muted:#64748b; --muted2:#475569;
-  --green:#22c55e; --amber:#f59e0b; --orange:#f97316; --blue:#3b82f6;
-  --red:#f87171; --lbg-g:#0a1f0a; --lbg-a:#1a1200; --lbg-o:#1a0d00; --lbg-b:#071020;
-  --r:12px; --rs:8px;
-}
+/* ── RESET & BASE ─────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
-::-webkit-scrollbar{width:3px;height:3px}
+:root{
+  --bg:      #050912;
+  --bg1:     #0d1526;
+  --bg2:     #080f1e;
+  --bg3:     #0a1322;
+  --surface: #111d35;
+  --border:  #1a2d50;
+  --border2: #243d6a;
+  --text:    #e8edf5;
+  --text2:   #8fa3c4;
+  --text3:   #4d6690;
+  --green:   #10d97e;
+  --green2:  #065f3a;
+  --amber:   #f5a623;
+  --amber2:  #7a4d08;
+  --orange:  #ff6b35;
+  --orange2: #7a2e0d;
+  --blue:    #4d9fff;
+  --blue2:   #0d2d5e;
+  --purple:  #a78bfa;
+  --red:     #ff5c7a;
+  --red2:    #5c0f1f;
+  --r:14px; --rs:9px; --rxs:6px;
+  --sh: 0 4px 24px rgba(0,0,0,.5);
+  --sh2: 0 2px 12px rgba(0,0,0,.3);
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;min-height:100vh;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg1)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 
-#nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:2px;padding:0 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* ── NAV ──────────────────────────────────────────────────── */
+#nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(5,9,18,.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:2px;
+  padding:0 16px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  height:52px;
+}
 #nav::-webkit-scrollbar{display:none}
-.nav-logo{display:flex;align-items:center;gap:7px;padding:10px 12px 10px 0;border-right:1px solid var(--border);margin-right:4px;flex-shrink:0}
-.nav-logo-icon{width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:white}
-.nav-logo-text{font-weight:800;font-size:14px;letter-spacing:-.02em}
-.nav-logo-text span{color:var(--blue)}
-.tab-btn{background:none;border:none;cursor:pointer;padding:10px 13px;border-radius:8px;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap;transition:all .15s;flex-shrink:0;font-family:inherit}
-.tab-btn:hover{background:#1a2744;color:var(--text)}
-.tab-btn.active{background:#1e3a5f;color:#60a5fa}
-.nav-right{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:8px;padding-left:8px}
-.nav-count{font-size:11px;color:var(--muted)}
-#filter-month{background:var(--bg2);border:1px solid var(--border);color:var(--muted);border-radius:var(--rs);padding:5px 8px;font-size:11px;font-family:inherit;cursor:pointer}
+.logo{display:flex;align-items:center;gap:9px;padding-right:16px;border-right:1px solid var(--border);margin-right:6px;flex-shrink:0;text-decoration:none}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#1a6fe8,#7c3aed);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;box-shadow:0 2px 12px rgba(100,80,240,.4)}
+.logo-text{font-weight:800;font-size:15px;letter-spacing:-.03em;color:var(--text)}
+.logo-text em{color:var(--blue);font-style:normal}
+.tab{background:none;border:none;cursor:pointer;padding:8px 12px;border-radius:var(--rxs);font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;transition:all .15s;flex-shrink:0;font-family:inherit;letter-spacing:.01em}
+.tab:hover{background:var(--surface);color:var(--text)}
+.tab.active{background:rgba(77,159,255,.12);color:var(--blue);border:1px solid rgba(77,159,255,.2)}
+.nav-end{margin-left:auto;display:flex;align-items:center;gap:10px;padding-left:10px;flex-shrink:0}
+.tx-badge{background:var(--surface);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--text2);font-weight:600}
+select.month-sel{background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rxs);padding:5px 10px;font-size:11px;font-family:inherit;cursor:pointer;outline:none}
 
-#app{padding:20px 16px;max-width:1200px;margin:0 auto}
+/* ── LAYOUT ───────────────────────────────────────────────── */
+#app{padding:22px 18px;max-width:1200px;margin:0 auto}
 .page{display:none}
 .page.active{display:block}
+.page-hd{margin-bottom:22px}
+.page-hd h1{font-size:22px;font-weight:800;letter-spacing:-.04em}
+.page-hd p{color:var(--text2);font-size:13px;margin-top:3px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}.hide-sm{display:none}}
 
-.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:18px}
-.card-title{font-weight:700;font-size:14px;margin-bottom:14px}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:18px}
-.kpi{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px}
-.kpi-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.kpi-value{font-size:21px;font-weight:800;letter-spacing:-.03em}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-@media(max-width:600px){.charts-grid{grid-template-columns:1fr}}
+/* ── CARDS ────────────────────────────────────────────────── */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh2)}
+.card-sm{padding:14px 16px}
+.card-title{font-weight:700;font-size:13px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
 
-.tra-block{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px}
-.tra-header{padding:10px 14px;font-weight:700;font-size:11px;letter-spacing:.07em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
-.tra-sub-label{padding:5px 14px 3px 14px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2);background:var(--bg3)}
-.tra-row{display:flex;justify-content:space-between;align-items:center;padding:6px 14px 6px 24px;border-top:1px solid #111827;font-size:12px}
-.tra-row:hover{background:var(--bg1)}
-.tra-code{font-family:monospace;font-size:10px;color:#334155;min-width:46px}
-.tra-pct{font-size:10px;color:var(--muted2);min-width:36px;text-align:right}
-.tra-amount{font-weight:700;min-width:80px;text-align:right;font-size:12px}
-.tra-total{padding:9px 14px;display:flex;justify-content:space-between;font-weight:700;font-size:13px;border-top:1px solid var(--border)}
-.tra-result-row{padding:11px 14px;display:flex;justify-content:space-between;font-weight:800;font-size:14px;border-top:1px solid var(--border);background:var(--bg2)}
+/* ── KPI GRID ─────────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--sh2);transition:transform .15s,border-color .15s}
+.kpi:hover{transform:translateY(-1px);border-color:var(--border2)}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--blue))}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:800;letter-spacing:-.04em;color:var(--kpi-color,var(--text))}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
 
-.tx-table{width:100%;border-collapse:collapse;font-size:12px}
-.tx-table th{padding:9px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap}
-.tx-table td{padding:7px 10px;border-bottom:1px solid var(--bg3);vertical-align:middle}
-.tx-table tr:hover td{background:#0a1020}
-@media(max-width:600px){.col-hide{display:none}}
+/* ── TRA ──────────────────────────────────────────────────── */
+.tra-block{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;box-shadow:var(--sh2)}
+.tra-hd{padding:12px 16px;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.tra-sub{padding:5px 16px 3px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);background:rgba(0,0,0,.2)}
+.tra-row{display:flex;justify-content:space-between;align-items:center;padding:7px 16px 7px 26px;border-top:1px solid rgba(255,255,255,.03);font-size:12px;transition:background .1s}
+.tra-row:hover{background:rgba(255,255,255,.02)}
+.tra-code{font-family:'SF Mono',Consolas,monospace;font-size:10px;color:var(--text3);min-width:48px}
+.tra-pct{font-size:10px;color:var(--text3);min-width:38px;text-align:right}
+.tra-amt{font-weight:700;min-width:85px;text-align:right;font-size:12px}
+.tra-total{padding:10px 16px;display:flex;justify-content:space-between;font-weight:700;font-size:13px;border-top:1px solid var(--border)}
+.tra-result{padding:12px 16px;display:flex;justify-content:space-between;font-weight:800;font-size:14px;border-top:1px solid var(--border);background:rgba(0,0,0,.2)}
 
-.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em}
-.badge-P{background:#0a1f0a;color:var(--green)}
-.badge-CV{background:#1a1200;color:var(--amber)}
-.badge-CF{background:#1a0d00;color:var(--orange)}
-.badge-I{background:#071020;color:var(--blue)}
-.badge-q{background:#111827;color:var(--muted)}
+/* ── TABLES ───────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap}
+.tbl td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl th.r,.tbl td.r{text-align:right}
 
-input,textarea,select{background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
-input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+/* ── BADGES ───────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em}
+.b-P {background:rgba(16,217,126,.1);color:var(--green)}
+.b-CV{background:rgba(245,166,35,.1); color:var(--amber)}
+.b-CF{background:rgba(255,107,53,.1); color:var(--orange)}
+.b-I {background:rgba(77,159,255,.1); color:var(--blue)}
+.b-q {background:rgba(255,255,255,.06);color:var(--text2)}
+
+/* ── STATUS DOT ───────────────────────────────────────────── */
+.dot-ok{color:var(--green);font-size:15px}
+.dot-ko{color:var(--red);font-size:15px}
+.dot-na{color:var(--text3);font-size:15px}
+
+/* ── BUDGET TABLE ─────────────────────────────────────────── */
+.bvr-section td{background:rgba(0,0,0,.25);font-weight:700;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 12px;color:var(--text2)}
+.bvr-total td{font-weight:800;font-size:13px;border-top:1px solid var(--border2);padding:11px 12px}
+.eco{color:var(--green);font-weight:700}
+.dep{color:var(--red);font-weight:700}
+.neu{color:var(--text3)}
+.bvr-inp{background:transparent;border:none;border-bottom:1px dashed var(--border2);color:var(--blue);font-weight:700;font-size:12px;width:88px;text-align:right;padding:2px 4px;font-family:inherit;outline:none;transition:border-color .15s}
+.bvr-inp:focus{border-bottom-color:var(--blue)}
+.verdict-box{padding:16px 20px;border-radius:var(--r);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:var(--sh2)}
+
+/* ── PROJECTION ───────────────────────────────────────────── */
+.param-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:18px}
+.param{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px}
+.param-lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+.param-inp{background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--blue);font-weight:700;font-size:17px;width:100%;text-align:right;padding:3px 0;font-family:inherit;outline:none;transition:border-color .15s}
+.param-inp:focus{border-bottom-color:var(--blue)}
+.param-unit{font-size:11px;color:var(--text3);margin-top:3px}
+.proj-row-milestone td{background:rgba(16,217,126,.05);border-left:3px solid var(--green)}
+.proj-row-now td{background:var(--bg2)}
+
+/* ── FORMS ────────────────────────────────────────────────── */
+input:not(.bvr-inp):not(.param-inp),textarea,select:not(.month-sel){
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--text);border-radius:var(--rs);
+  padding:10px 13px;font-size:13px;width:100%;
+  outline:none;font-family:inherit;transition:border-color .15s;
+}
+input:not(.bvr-inp):not(.param-inp):focus,textarea:focus{border-color:var(--blue)}
 .form-row{display:flex;gap:8px;flex-wrap:wrap}
-.form-row input{flex:1;min-width:120px}
-.btn{border:none;border-radius:var(--rs);padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
-.btn-primary{background:#2563eb;color:white}
-.btn-primary:hover{background:#1d4ed8}
-.btn-primary:active{background:#1e40af;transform:scale(.98)}
-.btn-secondary{background:#1a2744;color:#94a3b8}
-.btn-danger{background:#1a0a0a;color:var(--red);border:1px solid #7f1d1d}
-.btn-sm{padding:4px 10px;font-size:11px}
+.form-row input{flex:1;min-width:110px}
+.btn{border:none;border-radius:var(--rs);padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#3a8ef0}
+.btn-blue:active{transform:scale(.97)}
+.btn-ghost{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-red{background:rgba(255,92,122,.08);border:1px solid rgba(255,92,122,.2);color:var(--red)}
+.btn-sm{padding:5px 11px;font-size:11px}
 
-.progress-wrap{margin-bottom:13px}
-.progress-header{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
-.progress-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.progress-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+/* ── PROGRESS ─────────────────────────────────────────────── */
+.prog{margin-bottom:15px}
+.prog-hd{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.prog-bg{height:5px;background:var(--surface);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1)}
 
-.alert{padding:10px 14px;border-radius:var(--rs);font-size:13px;margin-top:10px}
-.alert-success{background:#0a1f0a;color:var(--green);border:1px solid #166534}
-.alert-error{background:#1a0a0a;color:var(--red);border:1px solid #7f1d1d}
+/* ── ALERTS ───────────────────────────────────────────────── */
+.alert{padding:11px 15px;border-radius:var(--rs);font-size:13px;margin-top:10px}
+.a-ok{background:rgba(16,217,126,.08);color:var(--green);border:1px solid rgba(16,217,126,.2)}
+.a-err{background:rgba(255,92,122,.08);color:var(--red);border:1px solid rgba(255,92,122,.2)}
 
-.page-header{margin-bottom:20px}
-.page-header h1{font-size:20px;font-weight:800;letter-spacing:-.03em}
-.page-header p{color:var(--muted);font-size:13px;margin-top:3px}
+/* ── EMPTY STATE ──────────────────────────────────────────── */
+.empty{text-align:center;padding:56px 20px;border:1px dashed var(--border);border-radius:var(--r)}
+.empty .e-icon{font-size:40px;margin-bottom:12px}
+.empty h2{font-size:16px;font-weight:700;margin-bottom:6px}
+.empty p{color:var(--text2);font-size:13px;margin-bottom:18px}
 
-.empty-state{text-align:center;padding:50px 20px}
-.empty-state .icon{font-size:36px;margin-bottom:10px}
-.empty-state h2{font-size:16px;font-weight:700;margin-bottom:6px}
-.empty-state p{color:var(--muted);font-size:13px;margin-bottom:16px}
+/* ── COMPTE ROWS ──────────────────────────────────────────── */
+.cpt-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:var(--rxs);margin-bottom:2px}
+.cpt-code{font-family:monospace;font-size:10px;color:var(--text3);min-width:50px;padding-top:2px}
+.cpt-kw{font-size:10px;color:var(--text3);margin-top:2px;font-family:monospace}
 
-.guide-step{display:flex;gap:8px;margin-bottom:10px}
-.step-num{width:20px;height:20px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
-.step-text{font-size:13px;color:#94a3b8;line-height:1.5}
+/* ── GUIDE ────────────────────────────────────────────────── */
+.guide-step{display:flex;gap:9px;margin-bottom:9px}
+.g-num{width:20px;height:20px;background:var(--blue2);border:1px solid rgba(77,159,255,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue);flex-shrink:0;margin-top:2px}
+.g-txt{font-size:13px;color:var(--text2);line-height:1.55}
 
-.compte-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:var(--bg2);border-radius:6px;margin-bottom:2px}
-.compte-code{font-family:monospace;font-size:10px;color:#334155;min-width:48px;padding-top:2px}
-.compte-lib{font-size:12px;font-weight:500}
-.compte-kw{font-size:10px;color:#334155;margin-top:2px;font-family:monospace}
+/* ── BANK TAG ─────────────────────────────────────────────── */
+.bank-bourso{background:rgba(77,159,255,.1);color:var(--blue);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.bank-bnp{background:rgba(16,217,126,.1);color:var(--green);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.bank-lbp{background:rgba(245,166,35,.1);color:var(--amber);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.bank-bnpcredit{background:rgba(167,139,250,.1);color:var(--purple);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
 
-.expense-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #111827}
-
-/* ── BUDGET vs RÉALISÉ ── */
-.bvr-table{width:100%;border-collapse:collapse;font-size:13px}
-.bvr-table th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap}
-.bvr-table td{padding:9px 12px;border-bottom:1px solid #111827;vertical-align:middle}
-.bvr-section-row td{background:var(--bg2);font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;padding:7px 12px}
-.bvr-total-row td{font-weight:800;font-size:14px;border-top:2px solid var(--border);padding:11px 12px}
-.ecart-pos{color:var(--green);font-weight:700}
-.ecart-neg{color:var(--red);font-weight:700}
-.ecart-zero{color:var(--muted)}
-.bvr-input{background:transparent;border:none;border-bottom:1px dashed var(--border);color:#60a5fa;font-weight:700;font-size:13px;width:90px;text-align:right;padding:2px 4px;font-family:inherit;outline:none}
-.bvr-input:focus{border-bottom-color:var(--blue)}
-.bvr-verdict{padding:14px 16px;border-radius:var(--r);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-
-/* ── PROJECTION ── */
-.proj-table{width:100%;border-collapse:collapse;font-size:13px}
-.proj-table th{padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2)}
-.proj-table th:first-child{text-align:left}
-.proj-table td{padding:9px 12px;border-bottom:1px solid #111827;text-align:center;font-size:13px}
-.proj-table td:first-child{text-align:left;font-weight:600}
-.proj-highlight{background:#0a1020;font-weight:800}
-.proj-milestone{background:linear-gradient(90deg,#0a1f0a,#071020)}
-.param-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px}
-.param-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px}
-.param-label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.param-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:#60a5fa;font-weight:700;font-size:16px;width:100%;text-align:right;padding:3px 0;font-family:inherit;outline:none}
-.param-input:focus{border-bottom-color:var(--blue)}
-.param-unit{font-size:11px;color:var(--muted);margin-top:3px}
-
+/* ── MOBILE ───────────────────────────────────────────────── */
 @media(max-width:480px){
-  #app{padding:12px 10px}
-  .kpi-value{font-size:17px}
-  .card{padding:13px}
+  #app{padding:14px 12px}
+  .kpi-value{font-size:18px}
+  .card{padding:14px}
+  .two-col{gap:10px}
 }
 </style>
 </head>
 <body>
 
+<!-- ── NAV ── -->
 <nav id="nav">
-  <div class="nav-logo">
-    <div class="nav-logo-icon">₱</div>
-    <div class="nav-logo-text">TRA<span>·</span>PM</div>
-  </div>
-  <button class="tab-btn active"  onclick="showTab('dashboard')">📊 Dashboard</button>
-  <button class="tab-btn" onclick="showTab('tra')">📋 TRA</button>
-  <button class="tab-btn" onclick="showTab('budget')">🎯 Budget vs Réel</button>
-  <button class="tab-btn" onclick="showTab('projection')">🚀 Projection</button>
-  <button class="tab-btn" onclick="showTab('transactions')">💳 Transactions</button>
-  <button class="tab-btn" onclick="showTab('import')">⬆️ Import</button>
-  <button class="tab-btn" onclick="showTab('comptes')">⚙️ Comptes</button>
-  <div class="nav-right">
-    <span class="nav-count" id="nav-count">0 tx</span>
-    <select id="filter-month" onchange="render()">
+  <a class="logo" href="#" onclick="showTab('dashboard');return false">
+    <div class="logo-icon">₱</div>
+    <div class="logo-text">TRA<em>·</em>PM</div>
+  </a>
+  <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+  <button class="tab" onclick="showTab('tra')">📋 TRA</button>
+  <button class="tab" onclick="showTab('budget')">🎯 Budget vs Réel</button>
+  <button class="tab" onclick="showTab('projection')">🚀 Projection</button>
+  <button class="tab" onclick="showTab('comparaison')">📅 Comparaison</button>
+  <button class="tab" onclick="showTab('transactions')">💳 Transactions</button>
+  <button class="tab" onclick="showTab('import')">⬆️ Import</button>
+  <button class="tab" onclick="showTab('comptes')">⚙️ Comptes</button>
+  <div class="nav-end">
+    <span class="tx-badge" id="nav-count">0 tx</span>
+    <select class="month-sel" id="filter-month" onchange="render()">
       <option value="all">Toute période</option>
     </select>
   </div>
@@ -171,313 +228,304 @@ input:focus,textarea:focus,select:focus{border-color:var(--blue)}
 
 <div id="app">
 
-  <!-- DASHBOARD -->
-  <div id="page-dashboard" class="page active">
-    <div class="page-header"><h1>Tableau de Bord</h1><p>Vue d'ensemble de ta situation financière</p></div>
-    <div class="kpi-grid" id="kpi-grid"></div>
-    <div id="empty-state" class="card empty-state" style="display:none">
-      <div class="icon">⬆️</div><h2>Aucune donnée</h2>
-      <p>Importe tes relevés CSV pour commencer</p>
-      <button class="btn btn-primary" onclick="showTab('import')">Importer des transactions</button>
+<!-- ════════════════════ DASHBOARD ════════════════════ -->
+<div id="page-dashboard" class="page active">
+  <div class="page-hd"><h1>Tableau de Bord</h1><p>Vue d'ensemble de ta situation financière</p></div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div id="empty-state" style="display:none">
+    <div class="empty"><div class="e-icon">⬆️</div><h2>Aucune donnée</h2><p>Importe tes relevés bancaires pour commencer</p><button class="btn btn-blue" onclick="showTab('import')">Importer mes relevés</button></div>
+  </div>
+  <div id="charts-section" style="display:none">
+    <div class="two-col" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Répartition des flux</div><canvas id="chart-pie" height="190"></canvas></div>
+      <div class="card"><div class="card-title">Évolution mensuelle 2026</div><canvas id="chart-bar" height="190"></canvas></div>
     </div>
-    <div id="charts-section" style="display:none">
-      <div class="charts-grid">
-        <div class="card"><div class="card-title">Répartition des flux</div><canvas id="chart-pie" height="180"></canvas></div>
-        <div class="card"><div class="card-title">Évolution mensuelle 2026</div><canvas id="chart-bar" height="180"></canvas></div>
-      </div>
-      <div class="charts-grid">
-        <div class="card"><div class="card-title">Top dépenses</div><div id="top-expenses-list"></div></div>
-        <div class="card"><div class="card-title">Indicateurs de discipline</div><div id="indicators"></div></div>
-      </div>
+    <div class="two-col">
+      <div class="card"><div class="card-title">Top dépenses</div><div id="top-exp"></div></div>
+      <div class="card"><div class="card-title">Indicateurs de discipline</div><div id="indicators"></div></div>
     </div>
   </div>
-
-  <!-- TRA -->
-  <div id="page-tra" class="page">
-    <div class="page-header"><h1>TRA Analytique</h1><p>Tableau de Résultats Analytique Personnel</p></div>
-    <div id="tra-content"></div>
-  </div>
-
-  <!-- BUDGET vs RÉALISÉ -->
-  <div id="page-budget" class="page">
-    <div class="page-header">
-      <h1>Budget vs Réalisé</h1>
-      <p>Compare tes dépenses réelles à tes objectifs. Les colonnes <span style="color:#60a5fa;font-weight:700">Objectif</span> sont modifiables.</p>
-    </div>
-    <div id="bvr-verdict-box"></div>
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
-      <div style="overflow-x:auto">
-        <table class="bvr-table" id="bvr-table"></table>
-      </div>
-    </div>
-    <div class="card" style="background:#0a1020;border-color:#1e3a5f;font-size:12px;color:var(--muted2)">
-      💡 Modifie les montants <span style="color:#60a5fa">Objectif</span> directement dans le tableau — ils sont sauvegardés automatiquement.
-      L'écart est calculé : <span style="color:var(--green)">vert = tu es sous le budget</span> (bien pour les dépenses) · <span style="color:var(--red)">rouge = tu dépasses</span>.
-    </div>
-  </div>
-
-  <!-- PROJECTION -->
-  <div id="page-projection" class="page">
-    <div class="page-header">
-      <h1>Projection Patrimoine</h1>
-      <p>Si tu continues comme ça — trajectoire sur 5, 10, 15, 20 ans</p>
-    </div>
-
-    <!-- Paramètres -->
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-title">⚙️ Paramètres (modifiables)</div>
-      <div class="param-grid">
-        <div class="param-card">
-          <div class="param-label">Patrimoine actuel net (€)</div>
-          <input class="param-input" id="p-patrimoine" value="101748" oninput="renderProjection()">
-          <div class="param-unit">Valeur immobilier + épargne − dettes</div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Épargne mensuelle actuelle (€)</div>
-          <input class="param-input" id="p-epargne" value="300" oninput="renderProjection()">
-          <div class="param-unit">Basé sur tes transactions (modifiable)</div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Épargne mensuelle IDEL (€) — dès 2028</div>
-          <input class="param-input" id="p-epargne-idel" value="4000" oninput="renderProjection()">
-          <div class="param-unit">Objectif en phase libérale</div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Rendement annuel portefeuille (%)</div>
-          <input class="param-input" id="p-rendement" value="7" oninput="renderProjection()">
-          <div class="param-unit">Hypothèse mix PEA ETF + AV (%)  </div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Appréciation immobilière (%/an)</div>
-          <input class="param-input" id="p-immo" value="2" oninput="renderProjection()">
-          <div class="param-unit">Revalorisation du bien</div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Remboursement capital prêt/mois (€)</div>
-          <input class="param-input" id="p-pret" value="813" oninput="renderProjection()">
-          <div class="param-unit">Capital amorti chaque mois</div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Valeur bien immobilier (€)</div>
-          <input class="param-input" id="p-immo-val" value="310000" oninput="renderProjection()">
-          <div class="param-unit">Prix actuel du bien locatif</div>
-        </div>
-        <div class="param-card">
-          <div class="param-label">Dette restante prêt (€)</div>
-          <input class="param-input" id="p-dette" value="213567" oninput="renderProjection()">
-          <div class="param-unit">Capital restant dû BNP</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPIs projection -->
-    <div class="kpi-grid" id="proj-kpis" style="margin-bottom:16px"></div>
-
-    <!-- Graphique -->
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-title">📈 Trajectoire patrimoine net</div>
-      <canvas id="chart-projection" height="220"></canvas>
-    </div>
-
-    <!-- Tableau jalons -->
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
-      <div style="overflow-x:auto">
-        <table class="proj-table" id="proj-table"></table>
-      </div>
-    </div>
-
-    <!-- Scénarios -->
-    <div class="charts-grid">
-      <div class="card">
-        <div class="card-title">🎯 Jalons importants</div>
-        <div id="proj-milestones"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">💡 Leviers d'accélération</div>
-        <div id="proj-leviers"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TRANSACTIONS -->
-  <div id="page-transactions" class="page">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-      <div class="page-header" style="margin:0"><h1>Transactions</h1><p id="tx-count-label">0 transactions</p></div>
-      <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Tout effacer</button>
-    </div>
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-weight:700;font-size:13px;margin-bottom:10px">➕ Ajouter manuellement</div>
-      <div class="form-row">
-        <input type="date" id="manual-date" style="flex:0 0 140px">
-        <input type="text" id="manual-label" placeholder="Libellé de l'opération">
-        <input type="text" id="manual-amount" placeholder="Montant (- = débit)" style="flex:0 0 150px">
-        <button class="btn btn-primary btn-sm" onclick="addManual()">Ajouter</button>
-      </div>
-    </div>
-    <input type="text" id="search-input" placeholder="🔍 Rechercher..." style="margin-bottom:12px" oninput="renderTransactions()">
-    <div class="card" style="padding:0;overflow:hidden">
-      <div style="overflow-x:auto">
-        <table class="tx-table">
-          <thead><tr>
-            <th>Date</th><th class="col-hide">Banque</th><th>Libellé</th>
-            <th class="col-hide">Compte</th><th>Cl.</th>
-            <th style="text-align:right">Montant</th><th></th>
-          </tr></thead>
-          <tbody id="tx-tbody"></tbody>
-        </table>
-      </div>
-      <div id="tx-more" style="display:none;padding:10px;text-align:center;font-size:12px;color:var(--muted)">
-        Affichage limité à 100 — utilise le filtre mois
-      </div>
-    </div>
-  </div>
-
-  <!-- IMPORT -->
-  <div id="page-import" class="page">
-    <div class="page-header"><h1>Import CSV</h1><p>Colle le contenu de tes relevés bancaires</p></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-title">📋 Comment exporter</div>
-          <div style="margin-bottom:14px">
-            <div style="font-weight:700;font-size:13px;color:#60a5fa;margin-bottom:7px">BoursoBank</div>
-            <div class="guide-step"><div class="step-num">1</div><div class="step-text">Mes comptes → ⋮ → Télécharger relevé → CSV</div></div>
-            <div class="guide-step"><div class="step-num">2</div><div class="step-text">Ouvrir avec Bloc-notes → Sélectionner tout → Copier</div></div>
-          </div>
-          <div style="margin-bottom:14px">
-            <div style="font-weight:700;font-size:13px;color:#60a5fa;margin-bottom:7px">BNP Paribas</div>
-            <div class="guide-step"><div class="step-num">1</div><div class="step-text">Mes comptes → Relevés & Documents → Export CSV</div></div>
-            <div class="guide-step"><div class="step-num">2</div><div class="step-text">Ouvrir avec Bloc-notes → Copier tout</div></div>
-          </div>
-          <div>
-            <div style="font-weight:700;font-size:13px;color:#60a5fa;margin-bottom:7px">La Banque Postale</div>
-            <div class="guide-step"><div class="step-num">1</div><div class="step-text">Espace client → Mes relevés → Télécharger → CSV</div></div>
-            <div class="guide-step"><div class="step-num">2</div><div class="step-text">Ouvrir avec Bloc-notes → Copier tout</div></div>
-          </div>
-        </div>
-        <div class="card" style="background:#0a1020;border-color:#1e3a5f">
-          <div style="font-weight:700;font-size:12px;color:#60a5fa;margin-bottom:8px">💡 Format reconnu</div>
-          <div style="font-family:monospace;font-size:11px;color:var(--muted);line-height:1.9">
-            <div>25/02/2026;25/02/2026;EDF PRLV;;-58.90</div>
-            <div>25/02/2026;25/02/2026;CHI CRETEIL;;750.00</div>
-            <div style="color:var(--blue);margin-top:6px">— OU format BNP —</div>
-            <div>22.01;VIR CENTURY 21;0.00;1740.40</div>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="card" style="display:flex;flex-direction:column;gap:12px">
-          <div class="card-title">⬆️ Colle ton CSV ici</div>
-          <textarea id="csv-input" rows="14" placeholder="Colle ici le contenu de ton fichier CSV...
-
-25/02/2026;25/02/2026;TRESORERIE HOSPITALIERE CHI CRETEIL;;750.00
-25/02/2026;25/02/2026;VIR SEPA FRANCE TRAVAIL;;769.42
-09/02/2026;09/02/2026;PRLV SEPA EDF;;-58.90
-05/02/2026;05/02/2026;ECHEANCE PRET 01812;;-1242.27" style="resize:vertical;font-family:monospace;font-size:12px;line-height:1.6"></textarea>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" style="flex:1" onclick="importCSV()">⬆️ Importer</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('csv-input').value='';document.getElementById('import-msg').innerHTML=''">Vider</button>
-          </div>
-          <div id="import-msg"></div>
-          <div style="padding:10px;background:var(--bg2);border-radius:var(--rs);font-size:12px;color:var(--muted2)">
-            💡 Transactions non reconnues → code <span style="font-family:monospace;color:var(--red)">???</span>. Ajoute leurs mots-clés dans ⚙️ Comptes.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPTES -->
-  <div id="page-comptes" class="page">
-    <div class="page-header"><h1>Plan de Comptes</h1><p>Catégorisation automatique des transactions</p></div>
-    <div id="comptes-content"></div>
-  </div>
-
 </div>
 
+<!-- ════════════════════ TRA ════════════════════ -->
+<div id="page-tra" class="page">
+  <div class="page-hd"><h1>TRA Analytique</h1><p>Tableau de Résultats Analytique Personnel</p></div>
+  <div id="tra-content"></div>
+</div>
+
+<!-- ════════════════════ BUDGET vs RÉALISÉ ════════════════════ -->
+<div id="page-budget" class="page">
+  <div class="page-hd">
+    <h1>Budget vs Réalisé</h1>
+    <p>Colonnes <span style="color:var(--blue);font-weight:700">Objectif</span> modifiables — sauvegardées automatiquement</p>
+  </div>
+  <div id="bvr-verdict"></div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+    <div style="overflow-x:auto"><table class="tbl" id="bvr-table"></table></div>
+  </div>
+  <div style="padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--text3)">
+    💡 Vert = tu es sous l'objectif (bien pour les dépenses) · Rouge = tu dépasses · ✏️ Clique sur les montants bleus pour les modifier
+  </div>
+</div>
+
+<!-- ════════════════════ PROJECTION ════════════════════ -->
+<div id="page-projection" class="page">
+  <div class="page-hd"><h1>Projection Patrimoine</h1><p>Trajectoire sur 5, 10, 15, 20 ans — paramètres modifiables</p></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">⚙️ Paramètres</div>
+    <div class="param-grid">
+      <div class="param"><div class="param-lbl">Patrimoine actuel net (€)</div><input class="param-inp" id="p-pat" value="101748" oninput="renderProjection()"><div class="param-unit">Immobilier + épargne − dettes</div></div>
+      <div class="param"><div class="param-lbl">Épargne mensuelle IDE (€)</div><input class="param-inp" id="p-ep" value="300" oninput="renderProjection()"><div class="param-unit">Phase actuelle (IDE SSPI)</div></div>
+      <div class="param"><div class="param-lbl">Épargne mensuelle IDEL (€)</div><input class="param-inp" id="p-ep2" value="4000" oninput="renderProjection()"><div class="param-unit">Dès 2028 en libéral</div></div>
+      <div class="param"><div class="param-lbl">Rendement portefeuille (%)</div><input class="param-inp" id="p-rend" value="7" oninput="renderProjection()"><div class="param-unit">Mix PEA ETF + AV + SCPI</div></div>
+      <div class="param"><div class="param-lbl">Appréciation immo (%/an)</div><input class="param-inp" id="p-immo" value="2" oninput="renderProjection()"><div class="param-unit">Revalorisation du bien</div></div>
+      <div class="param"><div class="param-lbl">Capital amorti prêt/mois (€)</div><input class="param-inp" id="p-pret" value="813" oninput="renderProjection()"><div class="param-unit">Capital remboursé chaque mois</div></div>
+      <div class="param"><div class="param-lbl">Valeur bien immobilier (€)</div><input class="param-inp" id="p-iv" value="310000" oninput="renderProjection()"><div class="param-unit">Prix actuel du bien locatif</div></div>
+      <div class="param"><div class="param-lbl">Dette restante prêt (€)</div><input class="param-inp" id="p-dt" value="213567" oninput="renderProjection()"><div class="param-unit">Capital restant dû BNP</div></div>
+    </div>
+  </div>
+  <div class="kpi-grid" id="proj-kpis" style="margin-bottom:16px"></div>
+  <div class="card" style="margin-bottom:16px"><div class="card-title">📈 Trajectoire patrimoine net</div><canvas id="chart-proj" height="220"></canvas></div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px"><div style="overflow-x:auto"><table class="tbl" id="proj-table"></table></div></div>
+  <div class="two-col">
+    <div class="card"><div class="card-title">🎯 Jalons</div><div id="proj-milestones"></div></div>
+    <div class="card"><div class="card-title">💡 Leviers d'accélération</div><div id="proj-leviers"></div></div>
+  </div>
+</div>
+
+<!-- ════════════════════ COMPARAISON ════════════════════ -->
+<div id="page-comparaison" class="page">
+  <div class="page-hd"><h1>Comparaison Mensuelle</h1><p>Analyse mois par mois — objectifs mensuels et annuels</p></div>
+
+  <!-- Objectifs annuels -->
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div class="card-title" style="margin:0">🎯 Objectifs Annuels 2026</div>
+      <button class="btn btn-ghost btn-sm" onclick="resetAnnualGoals()">↺ Réinitialiser</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px" id="annual-goals-grid"></div>
+  </div>
+
+  <!-- Sélecteur de mois -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">🗓️ Sélection des mois à comparer</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <div style="flex:1;min-width:140px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase">Mois de référence</div>
+        <select id="cmp-m1" onchange="renderComparaison()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;width:100%;outline:none;font-family:inherit"></select>
+      </div>
+      <div style="font-size:20px;color:var(--text3);padding-top:18px">↔</div>
+      <div style="flex:1;min-width:140px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase">Mois comparé</div>
+        <select id="cmp-m2" onchange="renderComparaison()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;width:100%;outline:none;font-family:inherit"></select>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase">Objectif mensuel</div>
+        <select id="cmp-obj" onchange="renderComparaison()" style="background:var(--bg2);border:1px solid var(--border);color:var(--blue);border-radius:var(--rs);padding:9px 12px;font-size:13px;width:100%;outline:none;font-family:inherit">
+          <option value="budget">Mes objectifs budget</option>
+          <option value="m1">Copier M1</option>
+          <option value="none">Sans objectif</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs comparaison -->
+  <div id="cmp-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:16px"></div>
+
+  <!-- Graphique comparaison -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📊 Comparaison visuelle</div>
+    <canvas id="chart-cmp" height="200"></canvas>
+  </div>
+
+  <!-- Tableau comparaison détaillé -->
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+    <div style="overflow-x:auto">
+      <table class="tbl" id="cmp-table"></table>
+    </div>
+  </div>
+
+  <!-- Vue annuelle synthèse -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📆 Vue annuelle — tous les mois</div>
+    <div style="overflow-x:auto">
+      <table class="tbl" id="annual-table"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ TRANSACTIONS ════════════════════ -->
+<div id="page-transactions" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="page-hd" style="margin:0"><h1>Transactions</h1><p id="tx-lbl">0 transactions</p></div>
+    <button class="btn btn-red btn-sm" onclick="clearAll()">🗑 Tout effacer</button>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--text2)">➕ Ajouter manuellement</div>
+    <div class="form-row">
+      <input type="date" id="m-date" style="flex:0 0 140px">
+      <input type="text" id="m-label" placeholder="Libellé de l'opération">
+      <input type="text" id="m-amt" placeholder="Montant (− = débit)" style="flex:0 0 148px">
+      <button class="btn btn-blue btn-sm" onclick="addManual()">Ajouter</button>
+    </div>
+  </div>
+  <input type="text" id="search" placeholder="🔍 Rechercher dans les libellés…" style="margin-bottom:12px" oninput="renderTX()">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr>
+          <th>Date</th><th class="hide-sm">Banque</th><th>Libellé</th>
+          <th class="hide-sm">Compte</th><th>Cl.</th>
+          <th class="r">Montant</th><th></th>
+        </tr></thead>
+        <tbody id="tx-tbody"></tbody>
+      </table>
+    </div>
+    <div id="tx-more" style="display:none;padding:10px;text-align:center;font-size:12px;color:var(--text3)">Affichage limité à 100 — filtre par mois pour voir plus</div>
+  </div>
+</div>
+
+<!-- ════════════════════ IMPORT ════════════════════ -->
+<div id="page-import" class="page">
+  <div class="page-hd"><h1>Import CSV</h1><p>Colle directement le contenu de tes exports bancaires — format détecté automatiquement</p></div>
+  <div class="two-col">
+    <div>
+      <!-- Banques supportées -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">✅ Banques supportées</div>
+        <div style="display:grid;gap:10px">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="bank-bourso">BoursoBank</span><span style="font-size:11px;color:var(--text3)">Format natif reconnu</span></div>
+            <div class="guide-step"><div class="g-num">1</div><div class="g-txt">Mes comptes → ⋮ → Télécharger → <strong>CSV</strong></div></div>
+            <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Ouvrir avec Bloc-notes → Ctrl+A → Ctrl+C → Coller ici</div></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="bank-bnp">BNP Paribas</span><span style="font-size:11px;color:var(--text3)">Compte courant</span></div>
+            <div class="guide-step"><div class="g-num">1</div><div class="g-txt">mabanque.bnpparibas → Mes comptes → Télécharger → CSV</div></div>
+            <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Ouvrir avec Bloc-notes → Copier tout → Coller ici</div></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="bank-bnpcredit">BNP Crédit immo</span><span style="font-size:11px;color:var(--text3)">Suivi amortissement</span></div>
+            <div class="guide-step"><div class="g-num">1</div><div class="g-txt">Même export CSV que BNP — fichier "Crédit immobilier"</div></div>
+            <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Copier tout → Coller ici</div></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="bank-lbp">La Banque Postale</span><span style="font-size:11px;color:var(--text3)">CCP</span></div>
+            <div class="guide-step"><div class="g-num">1</div><div class="g-txt">Espace client → Mes relevés → Télécharger → CSV</div></div>
+            <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Ouvrir avec Bloc-notes → Copier tout → Coller ici</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="display:flex;flex-direction:column;gap:13px">
+        <div class="card-title">⬆️ Colle ton export ici</div>
+        <textarea id="csv-input" rows="15" placeholder="Colle ici le contenu de ton fichier CSV…
+
+BoursoBank : dateOp;dateVal;label;category;...;amount;...
+BNP        : 05/01/2026;FRAIS;FRAIS;FRAIS TENUE DE COMPTE;-2,60
+La Poste   : 05/01/2026;VIREMENT DE CAF DU VAL DE MARNE...;1384,25
+BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:vertical;font-family:'SF Mono',Consolas,monospace;font-size:11px;line-height:1.65"></textarea>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-blue" style="flex:1" onclick="importCSV()">⬆️ Importer les transactions</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('csv-input').value='';document.getElementById('imp-msg').innerHTML=''">Vider</button>
+        </div>
+        <div id="imp-msg"></div>
+        <div style="padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--text3)">
+          🎯 La détection du format est <strong>automatique</strong>. Les transactions non reconnues apparaissent en <span style="font-family:monospace;color:var(--red)">???</span> — tu peux ajouter leurs mots-clés dans l'onglet ⚙️ Comptes.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ COMPTES ════════════════════ -->
+<div id="page-comptes" class="page">
+  <div class="page-hd"><h1>Plan de Comptes</h1><p>Règles de catégorisation automatique par mot-clé</p></div>
+  <div id="comptes-content"></div>
+</div>
+
+</div><!-- /app -->
+
 <script>
-// ─── PLAN DE COMPTES ──────────────────────────────────────────────────────
-const PLAN = [
-  {code:"P100",lib:"Salaire infirmier",cls:"P",sub:"Salaires & Traitements",kw:["TRESORERIE HOSPITALIERE","PAYE DU MOIS","CHI CRETEIL","CHI VILLENEUVE"]},
-  {code:"P110",lib:"France Travail / ARE",cls:"P",sub:"Salaires & Traitements",kw:["FRANCE TRAVAIL","ALLOCA","POLE EMPLOI"]},
-  {code:"P120",lib:"CAF – Allocations familiales",cls:"P",sub:"Prestations & Aides",kw:["CAF DU VAL","CAF "]},
-  {code:"P130",lib:"Avance crédit impôt DGFIP",cls:"P",sub:"Prestations & Aides",kw:["D.G.F.I.P. AVANCE","AVANCE CREDIMPOT","RICI"]},
-  {code:"P200",lib:"Loyers encaissés",cls:"P",sub:"Revenus Patrimoniaux",kw:["CENTURY 21","AARS IMMO"]},
-  {code:"P210",lib:"Revenus Sarah",cls:"P",sub:"Revenus Patrimoniaux",kw:["VIR INST SARAH","SARAH MASSOLIN"]},
-  {code:"P300",lib:"Remboursements & avoirs",cls:"P",sub:"Produits Exceptionnels",kw:["AVOIR","REMBOURSEMENT","RBT","BOUYGUES TELECOM VIR","CREATION COMPTE"]},
-  {code:"CV100",lib:"Alimentation & courses",cls:"CV",sub:"Vie courante",kw:["E.LECLERC","LECLERC","CARREFOUR","LIDL","HYPER PACYL","INTERMARCHE","BOULANGERIE","LAKSHMI","DELICE","LA CHEVILLAISE","M. MARKET","THE CORNER"]},
-  {code:"CV110",lib:"Restauration & fast-food",cls:"CV",sub:"Vie courante",kw:["MCDONALDS","QUICK","PIZZA HUT","BURGER KING","KFC","FETE A CREPE","LA FOURNEE","YOYO","SRS CHICKEN","G LA DALLE","LA ROMAINVILLE","CHEZ ALI","RAJPOOT","SO SQUARE","CROUSTI"]},
+// ─── PLAN DE COMPTES ──────────────────────────────────────────────────────────
+const PLAN=[
+  {code:"P100",lib:"Salaire infirmier",cls:"P",sub:"Salaires",kw:["TRESORERIE HOSPITALIERE","PAYE DU MOIS","CHI CRETEIL","CHI VILLENEUVE"]},
+  {code:"P110",lib:"France Travail / ARE",cls:"P",sub:"Salaires",kw:["FRANCE TRAVAIL","ALLOCA","POLE EMPLOI"]},
+  {code:"P120",lib:"CAF – Allocations familiales",cls:"P",sub:"Aides & Prestations",kw:["CAF DU VAL","VIREMENT DE CAF"]},
+  {code:"P130",lib:"Avance crédit impôt DGFIP",cls:"P",sub:"Aides & Prestations",kw:["D.G.F.I.P. AVANCE","AVANCE CREDIMPOT","RICI"]},
+  {code:"P200",lib:"Loyers encaissés",cls:"P",sub:"Patrimoine",kw:["CENTURY 21","AARS IMMO"]},
+  {code:"P210",lib:"Revenus Sarah",cls:"P",sub:"Patrimoine",kw:["VIR INST SARAH MASSOLIN","VIR SEPA INST RECU /DE MR MASSOLIN","VIREMENT INSTANTANE DE MLE FLIH SARAH"]},
+  {code:"P300",lib:"Remboursements & avoirs",cls:"P",sub:"Divers",kw:["AVOIR","REMBOURSEMENT","RBT","BOUYGUES TELECOM VIR","CREATION COMPTE","VIR SEPA RECU /DE D.G.F.I.P. 87"]},
+  {code:"CV100",lib:"Alimentation & courses",cls:"CV",sub:"Vie courante",kw:["E.LECLERC","LECLERC","CARREFOUR","LIDL","HYPER PACYL","INTERMARCHE","BOULANGERIE","LAKSHMI","DELICE","LA CHEVILLAISE","M. MARKET","THE CORNER","LA MARQUISE","ACHAT CB M. MARKET","ACHAT CB SALFIANA"]},
+  {code:"CV110",lib:"Restauration & fast-food",cls:"CV",sub:"Vie courante",kw:["MCDONALDS","QUICK","PIZZA HUT","BURGER KING","KFC","FETE A CREPE","LA FOURNEE","YOYO","SRS CHICKEN","G LA DALLE","LA ROMAINVILLE","CHEZ ALI","RAJPOOT","SO SQUARE","CROUSTI","ZETTLE"]},
   {code:"CV120",lib:"Essence & parking",cls:"CV",sub:"Vie courante",kw:["CARBURANT","TOTAL ENERGIE","ESSO","SHELL","VOIRIESTMAURICE","PARKING"]},
   {code:"CV130",lib:"Transport (hors essence)",cls:"CV",sub:"Vie courante",kw:["NAVIGO","RATP","SNCF","UBER","TAXI"]},
-  {code:"CV200",lib:"Habillement & mode",cls:"CV",sub:"Consommation",kw:["PRIMARK","ZARA","ZALANDO","NIKE","ADIDAS","DEVINA","SALFIANA","MNJDIVINE","CQSD"]},
+  {code:"CV200",lib:"Habillement & mode",cls:"CV",sub:"Consommation",kw:["PRIMARK","ZARA","ZALANDO","NIKE","ADIDAS","DEVINA","SALFIANA","MNJDIVINE","CQSD","VEEPEE","ACHAT CB SALFIANA"]},
   {code:"CV210",lib:"High-tech & shopping",cls:"CV",sub:"Consommation",kw:["FNAC","DARTY","SAMSUNG","AMAZON","WITHINGS","DECATHLON","IKEA","ACTION 4499","FNAC.COM"]},
   {code:"CV220",lib:"Santé & pharmacie",cls:"CV",sub:"Consommation",kw:["PHARMACIE","CIGPHARMA","MEDECIN","HOPITAL"]},
   {code:"CV230",lib:"Beauté & coiffure",cls:"CV",sub:"Consommation",kw:["SAN COIFFURE","COIFFURE","MARIONNAUD","BIOTECH"]},
   {code:"CV240",lib:"Loisirs & sorties",cls:"CV",sub:"Consommation",kw:["PATHE","CINEMA","UGC"]},
-  {code:"CV250",lib:"Virements famille",cls:"CV",sub:"Famille",kw:["FLIH SARAH","VIR SARAH MASSOLIN","VIREMENT MME MASSOLIN","CHUNG LAURENT","VIR INST MR MASSOLIN"]},
+  {code:"CV250",lib:"Virements famille",cls:"CV",sub:"Famille",kw:["VIREMENT INSTANTANE A FLIH SARAH","VIREMENT INSTANTANE A SARAH MASSOLIN","VIREMENT INSTANTANE A MASSOLIN PASCAL","INST EMIS /MOTIF C0081","CHUNG LAURENT"]},
   {code:"CV260",lib:"Dépenses exceptionnelles",cls:"CV",sub:"Famille",kw:["ELM CONSEIL","CARTER-CASH","WHOOP","PB - BELLE EPINE"]},
   {code:"CF100",lib:"Prêt immobilier BNP",cls:"CF",sub:"Immobilier",kw:["ECHEANCE PRET 01812","ECHEANCE PRET BNP"]},
   {code:"CF110",lib:"Assurance emprunteur (Cardif)",cls:"CF",sub:"Immobilier",kw:["CARDIF IARD"]},
-  {code:"CF120",lib:"Taxe foncière",cls:"CF",sub:"Immobilier",kw:["DGFIP IMPOT 094006","IMPOT TF","D.G.F.I.P. IMPOT 94006","DGFIP IMPOT"]},
-  {code:"CF130",lib:"Charges copropriété",cls:"CF",sub:"Immobilier",kw:["SDC LES VILLAS","SYNDICAT COPRO"]},
+  {code:"CF120",lib:"Taxe foncière",cls:"CF",sub:"Immobilier",kw:["DGFIP IMPOT 094006","IMPOT TF","D.G.F.I.P. IMPOT 94006","DGFIP IMPOT","PRLV SEPA D.G.F.I.P. IMPOT 94006"]},
+  {code:"CF130",lib:"Charges copropriété / SDC",cls:"CF",sub:"Immobilier",kw:["SDC LES VILLAS","SYNDICAT COPRO","INST EMIS /MOTIF C0081 00037 MASSOLIN"]},
   {code:"CF140",lib:"Loyer résidence principale",cls:"CF",sub:"Immobilier",kw:["LOYER RESIDENCE","QUITTANCE LOYER"]},
   {code:"CF200",lib:"Énergie (EDF)",cls:"CF",sub:"Charges courantes",kw:["EDF ","ENGIE","PRLV SEPA EDF"]},
   {code:"CF210",lib:"Téléphonie",cls:"CF",sub:"Charges courantes",kw:["BOUYGUES TELECOM PRLV","PRLV SFR","SFR DIGITAL","PRLV SEPA BOUYGUES"]},
-  {code:"CF220",lib:"Gold's Gym",cls:"CF",sub:"Charges courantes",kw:["GOLD'S GYM","GOLD S GYM","GOLDSWAY"]},
+  {code:"CF220",lib:"Gold's Gym",cls:"CF",sub:"Charges courantes",kw:["GOLD'S GYM","GOLD S GYM","GOLDSWAY","PRLV SEPA GOLD"]},
   {code:"CF230",lib:"Abonnements numériques",cls:"CF",sub:"Charges courantes",kw:["YOUTUBE","PERLEGO","GOOGLE PLAY","NETFLIX","SPOTIFY","NESPRESSO","COOKIDOO","AMAZON PRIME","SC-NESPRESSO","GOOGLE YOUTUBEPR"]},
   {code:"CF240",lib:"Impôt sur le revenu (PAS)",cls:"CF",sub:"Fiscalité",kw:["D.G.F.I.P. IMPOT PAS","IMPOT PAS","PRELEVEMENT A LA SOURCE","PRLV SEPA D.G.F.I.P. IMPOT PAS"]},
   {code:"CF250",lib:"Assurance habitation",cls:"CF",sub:"Charges courantes",kw:["ASSURANCE HAB","MAAF","AXA"]},
   {code:"CF260",lib:"Mutuelle santé",cls:"CF",sub:"Charges courantes",kw:["MUTUELLE","PREVOYANCE"]},
-  {code:"CF270",lib:"Frais bancaires",cls:"CF",sub:"Charges courantes",kw:["FRAIS TENUE","COMMISSION BANCAIRE"]},
+  {code:"CF270",lib:"Frais bancaires",cls:"CF",sub:"Charges courantes",kw:["FRAIS TENUE DE COMPTE","COMMISSION BANCAIRE","COTISATION TRIMESTRIELLE","MINIMUM FORFAITAIRE"]},
   {code:"I100",lib:"Épargne LEP / Livret A",cls:"I",sub:"Épargne sécurisée",kw:["VERS LIVRET","LIVRET EPARGNE POPULAIRE","LEP ","LIVRET A"]},
-  {code:"I200",lib:"PEA – ETF / Bourse",cls:"I",sub:"Investissements financiers",kw:["FINARY","PEA ","BOURSE","SAXO","DEGIRO","CARTE FINARY"]},
-  {code:"I210",lib:"Assurance-vie",cls:"I",sub:"Investissements financiers",kw:["ASSURANCE VIE","LINXEA","LUCYA"]},
-  {code:"I220",lib:"Crypto-monnaies",cls:"I",sub:"Investissements financiers",kw:["CRYPTO","BINANCE","COINBASE","KRAKEN"]},
+  {code:"I200",lib:"PEA – ETF / Bourse",cls:"I",sub:"Investissements",kw:["FINARY","PEA ","BOURSE","SAXO","DEGIRO","CARTE FINARY"]},
+  {code:"I210",lib:"Assurance-vie",cls:"I",sub:"Investissements",kw:["ASSURANCE VIE","LINXEA","LUCYA"]},
+  {code:"I220",lib:"Crypto-monnaies",cls:"I",sub:"Investissements",kw:["CRYPTO","BINANCE","COINBASE","KRAKEN"]},
+  {code:"I300",lib:"Capital amorti prêt (BNP Crédit)",cls:"I",sub:"Immobilier",kw:["AMORTISSEMENT PRET 01812","AMORTISSEMENT PRET BNP"]},
 ];
 
-// OBJECTIFS PAR DÉFAUT (modifiables dans le tableau Budget vs Réalisé)
-const DEFAULT_BUDGETS = {
-  P100:1500, P110:769, P120:1384, P130:0, P200:1500, P210:200, P300:0,
-  CV100:500, CV110:150, CV120:150, CV130:50, CV200:100, CV210:100,
-  CV220:50, CV230:40, CV240:50, CV250:200, CV260:0,
-  CF100:1242, CF110:220, CF120:182, CF130:153, CF140:0, CF200:59,
-  CF210:44, CF220:44, CF230:47, CF240:133, CF250:30, CF260:50, CF270:5,
-  I100:200, I200:100, I210:0, I220:0
+const DEFAULT_BUDGETS={
+  P100:1500,P110:769,P120:1384,P130:0,P200:1500,P210:200,P300:0,
+  CV100:500,CV110:150,CV120:150,CV130:50,CV200:100,CV210:100,
+  CV220:50,CV230:40,CV240:50,CV250:200,CV260:0,
+  CF100:1242,CF110:220,CF120:182,CF130:153,CF140:0,CF200:59,
+  CF210:44,CF220:44,CF230:47,CF240:133,CF250:30,CF260:50,CF270:5,
+  I100:200,I200:100,I210:0,I220:0,I300:0
 };
 
-const CLS_COLOR={P:"#22c55e",CV:"#f59e0b",CF:"#f97316",I:"#3b82f6","?":"#6b7280"};
-const CLS_BG={P:"#0a1f0a",CV:"#1a1200",CF:"#1a0d00",I:"#071020"};
-const CLS_LABEL={P:"PRODUITS",CV:"CHARGES VARIABLES",CF:"CHARGES FIXES",I:"INVESTISSEMENTS"};
-const CLS_ICON={P:"💵",CV:"📉",CF:"📌",I:"💎"};
+const CC={P:"var(--green)",CV:"var(--amber)",CF:"var(--orange)",I:"var(--blue)","?":"var(--text2)"};
+const CB={P:"rgba(16,217,126,.08)",CV:"rgba(245,166,35,.08)",CF:"rgba(255,107,53,.08)",I:"rgba(77,159,255,.08)"};
+const CBB={P:"var(--green2)",CV:"var(--amber2)",CF:"var(--orange2)",I:"var(--blue2)"};
+const CL={P:"PRODUITS",CV:"CHARGES VARIABLES",CF:"CHARGES FIXES",I:"INVESTISSEMENTS"};
+const CI={P:"💵",CV:"📉",CF:"📌",I:"💎"};
 const MONTHS=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
 
-// ─── STATE ──────────────────────────────────────────────────────────────────
-let TXS=[], BUDGETS={}, chartPie=null, chartBar=null, chartProj=null;
+let TXS=[],BUDGETS={},chartPie=null,chartBar=null,chartProj=null;
 
-// ─── STORAGE ────────────────────────────────────────────────────────────────
-function load(){
-  try{TXS=JSON.parse(localStorage.getItem("tra_pm_txs")||"[]")}catch(e){TXS=[]}
-  try{BUDGETS=JSON.parse(localStorage.getItem("tra_pm_budgets")||"{}")}catch(e){BUDGETS={}}
-  // Merge defaults
-  for(const k in DEFAULT_BUDGETS) if(BUDGETS[k]===undefined) BUDGETS[k]=DEFAULT_BUDGETS[k];
-  updateMonthFilter(); render();
-}
-function save(){
-  localStorage.setItem("tra_pm_txs",JSON.stringify(TXS));
-  updateMonthFilter(); render();
-}
-function saveBudget(code,val){
-  BUDGETS[code]=val;
-  localStorage.setItem("tra_pm_budgets",JSON.stringify(BUDGETS));
-  renderBVR();
-}
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+function save(){localStorage.setItem("tra_pm_txs",JSON.stringify(TXS));updateMonthFilter();render()}
+function saveBudget(code,val){BUDGETS[code]=val;localStorage.setItem("tra_pm_bud",JSON.stringify(BUDGETS));renderBVR()}
 
-// ─── UTILS ──────────────────────────────────────────────────────────────────
+// ─── UTILS ────────────────────────────────────────────────────────────────────
 function fmt(n){return new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n||0)}
 function fmtPct(n){return((n||0)*100).toFixed(1)+"%"}
 function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function bankClass(b){
+  if(!b) return "b-q";
+  const u=b.toLowerCase();
+  if(u.includes("bourso")) return "bank-bourso";
+  if(u.includes("crédit")||u.includes("credit")) return "bank-bnpcredit";
+  if(u.includes("bnp")) return "bank-bnp";
+  if(u.includes("postale")) return "bank-lbp";
+  return "b-q";
+}
 
-// ─── CATEGORIZE ─────────────────────────────────────────────────────────────
+// ─── CATEGORIZE ───────────────────────────────────────────────────────────────
 function categorize(label,amount){
   const up=label.toUpperCase();
   for(const acc of PLAN){
@@ -485,6 +533,8 @@ function categorize(label,amount){
       if(kw&&up.includes(kw.toUpperCase())){
         if(acc.cls==="P"&&amount>0) return acc;
         if(acc.cls==="I"&&amount<0) return acc;
+        // I300 (amortissement) is positive in BNP crédit
+        if(acc.code==="I300"&&amount>0) return acc;
         if(acc.cls!=="P"&&acc.cls!=="I"&&amount<0) return acc;
       }
     }
@@ -492,63 +542,147 @@ function categorize(label,amount){
   return{code:"???",lib:"Non catégorisé",cls:"?",sub:"?"};
 }
 
-// ─── PARSE CSV ──────────────────────────────────────────────────────────────
+// ─── PARSERS ──────────────────────────────────────────────────────────────────
+function pAmt(s){
+  if(!s&&s!==0)return null;
+  const v=parseFloat(String(s).trim().replace(/\s|\u00a0/g,"").replace(",","."));
+  return isNaN(v)?null:v;
+}
+
+function detectFmt(lines){
+  const h=(lines[0]||"").toUpperCase();
+  if(/DATEOP/i.test(lines[0])) return "boursobank";
+  if(/CR.{0,10}DIT IMMOBILIER|CR&AMP;EACUTE;DIT|CR&EACUTE;DIT/i.test(h)) return "bnp_credit";
+  if(/COMPTE DE CH|COMPTE CH.{1,5}QUES|\*{3}/i.test(h)) return "bnp";
+  if(/CCP|COMPTE TENU|NUMERO COMPTE/i.test(h)) return "lbp";
+  // Check if any data line looks like LBP (has Montant(EUROS) header)
+  for(const l of lines) if(/montant\(euros\)/i.test(l)) return "lbp";
+  return "generic";
+}
+
 function parseCSV(text){
-  const lines=text.trim().split("\n");
-  const sep=(lines[0]||"").includes(";")?";":","
+  const rawLines=text.trim().split("\n");
+  const lines=rawLines.map(l=>l.replace(/^\uFEFF/,"").trim());
+  const fmt=detectFmt(lines);
   const txs=[];
-  for(const raw of lines){
-    const line=raw.trim();if(!line)continue;
-    const parts=line.split(sep).map(p=>p.trim().replace(/^"|"$/g,""));
-    let dateStr="",label="",amount=0,found=false;
-    for(let i=0;i<parts.length;i++){
-      const dm=parts[i].match(/^(\d{2})[./](\d{2})(?:[./](\d{4}))?$/);
-      if(dm){
-        const y=dm[3]?parseInt(dm[3]):new Date().getFullYear();
-        dateStr=`${y}-${dm[2].padStart(2,"0")}-${dm[1].padStart(2,"0")}`;
-        label=parts[i+1]||"";
-        for(let j=i+2;j<parts.length;j++){
-          const v=parseFloat(parts[j].replace(/\s/g,"").replace(",","."));
-          if(!isNaN(v)&&v!==0){amount=v;break}
-        }
-        found=true;break;
-      }
+
+  // ── BOURSOBANK ─────────────────────────────────────────────
+  if(fmt==="boursobank"){
+    for(let i=1;i<lines.length;i++){
+      if(!lines[i].trim()) continue;
+      const p=lines[i].split(";").map(s=>s.trim().replace(/^"|"$/g,""));
+      if(p.length<7) continue;
+      const date=p[0];
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      const label=p[2]; const amount=pAmt(p[6]);
+      if(!label||amount===null) continue;
+      const acc=categorize(label,amount);
+      txs.push({id:Date.now()+Math.random(),date,label,amount,bank:"BoursoBank",code:acc.code,lib:acc.lib,cls:acc.cls});
     }
-    if(!found||!label||!amount)continue;
+    return txs;
+  }
+
+  // ── BNP CRÉDIT IMMOBILIER ──────────────────────────────────
+  if(fmt==="bnp_credit"){
+    for(const line of lines){
+      const p=line.split(";").map(s=>s.trim().replace(/^"|"$/g,""));
+      const dm=p[0].match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if(!dm) continue;
+      const date=`${dm[3]}-${dm[2]}-${dm[1]}`;
+      // Format: date;;;label;amount  (cols 0,3,4)
+      const label=(p[3]||p[1]||"").trim();
+      const amount=pAmt(p[4])||pAmt(p[p.length-1]);
+      if(!label||amount===null) continue;
+      const acc=categorize(label,amount>0?amount:-amount); // amortissement toujours positif
+      txs.push({id:Date.now()+Math.random(),date,label,amount:Math.abs(amount),bank:"BNP Crédit",code:acc.code||"I300",lib:acc.lib||"Capital amorti prêt",cls:"I"});
+    }
+    return txs;
+  }
+
+  // ── BNP COMPTE COURANT ─────────────────────────────────────
+  if(fmt==="bnp"){
+    for(const line of lines){
+      const p=line.split(";").map(s=>s.trim().replace(/^"|"$/g,""));
+      if(p.length<5) continue;
+      const dm=p[0].match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if(!dm) continue;
+      const date=`${dm[3]}-${dm[2]}-${dm[1]}`;
+      const label=p[3]; const amount=pAmt(p[4]);
+      if(!label||amount===null) continue;
+      const acc=categorize(label,amount);
+      txs.push({id:Date.now()+Math.random(),date,label,amount,bank:"BNP Paribas",code:acc.code,lib:acc.lib,cls:acc.cls});
+    }
+    return txs;
+  }
+
+  // ── LA BANQUE POSTALE ──────────────────────────────────────
+  if(fmt==="lbp"){
+    // Skip header lines until we hit "Date;Libellé;Montant"
+    let dataStart=0;
+    for(let i=0;i<lines.length;i++){
+      if(/^date;/i.test(lines[i])){dataStart=i+1;break}
+    }
+    for(let i=dataStart;i<lines.length;i++){
+      const line=lines[i];
+      if(!line.trim()) continue;
+      const p=line.split(";").map(s=>s.trim().replace(/^"|"$/g,""));
+      if(p.length<3) continue;
+      const dm=p[0].match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if(!dm) continue;
+      const date=`${dm[3]}-${dm[2]}-${dm[1]}`;
+      const label=p[1].trim();
+      const amount=pAmt(p[2]);
+      if(!label||amount===null) continue;
+      const acc=categorize(label,amount);
+      txs.push({id:Date.now()+Math.random(),date,label,amount,bank:"La Banque Postale",code:acc.code,lib:acc.lib,cls:acc.cls});
+    }
+    return txs;
+  }
+
+  // ── GENERIC FALLBACK ───────────────────────────────────────
+  const sep=(lines[0]||"").includes(";")?";":","
+  for(const line of lines){
+    if(!line.trim()) continue;
+    const p=line.split(sep).map(s=>s.trim().replace(/^"|"$/g,""));
+    let date="",label="",amount=0,found=false;
+    for(let i=0;i<p.length;i++){
+      const iso=p[i].match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(iso){date=p[i];label=p[i+1]||"";for(let j=i+2;j<p.length;j++){const v=pAmt(p[j]);if(v!==null){amount=v;break}}found=true;break}
+      const dmy=p[i].match(/^(\d{2})[./](\d{2})[./](\d{4})$/);
+      if(dmy){date=`${dmy[3]}-${dmy[2]}-${dmy[1]}`;label=p[i+1]||"";for(let j=i+2;j<p.length;j++){const v=pAmt(p[j]);if(v!==null){amount=v;break}}found=true;break}
+    }
+    if(!found||!label||!amount) continue;
     const acc=categorize(label,amount);
-    txs.push({id:Date.now()+Math.random(),date:dateStr,label,amount,code:acc.code,lib:acc.lib,cls:acc.cls});
+    txs.push({id:Date.now()+Math.random(),date,label,amount,code:acc.code,lib:acc.lib,cls:acc.cls});
   }
   return txs;
 }
 
-// ─── ANALYTICS ──────────────────────────────────────────────────────────────
+// ─── ANALYTICS ────────────────────────────────────────────────────────────────
 function analytics(txs){
-  const totals={};
-  PLAN.forEach(a=>totals[a.code]=0);totals["???"]=0;
+  const totals={};PLAN.forEach(a=>totals[a.code]=0);totals["???"]=0;
   for(const t of txs){const k=t.code||"???";if(totals[k]===undefined)totals[k]=0;totals[k]+=Math.abs(t.amount)}
   const byClass={P:0,CV:0,CF:0,I:0,"?":0};
   PLAN.forEach(a=>byClass[a.cls]=(byClass[a.cls]||0)+(totals[a.code]||0));
   byClass["?"]=totals["???"]||0;
   const solde=byClass.P-byClass.CV-byClass.CF-byClass.I;
-  const tauxEp=byClass.P>0?byClass.I/byClass.P:0;
-  const tauxCV=byClass.P>0?byClass.CV/byClass.P:0;
-  const tauxCF=byClass.P>0?byClass.CF/byClass.P:0;
-  return{totals,byClass,solde,tauxEp,tauxCV,tauxCF};
+  return{totals,byClass,solde,
+    tauxEp:byClass.P>0?byClass.I/byClass.P:0,
+    tauxCV:byClass.P>0?byClass.CV/byClass.P:0,
+    tauxCF:byClass.P>0?byClass.CF/byClass.P:0};
 }
 
 function monthlyData(){
   return MONTHS.map((m,i)=>{
-    const mm=String(i+1).padStart(2,"0");
-    const key=`${new Date().getFullYear()}-${mm}`;
-    const mt=TXS.filter(t=>t.date&&t.date.substring(0,7)===key);
-    const a=analytics(mt);
-    return{month:m,P:a.byClass.P,CV:a.byClass.CV,CF:a.byClass.CF,I:a.byClass.I};
+    const key=`${new Date().getFullYear()}-${String(i+1).padStart(2,"0")}`;
+    const A=analytics(TXS.filter(t=>t.date?.substring(0,7)===key));
+    return{month:m,...A.byClass};
   });
 }
 
 function filteredTxs(){
   const f=document.getElementById("filter-month").value;
-  return f==="all"?TXS:TXS.filter(t=>t.date&&t.date.substring(0,7)===f);
+  return f==="all"?TXS:TXS.filter(t=>t.date?.substring(0,7)===f);
 }
 
 function updateMonthFilter(){
@@ -558,356 +692,559 @@ function updateMonthFilter(){
   sel.innerHTML='<option value="all">Toute période</option>'+months.map(m=>`<option value="${m}"${m===cur?" selected":""}>${m}</option>`).join("");
 }
 
-// ─── RENDER MAIN ────────────────────────────────────────────────────────────
+// ─── RENDER MAIN ──────────────────────────────────────────────────────────────
 function render(){
   const txs=filteredTxs();const A=analytics(txs);
   document.getElementById("nav-count").textContent=TXS.length+" tx";
-  renderDashboard(txs,A);renderTRA(txs,A);
-  renderBVR();renderProjection();
-  renderTransactions();renderComptes(A);
+  renderDash(txs,A);renderTRA(txs,A);renderBVR();renderProjection();renderTX();renderComptes(A);
+  if(document.getElementById("page-comparaison").classList.contains("active")) renderComparaison();
 }
 
-// ─── DASHBOARD ──────────────────────────────────────────────────────────────
-function renderDashboard(txs,A){
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDash(txs,A){
   const has=TXS.length>0;
   document.getElementById("empty-state").style.display=has?"none":"block";
   document.getElementById("charts-section").style.display=has?"block":"none";
   if(!has)return;
 
-  const kpis=[
-    {label:"💵 Produits",val:A.byClass.P,color:"#22c55e",sub:"Revenus totaux"},
-    {label:"📉 Ch. Variables",val:A.byClass.CV,color:"#f59e0b",sub:fmtPct(A.tauxCV)+" des produits"},
-    {label:"📌 Ch. Fixes",val:A.byClass.CF,color:"#f97316",sub:fmtPct(A.tauxCF)+" des produits"},
-    {label:"💎 Investissements",val:A.byClass.I,color:"#3b82f6",sub:"Taux épargne "+fmtPct(A.tauxEp)},
-    {label:"🏦 Solde Net",val:A.solde,color:A.solde>=0?"#22c55e":"#f87171",sub:"Produits − Charges"},
-  ];
-  document.getElementById("kpi-grid").innerHTML=kpis.map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${fmt(k.val)}</div><div class="kpi-sub">${k.sub}</div></div>`).join("");
+  document.getElementById("kpi-grid").innerHTML=[
+    {label:"💵 Produits",v:A.byClass.P,c:CC.P,sub:"Revenus totaux"},
+    {label:"📉 Ch. Variables",v:A.byClass.CV,c:CC.CV,sub:fmtPct(A.tauxCV)+" des produits"},
+    {label:"📌 Ch. Fixes",v:A.byClass.CF,c:CC.CF,sub:fmtPct(A.tauxCF)+" des produits"},
+    {label:"💎 Investissements",v:A.byClass.I,c:CC.I,sub:"Taux épargne "+fmtPct(A.tauxEp)},
+    {label:"🏦 Solde Net",v:A.solde,c:A.solde>=0?CC.P:CC.red,sub:"Produits − Charges"},
+  ].map(k=>`<div class="kpi" style="--kpi-color:${k.c}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${fmt(k.v)}</div><div class="kpi-sub">${k.sub}</div></div>`).join("");
 
-  const pieData=[{label:"Produits",val:A.byClass.P,color:"#22c55e"},{label:"Ch. Var.",val:A.byClass.CV,color:"#f59e0b"},{label:"Ch. Fixes",val:A.byClass.CF,color:"#f97316"},{label:"Investiss.",val:A.byClass.I,color:"#3b82f6"}].filter(d=>d.val>0);
+  const pie=[{l:"Produits",v:A.byClass.P,c:"#10d97e"},{l:"Ch. Var.",v:A.byClass.CV,c:"#f5a623"},{l:"Ch. Fix.",v:A.byClass.CF,c:"#ff6b35"},{l:"Invest.",v:A.byClass.I,c:"#4d9fff"}].filter(d=>d.v>0);
   if(chartPie)chartPie.destroy();
-  chartPie=new Chart(document.getElementById("chart-pie").getContext("2d"),{
-    type:"doughnut",
-    data:{labels:pieData.map(d=>d.label),datasets:[{data:pieData.map(d=>d.val),backgroundColor:pieData.map(d=>d.color),borderWidth:2,borderColor:"#0f1729"}]},
-    options:{plugins:{legend:{position:"bottom",labels:{color:"#94a3b8",font:{size:11},boxWidth:10,padding:10}}},cutout:"60%",animation:{duration:400}}
-  });
+  chartPie=new Chart(document.getElementById("chart-pie"),{type:"doughnut",
+    data:{labels:pie.map(d=>d.l),datasets:[{data:pie.map(d=>d.v),backgroundColor:pie.map(d=>d.c),borderWidth:2,borderColor:"#0d1526"}]},
+    options:{plugins:{legend:{position:"bottom",labels:{color:"#8fa3c4",font:{size:11},boxWidth:10,padding:10}}},cutout:"62%",animation:{duration:500}}});
 
   const md=monthlyData();
   if(chartBar)chartBar.destroy();
-  chartBar=new Chart(document.getElementById("chart-bar").getContext("2d"),{
-    type:"bar",
+  chartBar=new Chart(document.getElementById("chart-bar"),{type:"bar",
     data:{labels:md.map(d=>d.month),datasets:[
-      {label:"Produits",data:md.map(d=>d.P),backgroundColor:"#22c55e",borderRadius:2},
-      {label:"Ch. Var.",data:md.map(d=>d.CV),backgroundColor:"#f59e0b",borderRadius:2},
-      {label:"Ch. Fix.",data:md.map(d=>d.CF),backgroundColor:"#f97316",borderRadius:2},
-      {label:"Invest.",data:md.map(d=>d.I),backgroundColor:"#3b82f6",borderRadius:2},
+      {label:"Produits",data:md.map(d=>d.P),backgroundColor:"#10d97e",borderRadius:3},
+      {label:"Ch. Var.",data:md.map(d=>d.CV),backgroundColor:"#f5a623",borderRadius:3},
+      {label:"Ch. Fix.",data:md.map(d=>d.CF),backgroundColor:"#ff6b35",borderRadius:3},
+      {label:"Invest.",data:md.map(d=>d.I),backgroundColor:"#4d9fff",borderRadius:3},
     ]},
-    options:{plugins:{legend:{position:"bottom",labels:{color:"#94a3b8",font:{size:10},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:"#64748b",font:{size:10}},grid:{color:"#1e2d4a"}},y:{ticks:{color:"#64748b",font:{size:10},callback:v=>v>999?(v/1000).toFixed(0)+"k":v},grid:{color:"#1e2d4a"}}},animation:{duration:400}}
-  });
+    options:{plugins:{legend:{position:"bottom",labels:{color:"#8fa3c4",font:{size:10},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:"#4d6690",font:{size:10}},grid:{color:"rgba(26,45,80,.5)"}},y:{ticks:{color:"#4d6690",font:{size:10},callback:v=>v>999?(v/1000).toFixed(0)+"k":v},grid:{color:"rgba(26,45,80,.5)"}}},animation:{duration:500}}});
 
-  const topExp=PLAN.filter(a=>a.cls==="CV"||a.cls==="CF").map(a=>({...a,val:A.totals[a.code]||0})).filter(a=>a.val>0).sort((a,b)=>b.val-a.val).slice(0,7);
-  document.getElementById("top-expenses-list").innerHTML=topExp.map(a=>`<div class="expense-row"><div><span class="badge badge-${a.cls}">${a.cls}</span> <span style="font-size:13px">${esc(a.lib)}</span></div><span style="font-weight:700;font-size:13px;color:#f87171">${fmt(a.val)}</span></div>`).join("")||'<div style="color:var(--muted);font-size:13px">Aucune dépense</div>';
+  const top=PLAN.filter(a=>a.cls==="CV"||a.cls==="CF").map(a=>({...a,v:A.totals[a.code]||0})).filter(a=>a.v>0).sort((a,b)=>b.v-a.v).slice(0,7);
+  document.getElementById("top-exp").innerHTML=top.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div><span class="badge b-${a.cls}" style="margin-right:7px">${a.cls}</span><span style="font-size:13px">${esc(a.lib)}</span></div><span style="font-weight:700;font-size:13px;color:var(--red)">${fmt(a.v)}</span></div>`).join("")||`<div style="color:var(--text3);font-size:13px">Aucune dépense</div>`;
 
-  const inds=[{label:"Taux d'épargne",val:A.tauxEp,target:0.15,better:"above"},{label:"Charges variables / Prod.",val:A.tauxCV,target:0.35,better:"below"},{label:"Charges fixes / Prod.",val:A.tauxCF,target:0.50,better:"below"}];
-  document.getElementById("indicators").innerHTML=inds.map(({label,val,target,better})=>{
-    const ok=better==="above"?val>=target:val<=target;
-    const pct=Math.min(100,(val*100/Math.max(target,0.01))).toFixed(0);
-    return`<div class="progress-wrap"><div class="progress-header"><span style="color:#94a3b8;font-size:12px">${label}</span><span style="color:${ok?"#22c55e":"#f87171"};font-weight:700;font-size:12px">${fmtPct(val)}</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${ok?"#22c55e":"#f87171"}"></div></div><div style="font-size:11px;color:var(--muted2);margin-top:2px">Objectif : ${fmtPct(target)}</div></div>`;
-  }).join("")+`<div style="margin-top:10px;padding:11px 13px;background:${A.solde>=0?"#0a1f0a":"#1a0a0a"};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:13px">🏦 Solde net</span><span style="font-weight:800;font-size:15px;color:${A.solde>=0?"#22c55e":"#f87171"}">${fmt(A.solde)}</span></div>`;
+  const inds=[{l:"Taux d'épargne",v:A.tauxEp,t:.15,dir:"above"},{l:"Charges variables / Produits",v:A.tauxCV,t:.35,dir:"below"},{l:"Charges fixes / Produits",v:A.tauxCF,t:.50,dir:"below"}];
+  document.getElementById("indicators").innerHTML=inds.map(({l,v,t,dir})=>{
+    const ok=dir==="above"?v>=t:v<=t;
+    return`<div class="prog"><div class="prog-hd"><span style="color:var(--text2);font-size:12px">${l}</span><span style="color:${ok?"var(--green)":"var(--red)"};font-weight:700;font-size:12px">${fmtPct(v)}</span></div><div class="prog-bg"><div class="prog-fill" style="width:${Math.min(100,(v/Math.max(t,.01)*100)).toFixed(0)}%;background:${ok?"var(--green)":"var(--red)"}"></div></div><div style="font-size:11px;color:var(--text3);margin-top:2px">Objectif : ${fmtPct(t)}</div></div>`;
+  }).join("")+`<div style="padding:12px 14px;background:${A.solde>=0?"rgba(16,217,126,.08)":"rgba(255,92,122,.08)"};border:1px solid ${A.solde>=0?"rgba(16,217,126,.2)":"rgba(255,92,122,.2)"};border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-weight:700;font-size:13px">🏦 Solde net</span><span style="font-weight:800;font-size:16px;color:${A.solde>=0?"var(--green)":"var(--red)"}">${fmt(A.solde)}</span></div>`;
 }
 
-// ─── TRA ────────────────────────────────────────────────────────────────────
+// ─── TRA ──────────────────────────────────────────────────────────────────────
 function renderTRA(txs,A){
-  let html="";
+  let h="";
   for(const cls of["P","CV","CF","I"]){
     const accs=PLAN.filter(a=>a.cls===cls);
     const subs=[...new Set(accs.map(a=>a.sub))];
     const total=A.byClass[cls]||0;
-    html+=`<div class="tra-block" style="margin-bottom:8px"><div class="tra-header" style="background:${CLS_BG[cls]};color:${CLS_COLOR[cls]}"><span>${CLS_ICON[cls]} ${CLS_LABEL[cls]}</span><span style="font-size:15px">${fmt(total)}</span></div>`;
+    h+=`<div class="tra-block" style="margin-bottom:10px">
+      <div class="tra-hd" style="background:${CB[cls]};color:${CC[cls]};border-bottom:1px solid ${CBB[cls]}">
+        <span>${CI[cls]} ${CL[cls]}</span><span style="font-size:16px">${fmt(total)}</span>
+      </div>`;
     for(const sub of subs){
-      html+=`<div class="tra-sub-label">${esc(sub)}</div>`;
+      h+=`<div class="tra-sub">${esc(sub)}</div>`;
       for(const acc of accs.filter(a=>a.sub===sub)){
-        const val=A.totals[acc.code]||0;
-        const pct=A.byClass.P>0?val/A.byClass.P:0;
-        html+=`<div class="tra-row"><div style="display:flex;align-items:center;gap:8px"><span class="tra-code">${acc.code}</span><span style="color:${val>0?"var(--text)":"var(--muted2)"}">${esc(acc.lib)}</span></div><div style="display:flex;align-items:center;gap:12px"><span class="tra-pct">${val>0?fmtPct(pct):"—"}</span><span class="tra-amount" style="color:${val>0?CLS_COLOR[cls]:"#334155"}">${val>0?fmt(val):"—"}</span></div></div>`;
+        const v=A.totals[acc.code]||0,pct=A.byClass.P>0?v/A.byClass.P:0;
+        h+=`<div class="tra-row"><div style="display:flex;align-items:center;gap:9px"><span class="tra-code">${acc.code}</span><span style="color:${v>0?"var(--text)":"var(--text3)"}">${esc(acc.lib)}</span></div><div style="display:flex;align-items:center;gap:12px"><span class="tra-pct">${v>0?fmtPct(pct):"—"}</span><span class="tra-amt" style="color:${v>0?CC[cls]:"var(--text3)"}">${v>0?fmt(v):"—"}</span></div></div>`;
       }
     }
-    html+=`<div class="tra-total" style="background:${CLS_BG[cls]}"><span style="color:${CLS_COLOR[cls]}">TOTAL ${CLS_LABEL[cls]}</span><div style="display:flex;gap:12px"><span style="color:var(--muted);font-size:12px">${A.byClass.P>0?fmtPct(total/A.byClass.P):"—"}</span><span style="color:${CLS_COLOR[cls]};min-width:80px;text-align:right">${fmt(total)}</span></div></div></div>`;
+    h+=`<div class="tra-total" style="background:${CB[cls]}"><span style="color:${CC[cls]}">TOTAL ${CL[cls]}</span><div style="display:flex;gap:12px"><span style="color:var(--text3);font-size:12px">${A.byClass.P>0?fmtPct(total/A.byClass.P):"—"}</span><span style="color:${CC[cls]};min-width:85px;text-align:right">${fmt(total)}</span></div></div></div>`;
   }
   const tc=A.byClass.CV+A.byClass.CF+A.byClass.I;
-  html+=`<div class="tra-block" style="margin-top:14px"><div class="tra-header" style="background:var(--bg2);color:var(--muted)"><span>RÉSULTATS</span></div><div class="tra-result-row"><span style="color:var(--muted);font-size:13px;font-weight:500">TOTAL CHARGES</span><span style="color:#f87171">${fmt(tc)}</span></div><div class="tra-result-row" style="font-size:16px"><span style="color:var(--muted);font-size:13px;font-weight:500">SOLDE NET DU MOIS</span><span style="color:${A.solde>=0?"#22c55e":"#f87171"}">${fmt(A.solde)}</span></div><div class="tra-result-row"><span style="color:var(--muted);font-size:13px;font-weight:500">TAUX D'ÉPARGNE</span><span style="color:#3b82f6">${fmtPct(A.tauxEp)}</span></div><div class="tra-result-row"><span style="color:var(--muted);font-size:13px;font-weight:500">CHARGES VARIABLES / Produits</span><span style="color:#f59e0b">${fmtPct(A.tauxCV)}</span></div><div class="tra-result-row"><span style="color:var(--muted);font-size:13px;font-weight:500">CHARGES FIXES / Produits</span><span style="color:#f97316">${fmtPct(A.tauxCF)}</span></div></div>`;
-  document.getElementById("tra-content").innerHTML=html;
+  h+=`<div class="tra-block" style="margin-top:14px">
+    <div class="tra-hd" style="background:rgba(0,0,0,.2);color:var(--text2)"><span>RÉSULTATS</span></div>
+    <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">TOTAL CHARGES (CV+CF+I)</span><span style="color:var(--red)">${fmt(tc)}</span></div>
+    <div class="tra-result" style="font-size:16px"><span style="color:var(--text2);font-size:13px;font-weight:500">SOLDE NET DU MOIS</span><span style="color:${A.solde>=0?"var(--green)":"var(--red)"}">${fmt(A.solde)}</span></div>
+    <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">TAUX D'ÉPARGNE</span><span style="color:var(--blue)">${fmtPct(A.tauxEp)}</span></div>
+    <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">CHARGES VARIABLES / Produits</span><span style="color:var(--amber)">${fmtPct(A.tauxCV)}</span></div>
+    <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">CHARGES FIXES / Produits</span><span style="color:var(--orange)">${fmtPct(A.tauxCF)}</span></div>
+  </div>`;
+  document.getElementById("tra-content").innerHTML=h;
 }
 
-// ─── BUDGET vs RÉALISÉ ──────────────────────────────────────────────────────
+// ─── BVR ──────────────────────────────────────────────────────────────────────
 function renderBVR(){
-  const txs=filteredTxs();
-  const A=analytics(txs);
-  let totalObj_P=0,totalReal_P=0,totalObj_D=0,totalReal_D=0;
-
+  const txs=filteredTxs(),A=analytics(txs);
+  let totP_obj=0,totP_real=0,totD_obj=0,totD_real=0;
   let html=`<thead><tr>
-    <th style="min-width:180px">Poste</th>
-    <th style="text-align:right">Objectif (€)</th>
-    <th style="text-align:right">Réalisé (€)</th>
-    <th style="text-align:right">Écart (€)</th>
-    <th style="text-align:right">Écart (%)</th>
-    <th style="text-align:center">Statut</th>
+    <th style="min-width:175px">Poste</th>
+    <th class="r">Objectif</th><th class="r">Réalisé</th>
+    <th class="r">Écart</th><th class="r">Écart %</th><th style="text-align:center">Statut</th>
   </tr></thead><tbody>`;
 
   for(const cls of["P","CV","CF","I"]){
     const accs=PLAN.filter(a=>a.cls===cls);
-    html+=`<tr class="bvr-section-row"><td colspan="6" style="color:${CLS_COLOR[cls]}">${CLS_ICON[cls]} ${CLS_LABEL[cls]}</td></tr>`;
-    let clsObj=0,clsReal=0;
+    html+=`<tr class="bvr-section"><td colspan="6" style="color:${CC[cls]}">${CI[cls]} ${CL[cls]}</td></tr>`;
+    let co=0,cr=0;
     for(const acc of accs){
-      const real=A.totals[acc.code]||0;
-      const obj=BUDGETS[acc.code]||0;
-      const ecart=cls==="P"?(real-obj):(obj-real); // Produits: réel>obj=bon; Dépenses: réel<obj=bon
-      const ecartPct=obj>0?ecart/obj:0;
-      const ok=ecart>=0;
-      const ecartClass=ecart>0?"ecart-pos":ecart<0?"ecart-neg":"ecart-zero";
-      clsObj+=obj;clsReal+=real;
+      const real=A.totals[acc.code]||0,obj=BUDGETS[acc.code]||0;
+      const ecart=cls==="P"?(real-obj):(obj-real);
+      const ecPct=obj>0?ecart/obj:0;
+      const ec=ecart>0?"eco":ecart<0?"dep":"neu";
+      co+=obj;cr+=real;
       html+=`<tr>
-        <td style="padding-left:24px;font-size:12px;color:${real>0?"var(--text)":"var(--muted2)"}"><span style="font-family:monospace;font-size:10px;color:#334155;margin-right:8px">${acc.code}</span>${esc(acc.lib)}</td>
-        <td style="text-align:right;padding:9px 12px"><input class="bvr-input" value="${obj}" onchange="saveBudget('${acc.code}',parseFloat(this.value.replace(',','.'))||0)" title="Modifier l'objectif"></td>
-        <td style="text-align:right;font-weight:${real>0?"700":"400"};color:${real>0?CLS_COLOR[cls]:"var(--muted)"}">${real>0?fmt(real):"—"}</td>
-        <td style="text-align:right" class="${ecartClass}">${ecart!==0?fmt(ecart):"—"}</td>
-        <td style="text-align:right" class="${ecartClass}">${obj>0?fmtPct(Math.abs(ecartPct)):"—"}</td>
-        <td style="text-align:center;font-size:16px">${real===0?"⬜":ok?"✅":"🔴"}</td>
+        <td style="padding-left:22px;font-size:12px;color:${real>0?"var(--text)":"var(--text3)"}"><span style="font-family:monospace;font-size:10px;color:var(--text3);margin-right:8px">${acc.code}</span>${esc(acc.lib)}</td>
+        <td class="r"><input class="bvr-inp" value="${obj}" onchange="saveBudget('${acc.code}',parseFloat(this.value.replace(',','.'))||0)"></td>
+        <td class="r" style="font-weight:${real>0?700:400};color:${real>0?CC[cls]:"var(--text3)"}">${real>0?fmt(real):"—"}</td>
+        <td class="r ${ec}">${ecart!==0?fmt(ecart):"—"}</td>
+        <td class="r ${ec}">${obj>0?fmtPct(Math.abs(ecPct)):"—"}</td>
+        <td style="text-align:center;font-size:15px">${real===0?"⬜":ecart>=0?"✅":"🔴"}</td>
       </tr>`;
     }
-    if(cls==="P"){totalObj_P=clsObj;totalReal_P=clsReal;}
-    else{totalObj_D+=clsObj;totalReal_D+=clsReal;}
-    const ecartCls=cls==="P"?(clsReal-clsObj):(clsObj-clsReal);
-    html+=`<tr class="bvr-total-row">
-      <td style="padding-left:14px;color:${CLS_COLOR[cls]}">TOTAL ${CLS_LABEL[cls]}</td>
-      <td style="text-align:right">${fmt(clsObj)}</td>
-      <td style="text-align:right;font-weight:800;color:${CLS_COLOR[cls]}">${fmt(clsReal)}</td>
-      <td style="text-align:right" class="${ecartCls>=0?"ecart-pos":"ecart-neg"}">${fmt(ecartCls)}</td>
-      <td style="text-align:right" class="${ecartCls>=0?"ecart-pos":"ecart-neg"}">${clsObj>0?fmtPct(Math.abs(ecartCls/clsObj)):"—"}</td>
-      <td style="text-align:center;font-size:16px">${ecartCls>=0?"✅":"🔴"}</td>
+    if(cls==="P"){totP_obj=co;totP_real=cr}else{totD_obj+=co;totD_real+=cr}
+    const ec=cls==="P"?(cr-co):(co-cr);
+    html+=`<tr class="bvr-total">
+      <td style="padding-left:12px;color:${CC[cls]}">TOTAL ${CL[cls]}</td>
+      <td class="r">${fmt(co)}</td>
+      <td class="r" style="font-weight:800;color:${CC[cls]}">${fmt(cr)}</td>
+      <td class="r ${ec>=0?"eco":"dep"}">${fmt(ec)}</td>
+      <td class="r ${ec>=0?"eco":"dep"}">${co>0?fmtPct(Math.abs(ec/co)):"—"}</td>
+      <td style="text-align:center;font-size:15px">${ec>=0?"✅":"🔴"}</td>
     </tr>`;
   }
-
-  // Solde
-  const soldeObj=totalObj_P-totalObj_D;
-  const soldeReal=totalReal_P-totalReal_D;
-  const soldeEcart=soldeReal-soldeObj;
-  html+=`<tr class="bvr-total-row" style="background:#0a0e1a;border-top:2px solid var(--blue)">
-    <td style="color:#60a5fa;font-size:15px">🏦 SOLDE NET</td>
-    <td style="text-align:right;font-weight:800">${fmt(soldeObj)}</td>
-    <td style="text-align:right;font-weight:800;color:${soldeReal>=0?"#22c55e":"#f87171"}">${fmt(soldeReal)}</td>
-    <td style="text-align:right;font-weight:800" class="${soldeEcart>=0?"ecart-pos":"ecart-neg"}">${fmt(soldeEcart)}</td>
-    <td></td><td style="text-align:center;font-size:18px">${soldeReal>=0?"✅":"🔴"}</td>
-  </tr>`;
-  html+="</tbody>";
+  const sObjt=totP_obj-totD_obj,sReal=totP_real-totD_real,sEc=sReal-sObjt;
+  html+=`<tr class="bvr-total" style="background:rgba(0,0,0,.2);border-top:1px solid var(--border2)">
+    <td style="color:var(--blue);font-size:14px">🏦 SOLDE NET</td>
+    <td class="r" style="font-weight:800">${fmt(sObjt)}</td>
+    <td class="r" style="font-weight:800;color:${sReal>=0?"var(--green)":"var(--red)"}">${fmt(sReal)}</td>
+    <td class="r ${sEc>=0?"eco":"dep"}" style="font-size:14px">${fmt(sEc)}</td>
+    <td></td><td style="text-align:center;font-size:17px">${sReal>=0?"✅":"🔴"}</td>
+  </tr></tbody>`;
   document.getElementById("bvr-table").innerHTML=html;
 
-  // Verdict
-  const ok=soldeReal>=soldeObj*0.8;
-  document.getElementById("bvr-verdict-box").innerHTML=`
-    <div class="bvr-verdict" style="background:${ok?"#0a1f0a":"#1a0a0a"};border:1px solid ${ok?"#166534":"#7f1d1d"};margin-bottom:14px">
-      <div>
-        <div style="font-weight:800;font-size:15px;color:${ok?"#22c55e":"#f87171"}">${ok?"✅ Mois dans les clous":"🔴 Attention — Budget dépassé"}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px">Solde réalisé ${fmt(soldeReal)} vs objectif ${fmt(soldeObj)}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:var(--muted)">Écart solde</div>
-        <div style="font-weight:800;font-size:18px;color:${soldeEcart>=0?"#22c55e":"#f87171"}">${fmt(soldeEcart)}</div>
-      </div>
-    </div>`;
+  const ok=sReal>=sObjt*.8;
+  document.getElementById("bvr-verdict").innerHTML=`<div class="verdict-box" style="background:${ok?"rgba(16,217,126,.06)":"rgba(255,92,122,.06)"};border:1px solid ${ok?"rgba(16,217,126,.2)":"rgba(255,92,122,.2)"};margin-bottom:14px">
+    <div><div style="font-weight:800;font-size:15px;color:${ok?"var(--green)":"var(--red)"}">${ok?"✅ Mois dans les clous":"🔴 Budget dépassé — attention"}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:3px">Solde réalisé ${fmt(sReal)} vs objectif ${fmt(sObjt)}</div></div>
+    <div style="text-align:right"><div style="font-size:11px;color:var(--text3)">Écart solde</div><div style="font-weight:800;font-size:20px;color:${sEc>=0?"var(--green)":"var(--red)"}">${fmt(sEc)}</div></div>
+  </div>`;
 }
 
-// ─── PROJECTION ─────────────────────────────────────────────────────────────
+// ─── PROJECTION ───────────────────────────────────────────────────────────────
 function renderProjection(){
-  const P0    = parseFloat(document.getElementById("p-patrimoine")?.value)||101748;
-  const epM   = parseFloat(document.getElementById("p-epargne")?.value)||300;
-  const epIDEL= parseFloat(document.getElementById("p-epargne-idel")?.value)||4000;
-  const rend  = (parseFloat(document.getElementById("p-rendement")?.value)||7)/100;
-  const immoG = (parseFloat(document.getElementById("p-immo")?.value)||2)/100;
-  const pretM = parseFloat(document.getElementById("p-pret")?.value)||813;
-  const immoV = parseFloat(document.getElementById("p-immo-val")?.value)||310000;
-  const dette = parseFloat(document.getElementById("p-dette")?.value)||213567;
+  const g=id=>parseFloat(document.getElementById(id)?.value)||0;
+  const P0=g("p-pat")||101748,epM=g("p-ep")||300,epI=g("p-ep2")||4000;
+  const rend=(g("p-rend")||7)/100,immoG=(g("p-immo")||2)/100;
+  const pretM=g("p-pret")||813,immoV=g("p-iv")||310000,dette=g("p-dt")||213567;
+  const NOW=new Date().getFullYear();
 
-  const NOW_YEAR = new Date().getFullYear(); // 2026
-  const IDEL_YEAR = 2028; // Démarrage libéral
-
-  // Simulation année par année
+  let finPat=P0-immoV+dette,immoVal=immoV,detteR=dette;
   const rows=[];
-  let finPat=P0-immoV+dette; // Patrimoine financier seul au départ
-  let immoNet=immoV-dette;
-  let detteRest=dette;
-  let immoVal=immoV;
-
   for(let y=0;y<=20;y++){
-    const year=NOW_YEAR+y;
-    const age=35+y;
-    const isIDEL=year>=IDEL_YEAR;
-    const ep=isIDEL?epIDEL:epM;
-
-    // Croissance patrimoine financier
-    finPat = finPat*(1+rend) + ep*12;
-    // Immobilier
-    immoVal = immoVal*(1+immoG);
-    detteRest = Math.max(0, detteRest - pretM*12);
-    immoNet = immoVal - detteRest;
-    const total = finPat + immoNet;
-
-    rows.push({year,age,ep,finPat,immoNet,total,isIDEL});
+    const year=NOW+y,age=35+y,isIDEL=year>=2028,ep=isIDEL?epI:epM;
+    finPat=finPat*(1+rend)+ep*12;
+    immoVal=immoVal*(1+immoG);
+    detteR=Math.max(0,detteR-pretM*12);
+    rows.push({year,age,ep,finPat,immoNet:immoVal-detteR,total:finPat+immoVal-detteR,isIDEL});
   }
 
-  // KPIs
-  const r5=rows[5],r10=rows[10],r15=rows[15],r20=rows[20];
-  const milNow=rows[0].total;
-  const milRow=rows.find(r=>r.total>=1000000);
+  const mil=rows.find(r=>r.total>=1000000);
   document.getElementById("proj-kpis").innerHTML=[
-    {label:"📍 Aujourd'hui",val:milNow,color:"#94a3b8",sub:"Patrimoine net actuel"},
-    {label:"🕐 Dans 5 ans",val:r5.total,color:"#60a5fa",sub:`${r5.year} — âge ${r5.age} ans`},
-    {label:"🕐 Dans 10 ans",val:r10.total,color:"#a78bfa",sub:`${r10.year} — âge ${r10.age} ans`},
-    {label:"🎯 Objectif 1M€",val:milRow?milRow.total:null,color:"#22c55e",sub:milRow?`${milRow.year} — âge ${milRow.age} ans (dans ${milRow.year-NOW_YEAR} ans)`:"Non atteint sur 20 ans"},
-  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.val!==null?fmt(k.val):"—"}</div><div class="kpi-sub">${k.sub}</div></div>`).join("");
+    {l:"📍 Aujourd'hui",v:rows[0].total,c:CC["?"],s:"Patrimoine net actuel"},
+    {l:"🕐 +5 ans",v:rows[5].total,c:"var(--blue)",s:`${rows[5].year} — âge ${rows[5].age} ans`},
+    {l:"🕐 +10 ans",v:rows[10].total,c:"var(--purple)",s:`${rows[10].year} — âge ${rows[10].age} ans`},
+    {l:"🎯 1 000 000 €",v:mil?mil.total:null,c:CC.P,s:mil?`${mil.year} — âge ${mil.age} ans`:"Non atteint sur 20 ans"},
+  ].map(k=>`<div class="kpi" style="--kpi-color:${k.c}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v!==null?fmt(k.v):"—"}</div><div class="kpi-sub">${k.s}</div></div>`).join("");
 
-  // Graphique
   if(chartProj)chartProj.destroy();
-  const labels=rows.map(r=>`${r.year}`);
-  const ctx=document.getElementById("chart-projection").getContext("2d");
-  chartProj=new Chart(ctx,{
-    type:"line",
-    data:{labels,datasets:[
-      {label:"Patrimoine total",data:rows.map(r=>Math.round(r.total)),borderColor:"#60a5fa",backgroundColor:"rgba(96,165,250,.08)",fill:true,tension:.4,borderWidth:2.5,pointRadius:rows.map(r=>r.total>=1000000&&(rows[rows.indexOf(r)-1]?.total||0)<1000000?8:3),pointBackgroundColor:rows.map(r=>r.total>=1000000?"#22c55e":"#60a5fa")},
-      {label:"Patrimoine financier",data:rows.map(r=>Math.round(r.finPat)),borderColor:"#3b82f6",borderDash:[4,3],tension:.4,borderWidth:1.5,pointRadius:0},
-      {label:"Immobilier net",data:rows.map(r=>Math.round(r.immoNet)),borderColor:"#f59e0b",borderDash:[4,3],tension:.4,borderWidth:1.5,pointRadius:0},
-      {label:"Objectif 1M€",data:rows.map(()=>1000000),borderColor:"rgba(34,197,94,.4)",borderDash:[6,4],borderWidth:1.5,pointRadius:0},
+  chartProj=new Chart(document.getElementById("chart-proj"),{type:"line",
+    data:{labels:rows.map(r=>String(r.year)),datasets:[
+      {label:"Patrimoine total",data:rows.map(r=>Math.round(r.total)),borderColor:"#4d9fff",backgroundColor:"rgba(77,159,255,.07)",fill:true,tension:.4,borderWidth:2.5,pointRadius:rows.map(r=>r.total>=1000000&&(rows[rows.indexOf(r)-1]?.total||0)<1000000?8:2),pointBackgroundColor:rows.map(r=>r.total>=1000000?"#10d97e":"#4d9fff")},
+      {label:"Patrimoine financier",data:rows.map(r=>Math.round(r.finPat)),borderColor:"#a78bfa",borderDash:[5,3],tension:.4,borderWidth:1.5,pointRadius:0},
+      {label:"Immobilier net",data:rows.map(r=>Math.round(r.immoNet)),borderColor:"#f5a623",borderDash:[5,3],tension:.4,borderWidth:1.5,pointRadius:0},
+      {label:"Objectif 1M€",data:rows.map(()=>1000000),borderColor:"rgba(16,217,126,.35)",borderDash:[7,4],borderWidth:1.5,pointRadius:0},
     ]},
-    options:{
-      plugins:{legend:{position:"bottom",labels:{color:"#94a3b8",font:{size:11},boxWidth:12,padding:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.raw)}`}}},
-      scales:{x:{ticks:{color:"#64748b",font:{size:10},maxTicksLimit:10},grid:{color:"#1e2d4a"}},y:{ticks:{color:"#64748b",font:{size:10},callback:v=>v>=1000000?`${(v/1000000).toFixed(1)}M`:`${(v/1000).toFixed(0)}k`},grid:{color:"#1e2d4a"}}},
-      animation:{duration:500}
-    }
-  });
+    options:{plugins:{legend:{position:"bottom",labels:{color:"#8fa3c4",font:{size:11},boxWidth:12,padding:10}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{ticks:{color:"#4d6690",font:{size:10},maxTicksLimit:11},grid:{color:"rgba(26,45,80,.4)"}},y:{ticks:{color:"#4d6690",font:{size:10},callback:v=>v>=1000000?`${(v/1e6).toFixed(1)}M`:`${(v/1000).toFixed(0)}k`},grid:{color:"rgba(26,45,80,.4)"}}},animation:{duration:500}}});
 
-  // Tableau jalons
   const jalons=[0,5,10,15,20];
-  let th=`<thead><tr><th>Horizon</th><th>Année</th><th>Âge</th><th>Épargne/mois</th><th>Pat. financier</th><th>Immo net</th><th style="color:#60a5fa">PAT. TOTAL</th><th>% 1M€</th></tr></thead><tbody>`;
+  let th=`<thead><tr><th>Horizon</th><th>Année</th><th>Âge</th><th>Épargne/mois</th><th>Pat. financier</th><th>Immo net</th><th style="color:var(--blue)">PAT. TOTAL</th><th>% 1M€</th></tr></thead><tbody>`;
   for(const j of jalons){
     const r=rows[j];
-    const isMil=rows.slice(0,j+1).some(x=>x.total>=1000000)&&!rows.slice(0,j).some(x=>x.total>=1000000);
-    const rowClass=r.total>=1000000?"proj-milestone":(j===0?"proj-highlight":"");
-    th+=`<tr class="${rowClass}">
-      <td style="font-weight:700">${j===0?"Maintenant":`+${j} ans`}${isMil?" 🎯":""}</td>
-      <td style="color:var(--muted)">${r.year}</td>
-      <td style="color:var(--muted)">${r.age} ans</td>
-      <td style="color:${r.isIDEL?"#3b82f6":"#94a3b8"};font-weight:700">${fmt(r.ep)}</td>
-      <td style="color:#60a5fa">${fmt(r.finPat)}</td>
-      <td style="color:#f59e0b">${fmt(r.immoNet)}</td>
-      <td style="font-weight:800;color:${r.total>=1000000?"#22c55e":"#e2e8f0"};font-size:14px">${fmt(r.total)}</td>
-      <td><div style="display:flex;align-items:center;gap:6px">
-        <div style="height:6px;background:var(--border);border-radius:3px;width:60px;overflow:hidden"><div style="height:100%;background:${r.total>=1000000?"#22c55e":"#3b82f6"};width:${Math.min(100,(r.total/10000)).toFixed(0)}%;border-radius:3px"></div></div>
-        <span style="font-size:11px;color:var(--muted)">${(r.total/10000).toFixed(0)}%</span>
-      </div></td>
+    const passed=rows.slice(0,j+1).some(x=>x.total>=1e6)&&!rows.slice(0,j).some(x=>x.total>=1e6);
+    th+=`<tr class="${r.total>=1e6?"proj-row-milestone":j===0?"proj-row-now":""}">
+      <td style="font-weight:700">${j===0?"Maintenant":`+${j} ans`}${passed?" 🎯":""}</td>
+      <td style="color:var(--text2)">${r.year}</td><td style="color:var(--text2)">${r.age} ans</td>
+      <td style="color:${r.isIDEL?"var(--blue)":"var(--text2)"};font-weight:700">${fmt(r.ep)}</td>
+      <td style="color:var(--purple)">${fmt(r.finPat)}</td>
+      <td style="color:var(--amber)">${fmt(r.immoNet)}</td>
+      <td style="font-weight:800;color:${r.total>=1e6?"var(--green)":"var(--text)"};font-size:14px">${fmt(r.total)}</td>
+      <td><div style="display:flex;align-items:center;gap:7px"><div style="height:5px;background:var(--surface);border-radius:3px;width:55px;overflow:hidden"><div style="height:100%;background:${r.total>=1e6?"var(--green)":"var(--blue)"};width:${Math.min(100,r.total/10000).toFixed(0)}%;border-radius:3px"></div></div><span style="font-size:11px;color:var(--text3)">${(r.total/10000).toFixed(0)}%</span></div></td>
     </tr>`;
   }
-  th+="</tbody>";
-  document.getElementById("proj-table").innerHTML=th;
+  document.getElementById("proj-table").innerHTML=th+"</tbody>";
 
-  // Milestones
-  const mils=[{target:150000,label:"Matelas de sécurité complet"},{target:250000,label:"Quart du chemin"},{target:500000,label:"Mi-parcours — 500K€"},{target:750000,label:"3/4 de l'objectif"},{target:1000000,label:"🎯 OBJECTIF 1 MILLION €"}];
-  document.getElementById("proj-milestones").innerHTML=mils.map(m=>{
-    const r=rows.find(x=>x.total>=m.target);
-    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #111827">
-      <div><div style="font-size:13px;font-weight:500">${m.label}</div><div style="font-size:11px;color:var(--muted)">${fmt(m.target)}</div></div>
-      <div style="text-align:right"><div style="font-weight:700;font-size:13px;color:${r?"#22c55e":"#64748b"}">${r?r.year:"Au-delà"}</div><div style="font-size:11px;color:var(--muted)">${r?`âge ${r.age} ans`:"Non atteint"}</div></div>
-    </div>`;
+  document.getElementById("proj-milestones").innerHTML=[
+    {t:150000,l:"Matelas de sécurité complet"},{t:250000,l:"Quart du chemin"},
+    {t:500000,l:"Mi-parcours — 500K€"},{t:750000,l:"3/4 de l'objectif"},
+    {t:1000000,l:"🎯 OBJECTIF 1 MILLION €"},
+  ].map(m=>{
+    const r=rows.find(x=>x.total>=m.t);
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div><div style="font-size:13px;font-weight:500">${m.l}</div><div style="font-size:11px;color:var(--text3)">${fmt(m.t)}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:13px;color:${r?"var(--green)":"var(--text3)"}">${r?r.year:"Au-delà"}</div><div style="font-size:11px;color:var(--text3)">${r?`âge ${r.age} ans`:"Non atteint"}</div></div></div>`;
   }).join("");
 
-  // Leviers
-  const leviersData=[
-    {label:"Passer en IDEL",impact:"+4 000 €/mois d'épargne",color:"#22c55e"},
-    {label:"Maintenir train de vie IDE en IDEL",impact:"Accélère de 3-4 ans",color:"#22c55e"},
-    {label:"PEA ETF World (7% vs 2%)",impact:"×2,3 sur le pat. financier",color:"#3b82f6"},
-    {label:"2ème bien locatif",impact:"Levier supplémentaire",color:"#f59e0b"},
-    {label:"SELARL à partir de 2031",impact:"Optimisation fiscale",color:"#a78bfa"},
-  ];
-  document.getElementById("proj-leviers").innerHTML=leviersData.map(l=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #111827">
-      <div style="width:8px;height:8px;background:${l.color};border-radius:50%;flex-shrink:0"></div>
-      <div><div style="font-size:13px;font-weight:500">${l.label}</div><div style="font-size:11px;color:var(--muted)">${l.impact}</div></div>
-    </div>`).join("");
+  document.getElementById("proj-leviers").innerHTML=[
+    {l:"Passer en IDEL",d:"+4 000 €/mois d'épargne dès 2028",c:"var(--green)"},
+    {l:"Garder le train de vie IDE",d:"Accélère l'objectif de 3–4 ans",c:"var(--green)"},
+    {l:"PEA ETF World (7% vs 2%)",d:"×2,3 sur le patrimoine financier",c:"var(--blue)"},
+    {l:"2ème investissement locatif",d:"Effet de levier supplémentaire",c:"var(--amber)"},
+    {l:"SELARL à partir de 2031",d:"Optimisation fiscale IDEL",c:"var(--purple)"},
+  ].map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div style="width:7px;height:7px;background:${l.c};border-radius:50%;flex-shrink:0"></div><div><div style="font-size:13px;font-weight:500">${l.l}</div><div style="font-size:11px;color:var(--text2)">${l.d}</div></div></div>`).join("");
 }
 
-// ─── TRANSACTIONS ────────────────────────────────────────────────────────────
-function renderTransactions(){
-  const search=(document.getElementById("search-input").value||"").toLowerCase();
+// ─── TRANSACTIONS ─────────────────────────────────────────────────────────────
+function renderTX(){
+  const s=(document.getElementById("search").value||"").toLowerCase();
   const f=document.getElementById("filter-month").value;
   let txs=f==="all"?[...TXS]:TXS.filter(t=>t.date?.substring(0,7)===f);
-  if(search)txs=txs.filter(t=>t.label.toLowerCase().includes(search));
+  if(s)txs=txs.filter(t=>t.label.toLowerCase().includes(s));
   txs.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
-  document.getElementById("tx-count-label").textContent=txs.length+" transactions";
+  document.getElementById("tx-lbl").textContent=txs.length+" transactions";
   document.getElementById("tx-more").style.display=txs.length>100?"block":"none";
   document.getElementById("tx-tbody").innerHTML=txs.slice(0,100).map(t=>`
     <tr>
-      <td style="color:var(--muted);white-space:nowrap;font-size:12px">${t.date||"—"}</td>
-      <td class="col-hide" style="color:var(--muted);font-size:12px">${esc(t.bank||"—")}</td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.label)}</td>
-      <td class="col-hide"><span style="font-family:monospace;font-size:10px;color:#475569">${t.code}</span><span style="margin-left:6px;font-size:11px;color:#64748b">${esc(t.lib)}</span></td>
-      <td><span class="badge badge-${t.cls||"q"}">${t.cls||"?"}</span></td>
-      <td style="text-align:right;font-weight:700;white-space:nowrap;color:${t.amount>0?"#22c55e":"#f87171"}">${fmt(t.amount)}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteTx('${t.id}')">✕</button></td>
+      <td style="color:var(--text2);white-space:nowrap;font-size:12px">${t.date||"—"}</td>
+      <td class="hide-sm"><span class="${bankClass(t.bank)}">${esc(t.bank||"—")}</span></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.label)}</td>
+      <td class="hide-sm"><span style="font-family:monospace;font-size:10px;color:var(--text3)">${t.code}</span><span style="margin-left:6px;font-size:11px;color:var(--text2)">${esc(t.lib)}</span></td>
+      <td><span class="badge b-${t.cls||"q"}">${t.cls||"?"}</span></td>
+      <td class="r" style="font-weight:700;white-space:nowrap;color:${t.amount>0?"var(--green)":"var(--red)"}">${fmt(t.amount)}</td>
+      <td><button class="btn btn-red btn-sm" onclick="delTx('${t.id}')">✕</button></td>
     </tr>`).join("");
 }
 
-// ─── COMPTES ─────────────────────────────────────────────────────────────────
+// ─── COMPTES ──────────────────────────────────────────────────────────────────
 function renderComptes(A){
-  let html="";
+  let h="";
   for(const cls of["P","CV","CF","I"]){
-    const accs=PLAN.filter(a=>a.cls===cls);
-    const total=A.byClass[cls]||0;
-    html+=`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><div style="font-weight:800;font-size:14px;color:${CLS_COLOR[cls]}">${CLS_ICON[cls]} ${CLS_LABEL[cls]}</div><span style="font-weight:700;color:${CLS_COLOR[cls]}">${fmt(total)}</span></div>`;
+    const accs=PLAN.filter(a=>a.cls===cls),total=A.byClass[cls]||0;
+    h+=`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div style="font-weight:800;font-size:14px;color:${CC[cls]}">${CI[cls]} ${CL[cls]}</div><span style="font-weight:700;color:${CC[cls]}">${fmt(total)}</span></div>`;
     for(const acc of accs){
-      const val=A.totals[acc.code]||0;
-      html+=`<div class="compte-row"><span class="compte-code">${acc.code}</span><div style="flex:1;min-width:0"><div class="compte-lib" style="color:${val>0?"var(--text)":"#475569"}">${esc(acc.lib)}</div><div class="compte-kw">${acc.kw.slice(0,5).join(" · ")}</div></div><span style="font-weight:700;font-size:12px;color:${CLS_COLOR[cls]};white-space:nowrap">${val>0?fmt(val):"—"}</span></div>`;
+      const v=A.totals[acc.code]||0;
+      h+=`<div class="cpt-row"><span class="cpt-code">${acc.code}</span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:${v>0?"var(--text)":"var(--text3)"}">${esc(acc.lib)}</div><div class="cpt-kw">${acc.kw.slice(0,5).join(" · ")}</div></div><span style="font-weight:700;font-size:12px;color:${CC[cls]};white-space:nowrap">${v>0?fmt(v):"—"}</span></div>`;
     }
-    html+=`</div>`;
+    h+=`</div>`;
   }
-  document.getElementById("comptes-content").innerHTML=html;
+  document.getElementById("comptes-content").innerHTML=h;
 }
 
-// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+// ─── ACTIONS ──────────────────────────────────────────────────────────────────
 function importCSV(){
   const text=document.getElementById("csv-input").value;
-  if(!text.trim()){showMsg("❌ Colle d'abord le contenu CSV","error");return}
+  if(!text.trim()){showMsg("❌ Colle d'abord le contenu CSV","err");return}
   const parsed=parseCSV(text);
-  if(!parsed.length){showMsg("❌ Aucune transaction reconnue — vérifie le format","error");return}
+  if(!parsed.length){showMsg("❌ Aucune transaction reconnue — vérifie le format","err");return}
   TXS=[...TXS,...parsed];save();
   document.getElementById("csv-input").value="";
   const ncat=parsed.filter(t=>t.code==="???").length;
-  showMsg(`✅ ${parsed.length} transactions importées${ncat?` (${ncat} non catégorisées)`:""}`, "success");
+  const bankCounts={};
+  parsed.forEach(t=>{const b=t.bank||"?";bankCounts[b]=(bankCounts[b]||0)+1});
+  const detail=Object.entries(bankCounts).map(([b,n])=>`${b}: ${n}`).join(", ");
+  showMsg(`✅ ${parsed.length} transactions importées (${detail})${ncat?` · ${ncat} non catégorisées`:""}`, "ok");
 }
-function showMsg(msg,type){document.getElementById("import-msg").innerHTML=`<div class="alert alert-${type==="success"?"success":"error"}">${msg}</div>`}
+function showMsg(msg,t){document.getElementById("imp-msg").innerHTML=`<div class="alert a-${t==="ok"?"ok":"err"}">${msg}</div>`}
 function addManual(){
-  const date=document.getElementById("manual-date").value;
-  const label=document.getElementById("manual-label").value.trim();
-  const amount=parseFloat(document.getElementById("manual-amount").value.replace(",","."));
+  const date=document.getElementById("m-date").value,label=document.getElementById("m-label").value.trim();
+  const amount=parseFloat(document.getElementById("m-amt").value.replace(",","."));
   if(!date||!label||isNaN(amount))return;
   const acc=categorize(label,amount);
   TXS.push({id:Date.now()+Math.random(),date,label,amount,code:acc.code,lib:acc.lib,cls:acc.cls});
   save();
-  document.getElementById("manual-date").value="";
-  document.getElementById("manual-label").value="";
-  document.getElementById("manual-amount").value="";
+  ["m-date","m-label","m-amt"].forEach(id=>document.getElementById(id).value="");
 }
-function deleteTx(id){TXS=TXS.filter(t=>String(t.id)!==String(id));save()}
+function delTx(id){TXS=TXS.filter(t=>String(t.id)!==String(id));save()}
 function clearAll(){if(!confirm("Supprimer TOUTES les transactions ?"))return;TXS=[];save()}
 
-// ─── NAV ─────────────────────────────────────────────────────────────────────
+// ─── NAV ──────────────────────────────────────────────────────────────────────
 function showTab(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
-  document.querySelectorAll(".tab-btn").forEach(b=>{if(b.getAttribute("onclick")===`showTab('${id}')`)b.classList.add("active")});
+  document.querySelectorAll(".tab").forEach(b=>{if(b.getAttribute("onclick")===`showTab('${id}')`)b.classList.add("active")});
   render();
+  if(id==="comparaison") renderComparaison();
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// ─── OBJECTIFS ANNUELS ───────────────────────────────────────────────────────
+const DEFAULT_ANNUAL = {
+  produits:  {label:"💵 Produits totaux",    color:"var(--green)",  val:45000},
+  epargne:   {label:"💎 Épargne annuelle",    color:"var(--blue)",   val:3600},
+  cv:        {label:"📉 Charges variables",   color:"var(--amber)",  val:18000},
+  cf:        {label:"📌 Charges fixes",       color:"var(--orange)", val:24000},
+  solde:     {label:"🏦 Solde net annuel",    color:"var(--green)",  val:3000},
+  taux_ep:   {label:"📈 Taux épargne cible",  color:"var(--purple)", val:8, isPct:true},
+};
+let ANNUAL_GOALS = {};
+
+function loadAnnualGoals(){
+  try{ ANNUAL_GOALS=JSON.parse(localStorage.getItem("tra_annual_goals")||"{}"); }catch(e){}
+  for(const k in DEFAULT_ANNUAL) if(ANNUAL_GOALS[k]===undefined) ANNUAL_GOALS[k]=DEFAULT_ANNUAL[k].val;
+}
+function saveAnnualGoals(){ localStorage.setItem("tra_annual_goals",JSON.stringify(ANNUAL_GOALS)); }
+function resetAnnualGoals(){
+  ANNUAL_GOALS={};for(const k in DEFAULT_ANNUAL) ANNUAL_GOALS[k]=DEFAULT_ANNUAL[k].val;
+  saveAnnualGoals(); renderComparaison();
+}
+
+// ─── COMPARAISON ─────────────────────────────────────────────────────────────
+let chartCmp = null;
+
+function initCmpSelectors(){
+  const year = new Date().getFullYear();
+  const months = MONTHS.map((m,i)=>{
+    const key=`${year}-${String(i+1).padStart(2,"0")}`;
+    const has = TXS.some(t=>t.date?.substring(0,7)===key);
+    return {key, label:`${m} ${year}`, has};
+  });
+  const withData = months.filter(m=>m.has);
+  const opts = withData.map(m=>`<option value="${m.key}">${m.label}</option>`).join("");
+  const noData = '<option value="">— aucune donnée —</option>';
+  const s1 = document.getElementById("cmp-m1");
+  const s2 = document.getElementById("cmp-m2");
+  s1.innerHTML = opts || noData;
+  s2.innerHTML = opts || noData;
+  // Default: last 2 months with data
+  if(withData.length>=2){ s1.value=withData[withData.length-2].key; s2.value=withData[withData.length-1].key; }
+  else if(withData.length===1){ s1.value=withData[0].key; s2.value=withData[0].key; }
+}
+
+function renderComparaison(){
+  loadAnnualGoals();
+  renderAnnualGoals();
+  initCmpSelectors();
+  const m1 = document.getElementById("cmp-m1")?.value;
+  const m2 = document.getElementById("cmp-m2")?.value;
+  const objMode = document.getElementById("cmp-obj")?.value || "budget";
+  if(!m1||!m2){ document.getElementById("cmp-kpis").innerHTML=""; return; }
+
+  const txs1 = TXS.filter(t=>t.date?.substring(0,7)===m1);
+  const txs2 = TXS.filter(t=>t.date?.substring(0,7)===m2);
+  const A1 = analytics(txs1), A2 = analytics(txs2);
+  const [y1,mo1] = m1.split("-"); const [y2,mo2] = m2.split("-");
+  const lbl1 = `${MONTHS[parseInt(mo1)-1]} ${y1}`;
+  const lbl2 = `${MONTHS[parseInt(mo2)-1]} ${y2}`;
+
+  // ── KPIs comparaison ──
+  const kpiData = [
+    {l:"💵 Produits",    v1:A1.byClass.P,  v2:A2.byClass.P,  c:CC.P},
+    {l:"📉 Ch. Variables",v1:A1.byClass.CV, v2:A2.byClass.CV, c:CC.CV, lower:true},
+    {l:"📌 Ch. Fixes",   v1:A1.byClass.CF, v2:A2.byClass.CF, c:CC.CF, lower:true},
+    {l:"💎 Invest.",     v1:A1.byClass.I,  v2:A2.byClass.I,  c:CC.I},
+    {l:"🏦 Solde Net",   v1:A1.solde,      v2:A2.solde,      c:A2.solde>=0?CC.P:CC["?"]},
+    {l:"📈 Taux épargne",v1:A1.tauxEp,     v2:A2.tauxEp,     c:CC.I, isPct:true},
+  ];
+  document.getElementById("cmp-kpis").innerHTML = kpiData.map(k=>{
+    const diff = k.v2-k.v1;
+    const better = k.lower ? diff<=0 : diff>=0;
+    const pct = k.v1!==0 ? ((k.v2-k.v1)/Math.abs(k.v1)*100) : 0;
+    const arrow = diff>0?"↑":diff<0?"↓":"→";
+    const arrowColor = better?"var(--green)":"var(--red)";
+    return `<div class="kpi" style="--kpi-color:${k.c}">
+      <div class="kpi-label">${k.l}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${lbl1}</div>
+          <div style="font-size:14px;color:var(--text2);font-weight:600">${k.isPct?fmtPct(k.v1):fmt(k.v1)}</div>
+        </div>
+        <div style="font-size:16px;color:${arrowColor};font-weight:700;padding:0 6px">${arrow}</div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${lbl2}</div>
+          <div style="font-size:17px;color:${k.c};font-weight:800">${k.isPct?fmtPct(k.v2):fmt(k.v2)}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;margin-top:5px;color:${arrowColor};font-weight:600">${arrow} ${k.isPct?fmtPct(Math.abs(diff)):fmt(Math.abs(diff))} (${Math.abs(pct).toFixed(0)}%)</div>
+    </div>`;
+  }).join("");
+
+  // ── Graphique ──
+  if(chartCmp) chartCmp.destroy();
+  const cats = ["Produits","Ch. Var.","Ch. Fixes","Invest."];
+  const vals1 = [A1.byClass.P, A1.byClass.CV, A1.byClass.CF, A1.byClass.I];
+  const vals2 = [A2.byClass.P, A2.byClass.CV, A2.byClass.CF, A2.byClass.I];
+  chartCmp = new Chart(document.getElementById("chart-cmp"),{
+    type:"bar",
+    data:{labels:cats, datasets:[
+      {label:lbl1, data:vals1, backgroundColor:"rgba(77,159,255,.5)", borderColor:"#4d9fff", borderWidth:1, borderRadius:4},
+      {label:lbl2, data:vals2, backgroundColor:["rgba(16,217,126,.5)","rgba(245,166,35,.5)","rgba(255,107,53,.5)","rgba(167,139,250,.5)"], borderColor:["#10d97e","#f5a623","#ff6b35","#a78bfa"], borderWidth:1, borderRadius:4},
+    ]},
+    options:{plugins:{legend:{position:"top",labels:{color:"#8fa3c4",font:{size:11},boxWidth:12,padding:10}}},scales:{x:{ticks:{color:"#4d6690",font:{size:11}},grid:{color:"rgba(26,45,80,.4)"}},y:{ticks:{color:"#4d6690",font:{size:10},callback:v=>v>999?(v/1000).toFixed(0)+"k":v},grid:{color:"rgba(26,45,80,.4)"}}},animation:{duration:400}}
+  });
+
+  // ── Tableau détaillé ──
+  // Objectif selon mode
+  let objTotals = {};
+  if(objMode==="budget") for(const acc of PLAN) objTotals[acc.code]=BUDGETS[acc.code]||0;
+  else if(objMode==="m1") objTotals = {...A1.totals};
+  else for(const acc of PLAN) objTotals[acc.code]=0;
+
+  let th = `<thead><tr>
+    <th style="min-width:170px">Poste</th>
+    <th class="r" style="color:#4d9fff">${lbl1}</th>
+    <th class="r" style="color:#10d97e">${lbl2}</th>
+    <th class="r">Objectif</th>
+    <th class="r">Écart vs obj.</th>
+    <th class="r">Évolution</th>
+  </tr></thead><tbody>`;
+
+  for(const cls of["P","CV","CF","I"]){
+    const accs = PLAN.filter(a=>a.cls===cls);
+    const t1=A1.byClass[cls]||0, t2=A2.byClass[cls]||0;
+    const obj_cls = accs.reduce((s,a)=>s+(objTotals[a.code]||0),0);
+    th+=`<tr class="bvr-section"><td colspan="6" style="color:${CC[cls]}">${CI[cls]} ${CL[cls]}</td></tr>`;
+    for(const acc of accs){
+      const v1=A1.totals[acc.code]||0, v2=A2.totals[acc.code]||0;
+      const obj=objTotals[acc.code]||0;
+      const ecart = cls==="P"?(v2-obj):(obj-v2);
+      const evol = v2-v1;
+      const evolBetter = cls==="P"?evol>=0:evol<=0;
+      const ecartClass = ecart>=0?"eco":ecart<0?"dep":"neu";
+      const active = v1>0||v2>0;
+      th+=`<tr style="opacity:${active?1:.4}">
+        <td style="padding-left:22px;font-size:12px"><span style="font-family:monospace;font-size:10px;color:var(--text3);margin-right:8px">${acc.code}</span>${esc(acc.lib)}</td>
+        <td class="r" style="color:${v1>0?"#4d9fff":"var(--text3)"};font-weight:${v1>0?700:400}">${v1>0?fmt(v1):"—"}</td>
+        <td class="r" style="color:${v2>0?CC[cls]:"var(--text3)"};font-weight:${v2>0?700:400}">${v2>0?fmt(v2):"—"}</td>
+        <td class="r" style="color:var(--blue)">${obj>0?fmt(obj):"—"}</td>
+        <td class="r ${ecartClass}">${obj>0?(ecart>=0?"▲ ":"▼ ")+fmt(Math.abs(ecart)):"—"}</td>
+        <td class="r" style="color:${evolBetter?"var(--green)":"var(--red)"};font-weight:600">${(v1>0||v2>0)?(evol>=0?"↑ ":"↓ ")+fmt(Math.abs(evol)):"—"}</td>
+      </tr>`;
+    }
+    const ecart_cls = cls==="P"?(t2-obj_cls):(obj_cls-t2);
+    th+=`<tr class="bvr-total">
+      <td style="color:${CC[cls]}">TOTAL ${CL[cls]}</td>
+      <td class="r" style="color:#4d9fff">${fmt(t1)}</td>
+      <td class="r" style="color:${CC[cls]};font-weight:800">${fmt(t2)}</td>
+      <td class="r" style="color:var(--blue)">${obj_cls>0?fmt(obj_cls):"—"}</td>
+      <td class="r ${ecart_cls>=0?"eco":"dep"}">${obj_cls>0?fmt(ecart_cls):"—"}</td>
+      <td class="r" style="color:${cls==="P"?(t2>=t1?"var(--green)":"var(--red)"):(t2<=t1?"var(--green)":"var(--red)")};font-size:13px">${t2>=t1?"↑":"↓"} ${fmt(Math.abs(t2-t1))}</td>
+    </tr>`;
+  }
+  th += "</tbody>";
+  document.getElementById("cmp-table").innerHTML = th;
+
+  // ── Vue annuelle ──
+  renderAnnualTable();
+}
+
+function renderAnnualTable(){
+  const year = new Date().getFullYear();
+  const monthsData = MONTHS.map((m,i)=>{
+    const key=`${year}-${String(i+1).padStart(2,"0")}`;
+    const txs = TXS.filter(t=>t.date?.substring(0,7)===key);
+    const A = analytics(txs);
+    return {m, key, P:A.byClass.P, CV:A.byClass.CV, CF:A.byClass.CF, I:A.byClass.I, solde:A.solde, tauxEp:A.tauxEp};
+  });
+
+  const totals = {P:0,CV:0,CF:0,I:0,solde:0};
+  monthsData.forEach(d=>{totals.P+=d.P;totals.CV+=d.CV;totals.CF+=d.CF;totals.I+=d.I;totals.solde+=d.solde});
+  const annualProd = totals.P;
+
+  // Annual goal comparison
+  const goalP  = ANNUAL_GOALS.produits||0;
+  const goalEp = ANNUAL_GOALS.epargne||0;
+  const goalCV = ANNUAL_GOALS.cv||0;
+  const goalCF = ANNUAL_GOALS.cf||0;
+
+  const rows = [
+    {l:"💵 Produits",   key:"P",   c:CC.P,   goalKey:"produits"},
+    {l:"📉 Ch. Var.",   key:"CV",  c:CC.CV,  goalKey:"cv",  lower:true},
+    {l:"📌 Ch. Fixes",  key:"CF",  c:CC.CF,  goalKey:"cf",  lower:true},
+    {l:"💎 Invest.",    key:"I",   c:CC.I,   goalKey:"epargne"},
+    {l:"🏦 Solde Net",  key:"solde",c:CC.P,  goalKey:"solde"},
+  ];
+
+  let html = `<thead><tr><th style="min-width:120px">Catégorie</th>`;
+  monthsData.forEach(d=>{ html+=`<th class="r" style="font-size:10px">${d.m}</th>`; });
+  html+=`<th class="r" style="color:var(--blue)">TOTAL</th><th class="r" style="color:var(--amber)">Obj. annuel</th><th class="r">Avancement</th></tr></thead><tbody>`;
+
+  rows.forEach(row=>{
+    const goal = ANNUAL_GOALS[row.goalKey]||0;
+    const total = totals[row.key];
+    const ecart = row.lower?(goal-total):(total-goal);
+    const pct = goal>0?Math.min(100,(total/goal*100)):0;
+    const onTrack = ecart>=0;
+    html+=`<tr>
+      <td style="font-weight:700;color:${row.c};font-size:12px">${row.l}</td>`;
+    monthsData.forEach(d=>{
+      const v=d[row.key];
+      html+=`<td class="r" style="font-size:12px;color:${v>0?row.c:"var(--text3)"}">${v>0?fmt(v):"—"}</td>`;
+    });
+    html+=`<td class="r" style="font-weight:800;color:${row.c}">${fmt(total)}</td>
+      <td class="r"><input class="bvr-inp" style="width:80px" value="${goal}" onchange="ANNUAL_GOALS['${row.goalKey}']=parseFloat(this.value.replace(',','.'))||0;saveAnnualGoals();renderComparaison()"></td>
+      <td class="r">
+        <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+          <div style="height:5px;background:var(--surface);border-radius:3px;width:50px;overflow:hidden">
+            <div style="height:100%;border-radius:3px;background:${onTrack?"var(--green)":"var(--red)"};width:${pct.toFixed(0)}%"></div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:${onTrack?"var(--green)":"var(--red)"}">${pct.toFixed(0)}%</span>
+        </div>
+      </td>
+    </tr>`;
+  });
+  html += "</tbody>";
+  document.getElementById("annual-table").innerHTML = html;
+}
+
+function renderAnnualGoals(){
+  const year = new Date().getFullYear();
+  const allTxs = TXS.filter(t=>t.date?.startsWith(year));
+  const A = analytics(allTxs);
+  const monthsPassed = new Date().getMonth()+1;
+
+  const items = [
+    {k:"produits",  label:"💵 Revenus annuels",   real:A.byClass.P,  color:"var(--green)"},
+    {k:"epargne",   label:"💎 Épargne annuelle",   real:A.byClass.I,  color:"var(--blue)"},
+    {k:"cv",        label:"📉 Ch. Variables max",  real:A.byClass.CV, color:"var(--amber)", lower:true},
+    {k:"cf",        label:"📌 Ch. Fixes max",      real:A.byClass.CF, color:"var(--orange)", lower:true},
+    {k:"solde",     label:"🏦 Solde net cumulé",   real:A.solde,      color:A.solde>=0?"var(--green)":"var(--red)"},
+    {k:"taux_ep",   label:"📈 Taux épargne",       real:A.tauxEp,     color:"var(--purple)", isPct:true},
+  ];
+
+  document.getElementById("annual-goals-grid").innerHTML = items.map(item=>{
+    const goal = ANNUAL_GOALS[item.k]||0;
+    const realVal = item.isPct ? item.real : item.real;
+    const goalVal = item.isPct ? goal/100 : goal;
+    const pct = goalVal>0 ? Math.min(100, (realVal/goalVal*100)) : 0;
+    const onTrack = item.lower ? realVal<=goalVal : realVal>=goalVal;
+    // Projection fin d'année
+    const projected = monthsPassed>0 ? (realVal/monthsPassed*12) : 0;
+    const projClass = item.lower ? (projected<=goalVal?"var(--green)":"var(--red)") : (projected>=goalVal?"var(--green)":"var(--amber)");
+    return `<div style="background:var(--bg2);border:1px solid ${onTrack?"rgba(16,217,126,.2)":"var(--border)"};border-radius:var(--rs);padding:14px 16px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">${item.label}</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <div style="font-size:18px;font-weight:800;color:${item.color}">${item.isPct?fmtPct(realVal):fmt(realVal)}</div>
+        <div style="font-size:12px;color:var(--text3)">/ <input class="bvr-inp" style="width:75px;font-size:12px" value="${goal}" onchange="ANNUAL_GOALS['${item.k}']=parseFloat(this.value.replace(',','.'))||0;saveAnnualGoals();renderComparaison()"> ${item.isPct?"%":"€"}</div>
+      </div>
+      <div style="height:5px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div style="height:100%;border-radius:3px;background:${onTrack?"var(--green)":"var(--red)"};width:${pct.toFixed(0)}%;transition:width .6s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px">
+        <span style="color:var(--text3)">${pct.toFixed(0)}% atteint</span>
+        <span style="color:${projClass}">Proj. : ${item.isPct?fmtPct(projected/12):fmt(projected)}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
 load();
+function load(){
+  try{TXS=JSON.parse(localStorage.getItem("tra_pm_txs")||"[]")}catch(e){TXS=[]}
+  try{BUDGETS=JSON.parse(localStorage.getItem("tra_pm_bud")||"{}")}catch(e){BUDGETS={}}
+  for(const k in DEFAULT_BUDGETS) if(BUDGETS[k]===undefined) BUDGETS[k]=DEFAULT_BUDGETS[k];
+  loadAnnualGoals();
+  updateMonthFilter(); render();
+}
+
 </script>
 </body>
 </html>
