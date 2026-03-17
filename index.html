@@ -572,7 +572,48 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
 
 <!-- ════════════════════ COMPTES ════════════════════ -->
 <div id="page-comptes" class="page">
-  <div class="page-hd"><h1>Plan de Comptes</h1><p>Comptes prédéfinis + tes comptes personnalisés</p></div>
+  <div class="page-hd"><h1>Plan de Comptes</h1><p>Classes, comptes prédéfinis et personnalisés</p></div>
+
+  <!-- Créer une classe personnalisée -->
+  <div class="card" style="margin-bottom:14px;border-color:rgba(167,139,250,.3)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:32px;height:32px;background:rgba(167,139,250,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">🏷️</div>
+      <div>
+        <div style="font-weight:700;font-size:14px">Créer une classe analytique</div>
+        <div style="font-size:12px;color:var(--text2)">Ex : Famille, Épargne précaution, Investissement immobilier…</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Code (2-4 lettres)</label>
+        <input type="text" id="ncls-code" placeholder="Ex: FAM, EP, IL…" maxlength="4" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Comportement</label>
+        <select id="ncls-behavior" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none">
+          <option value="charge">📉 Charge (dépense)</option>
+          <option value="produit">💵 Produit (revenu)</option>
+          <option value="investissement">💎 Investissement</option>
+          <option value="neutre">🔄 Neutre (exclu des calculs)</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Icône + Couleur</label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="ncls-icon" placeholder="🏠" maxlength="2" style="width:52px;text-align:center;font-size:18px">
+          <input type="color" id="ncls-color" value="#a78bfa" style="width:50px;height:42px;padding:2px;cursor:pointer;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg2)">
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Libellé complet</label>
+      <input type="text" id="ncls-label" placeholder="Ex: DÉPENSES FAMILLE, ÉPARGNE PRÉCAUTION…">
+    </div>
+    <button class="btn btn-blue" onclick="addCustomClass()" style="width:100%">🏷️ Créer cette classe</button>
+    <div id="ncls-msg" style="margin-top:8px"></div>
+    <!-- Classes personnalisées existantes -->
+    <div id="custom-classes-list" style="margin-top:14px"></div>
+  </div>
 
   <!-- Ajouter un compte personnalisé -->
   <div class="card" style="margin-bottom:18px;border-color:rgba(77,159,255,.3)">
@@ -592,6 +633,7 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
           <option value="CV" selected>📉 Charges Variables</option>
           <option value="CF">📌 Charges Fixes</option>
           <option value="I">💎 Investissements</option>
+          <option value="VI">🔄 Virements Internes</option>
         </select>
       </div>
     </div>
@@ -661,6 +703,10 @@ const PLAN=[
   {code:"I210",lib:"Assurance-vie",cls:"I",sub:"Investissements",kw:["ASSURANCE VIE","LINXEA","LUCYA"]},
   {code:"I220",lib:"Crypto-monnaies",cls:"I",sub:"Investissements",kw:["CRYPTO","BINANCE","COINBASE","KRAKEN"]},
   {code:"I300",lib:"Capital amorti prêt (BNP Crédit)",cls:"I",sub:"Immobilier",kw:["AMORTISSEMENT PRET 01812","AMORTISSEMENT PRET BNP"]},
+  // ── VIREMENTS INTERNES (neutres — exclus des calculs) ──
+  {code:"VI100",lib:"Virement entre mes comptes",cls:"VI",sub:"Virements internes",kw:["VIR SEPA INST RECU /DE PASCAL MASSOLIN","VIR SEPA INST EMIS /MOTIF VIREMENT DEPUIS","VIREMENT INSTANTANE A MASSOLIN PASCAL","VIR INST MR MASSOLIN PASCAL","VIR INST MONSIEUR PASCAL MASSOLIN"]},
+  {code:"VI200",lib:"Flux avec Sarah (neutre)",cls:"VI",sub:"Virements internes",kw:["VIR INST MR MASSOLIN","VIREMENT INSTANTANE DEBIT","VIREMENT INSTANTANE A SARAH MASSOLIN","VIREMENT INSTANTANE DE MLE FLIH SARAH"]},
+  {code:"VI300",lib:"Remboursements entre comptes",cls:"VI",sub:"Virements internes",kw:["REMB ENTRE COMPTES"]},
 ];
 const PLAN_BASE_LENGTH = PLAN.length; // Used to reset custom accounts on merge
 
@@ -673,11 +719,45 @@ const DEFAULT_BUDGETS={
   I100:200,I200:100,I210:0,I220:0,I300:0
 };
 
-const CC={P:"var(--green)",CV:"var(--amber)",CF:"var(--orange)",I:"var(--blue)","?":"var(--text2)"};
-const CB={P:"rgba(16,217,126,.08)",CV:"rgba(245,166,35,.08)",CF:"rgba(255,107,53,.08)",I:"rgba(77,159,255,.08)"};
-const CBB={P:"var(--green2)",CV:"var(--amber2)",CF:"var(--orange2)",I:"var(--blue2)"};
-const CL={P:"PRODUITS",CV:"CHARGES VARIABLES",CF:"CHARGES FIXES",I:"INVESTISSEMENTS"};
-const CI={P:"💵",CV:"📉",CF:"📌",I:"💎"};
+// ─── SYSTÈME DE CLASSES ───────────────────────────────────────────────────────
+// Classes de base — immuables
+const BASE_CLASSES = {
+  P:  {label:"PRODUITS",          icon:"💵", color:"var(--green)",  bg:"rgba(16,217,126,.08)",  border:"var(--green2)",  behavior:"produit"},
+  CV: {label:"CHARGES VARIABLES", icon:"📉", color:"var(--amber)",  bg:"rgba(245,166,35,.08)",  border:"var(--amber2)",  behavior:"charge"},
+  CF: {label:"CHARGES FIXES",     icon:"📌", color:"var(--orange)", bg:"rgba(255,107,53,.08)",  border:"var(--orange2)", behavior:"charge"},
+  I:  {label:"INVESTISSEMENTS",   icon:"💎", color:"var(--blue)",   bg:"rgba(77,159,255,.08)",  border:"var(--blue2)",   behavior:"investissement"},
+  VI: {label:"VIREMENTS INTERNES",icon:"🔄", color:"var(--text2)",  bg:"rgba(255,255,255,.03)", border:"rgba(255,255,255,.08)", behavior:"neutre"},
+  "?":{label:"NON CATÉGORISÉ",    icon:"❓", color:"var(--text2)",  bg:"rgba(255,255,255,.03)", border:"rgba(255,255,255,.08)", behavior:"charge"},
+};
+// Classes actives (base + custom) — rebuilt dynamically
+let CLASSES = {...BASE_CLASSES};
+let CUSTOM_CLASSES = []; // [{code, label, icon, color, bg, border, behavior}]
+
+const FALLBACK_CLS = {label:"?", icon:"❓", color:"var(--text2)", bg:"rgba(255,255,255,.03)", border:"rgba(255,255,255,.06)", behavior:"charge"};
+
+function rebuildClasses(){
+  CLASSES = {...BASE_CLASSES};
+  CUSTOM_CLASSES.forEach(c=>{ CLASSES[c.code]=c; });
+}
+
+// Helpers — all safe, never return undefined
+const cc  = k => (CLASSES[k]||FALLBACK_CLS).color;
+const cb  = k => (CLASSES[k]||FALLBACK_CLS).bg;
+const cbb = k => (CLASSES[k]||FALLBACK_CLS).border;
+const cl  = k => (CLASSES[k]||FALLBACK_CLS).label;
+const ci  = k => (CLASSES[k]||FALLBACK_CLS).icon;
+const isNeutral = k => (CLASSES[k]||FALLBACK_CLS).behavior==="neutre";
+const isProduit = k => (CLASSES[k]||FALLBACK_CLS).behavior==="produit";
+const isCharge  = k => (CLASSES[k]||FALLBACK_CLS).behavior==="charge";
+const isInvest  = k => (CLASSES[k]||FALLBACK_CLS).behavior==="investissement";
+
+// Legacy compat
+const CC  = new Proxy({},{get:(_,k)=>cc(String(k))});
+const CB  = new Proxy({},{get:(_,k)=>cb(String(k))});
+const CBB = new Proxy({},{get:(_,k)=>cbb(String(k))});
+const CL  = new Proxy({},{get:(_,k)=>cl(String(k))});
+const CI  = new Proxy({},{get:(_,k)=>ci(String(k))});
+
 const MONTHS=["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
 
 let TXS=[],BUDGETS={},chartPie=null,chartBar=null,chartProj=null;
@@ -718,10 +798,12 @@ async function doLogin(){
   localStorage.setItem("tra_pm_uid", USER_ID);
   SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById("login-screen").style.display="none";
-  loadAnnualGoals(); loadRules(); loadCustomAccounts();
+  loadAnnualGoals(); loadRules(); loadCustomClasses(); loadCustomAccounts();
   syncShow("syncing","Chargement des données…");
   await loadFromSupabase();
   populateAccountDropdowns();
+  updateClassSelectors();
+  renderCustomClassesList();
   syncShow("ok","Synchronisé ✓");
 }
 
@@ -934,23 +1016,43 @@ function parseCSV(text){
 
 // ─── ANALYTICS ────────────────────────────────────────────────────────────────
 function analytics(txs){
-  const totals={};PLAN.forEach(a=>totals[a.code]=0);totals["???"]=0;
+  const totals={};
+  PLAN.forEach(a=>totals[a.code]=0); totals["???"]=0;
   for(const t of txs){const k=t.code||"???";if(totals[k]===undefined)totals[k]=0;totals[k]+=Math.abs(t.amount)}
-  const byClass={P:0,CV:0,CF:0,I:0,"?":0};
-  PLAN.forEach(a=>byClass[a.cls]=(byClass[a.cls]||0)+(totals[a.code]||0));
+
+  // Build byClass dynamically — ALL classes including custom
+  const byClass={"?":0};
+  Object.keys(CLASSES).forEach(k=>byClass[k]=0);
+  PLAN.forEach(a=>{
+    if(isNeutral(a.cls)) return; // Virements internes exclus
+    byClass[a.cls]=(byClass[a.cls]||0)+(totals[a.code]||0);
+  });
   byClass["?"]=totals["???"]||0;
-  const solde=byClass.P-byClass.CV-byClass.CF-byClass.I;
-  return{totals,byClass,solde,
-    tauxEp:byClass.P>0?byClass.I/byClass.P:0,
-    tauxCV:byClass.P>0?byClass.CV/byClass.P:0,
-    tauxCF:byClass.P>0?byClass.CF/byClass.P:0};
+
+  // Totals neutres (pour info, pas pour le solde)
+  const byClassAll={"?":0};
+  Object.keys(CLASSES).forEach(k=>byClassAll[k]=0);
+  PLAN.forEach(a=>{byClassAll[a.cls]=(byClassAll[a.cls]||0)+(totals[a.code]||0)});
+  byClassAll["?"]=totals["???"]||0;
+
+  // Produits et charges réels (hors neutre)
+  const totalProduits = Object.keys(CLASSES).filter(k=>isProduit(k)).reduce((s,k)=>s+(byClass[k]||0),0);
+  const totalCharges  = Object.keys(CLASSES).filter(k=>isCharge(k)).reduce((s,k)=>s+(byClass[k]||0),0);
+  const totalInvest   = Object.keys(CLASSES).filter(k=>isInvest(k)).reduce((s,k)=>s+(byClass[k]||0),0);
+  const solde = totalProduits - totalCharges - totalInvest;
+
+  return{totals, byClass, byClassAll, solde,
+    totalProduits, totalCharges, totalInvest,
+    tauxEp: totalProduits>0 ? totalInvest/totalProduits : 0,
+    tauxCV: totalProduits>0 ? (byClass.CV||0)/totalProduits : 0,
+    tauxCF: totalProduits>0 ? (byClass.CF||0)/totalProduits : 0};
 }
 
 function monthlyData(){
   return MONTHS.map((m,i)=>{
     const key=`${new Date().getFullYear()}-${String(i+1).padStart(2,"0")}`;
     const A=analytics(TXS.filter(t=>t.date?.substring(0,7)===key));
-    return{month:m,...A.byClass};
+    return{month:m, P:A.byClass.P||0, CV:A.byClass.CV||0, CF:A.byClass.CF||0, I:A.byClass.I||0};
   });
 }
 
@@ -982,14 +1084,17 @@ function renderDash(txs,A){
   if(!has)return;
 
   document.getElementById("kpi-grid").innerHTML=[
-    {label:"💵 Produits",v:A.byClass.P,c:CC.P,sub:"Revenus totaux"},
-    {label:"📉 Ch. Variables",v:A.byClass.CV,c:CC.CV,sub:fmtPct(A.tauxCV)+" des produits"},
-    {label:"📌 Ch. Fixes",v:A.byClass.CF,c:CC.CF,sub:fmtPct(A.tauxCF)+" des produits"},
-    {label:"💎 Investissements",v:A.byClass.I,c:CC.I,sub:"Taux épargne "+fmtPct(A.tauxEp)},
-    {label:"🏦 Solde Net",v:A.solde,c:A.solde>=0?CC.P:CC.red,sub:"Produits − Charges"},
+    {label:"💵 Produits",     v:A.totalProduits, c:"var(--green)",  sub:"Revenus totaux (hors VI)"},
+    {label:"📉 Ch. Variables",v:A.byClass.CV||0, c:"var(--amber)",  sub:fmtPct(A.tauxCV)+" des produits"},
+    {label:"📌 Ch. Fixes",   v:A.byClass.CF||0, c:"var(--orange)", sub:fmtPct(A.tauxCF)+" des produits"},
+    {label:"💎 Investissements",v:A.totalInvest, c:"var(--blue)",   sub:"Taux épargne "+fmtPct(A.tauxEp)},
+    {label:"🏦 Solde Net",   v:A.solde,          c:A.solde>=0?"var(--green)":"var(--red)", sub:"Produits − Charges (hors VI)"},
   ].map(k=>`<div class="kpi" style="--kpi-color:${k.c}"><div class="kpi-label">${k.label}</div><div class="kpi-value">${fmt(k.v)}</div><div class="kpi-sub">${k.sub}</div></div>`).join("");
 
-  const pie=[{l:"Produits",v:A.byClass.P,c:"#10d97e"},{l:"Ch. Var.",v:A.byClass.CV,c:"#f5a623"},{l:"Ch. Fix.",v:A.byClass.CF,c:"#ff6b35"},{l:"Invest.",v:A.byClass.I,c:"#4d9fff"}].filter(d=>d.v>0);
+  // Pie chart — all non-neutral classes with data
+  const pie = Object.keys(CLASSES)
+    .filter(k=>!isNeutral(k)&&(A.byClass[k]||0)>0)
+    .map(k=>({l:cl(k),v:A.byClass[k]||0,c:cc(k).replace("var(--green)","#10d97e").replace("var(--amber)","#f5a623").replace("var(--orange)","#ff6b35").replace("var(--blue)","#4d9fff").replace("var(--purple)","#a78bfa").replace("var(--text2)","#8fa3c4")}));
   if(chartPie)chartPie.destroy();
   chartPie=new Chart(document.getElementById("chart-pie"),{type:"doughnut",
     data:{labels:pie.map(d=>d.l),datasets:[{data:pie.map(d=>d.v),backgroundColor:pie.map(d=>d.c),borderWidth:2,borderColor:"#0d1526"}]},
@@ -1019,31 +1124,62 @@ function renderDash(txs,A){
 // ─── TRA ──────────────────────────────────────────────────────────────────────
 function renderTRA(txs,A){
   let h="";
-  for(const cls of["P","CV","CF","I"]){
+  // Get all classes that have at least one account in PLAN
+  const activeClasses = Object.keys(CLASSES).filter(k=>PLAN.some(a=>a.cls===k));
+
+  for(const cls of activeClasses){
     const accs=PLAN.filter(a=>a.cls===cls);
     const subs=[...new Set(accs.map(a=>a.sub))];
-    const total=A.byClass[cls]||0;
-    h+=`<div class="tra-block" style="margin-bottom:10px">
-      <div class="tra-hd" style="background:${CB[cls]};color:${CC[cls]};border-bottom:1px solid ${CBB[cls]}">
-        <span>${CI[cls]} ${CL[cls]}</span><span style="font-size:16px">${fmt(total)}</span>
+    const total=A.byClassAll[cls]||0;
+    const neutral=isNeutral(cls);
+    const clsColor=cc(cls), clsBg=cb(cls), clsBorder=cbb(cls);
+
+    h+=`<div class="tra-block" style="margin-bottom:10px${neutral?";opacity:.75":""}">
+      <div class="tra-hd" style="background:${clsBg};color:${clsColor};border-bottom:1px solid ${clsBorder}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span>${ci(cls)} ${cl(cls)}</span>
+          ${neutral?`<span style="font-size:10px;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:10px;font-weight:600">NEUTRE — exclu des calculs</span>`:""}
+        </div>
+        <span style="font-size:16px">${fmt(total)}</span>
       </div>`;
     for(const sub of subs){
       h+=`<div class="tra-sub">${esc(sub)}</div>`;
       for(const acc of accs.filter(a=>a.sub===sub)){
-        const v=A.totals[acc.code]||0,pct=A.byClass.P>0?v/A.byClass.P:0;
-        h+=`<div class="tra-row"><div style="display:flex;align-items:center;gap:9px"><span class="tra-code">${acc.code}</span><span style="color:${v>0?"var(--text)":"var(--text3)"}">${esc(acc.lib)}</span></div><div style="display:flex;align-items:center;gap:12px"><span class="tra-pct">${v>0?fmtPct(pct):"—"}</span><span class="tra-amt" style="color:${v>0?CC[cls]:"var(--text3)"}">${v>0?fmt(v):"—"}</span></div></div>`;
+        const v=A.totals[acc.code]||0;
+        const pct=A.totalProduits>0&&!neutral?v/A.totalProduits:0;
+        h+=`<div class="tra-row">
+          <div style="display:flex;align-items:center;gap:9px">
+            <span class="tra-code">${acc.code}</span>
+            <span style="color:${v>0?"var(--text)":"var(--text3)"}">${esc(acc.lib)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="tra-pct">${v>0&&!neutral?fmtPct(pct):"—"}</span>
+            <span class="tra-amt" style="color:${v>0?clsColor:"var(--text3)"}">${v>0?fmt(v):"—"}</span>
+          </div>
+        </div>`;
       }
     }
-    h+=`<div class="tra-total" style="background:${CB[cls]}"><span style="color:${CC[cls]}">TOTAL ${CL[cls]}</span><div style="display:flex;gap:12px"><span style="color:var(--text3);font-size:12px">${A.byClass.P>0?fmtPct(total/A.byClass.P):"—"}</span><span style="color:${CC[cls]};min-width:85px;text-align:right">${fmt(total)}</span></div></div></div>`;
+    h+=`<div class="tra-total" style="background:${clsBg}">
+      <span style="color:${clsColor}">TOTAL ${cl(cls)}</span>
+      <div style="display:flex;gap:12px">
+        <span style="color:var(--text3);font-size:12px">${!neutral&&A.totalProduits>0?fmtPct(total/A.totalProduits):"—"}</span>
+        <span style="color:${clsColor};min-width:85px;text-align:right">${fmt(total)}</span>
+      </div>
+    </div></div>`;
   }
-  const tc=A.byClass.CV+A.byClass.CF+A.byClass.I;
+
+  // Résultats (seulement les classes non-neutres)
+  const customCharges=Object.keys(CLASSES).filter(k=>isCharge(k)&&k!=="CV"&&k!=="CF").reduce((s,k)=>s+(A.byClass[k]||0),0);
   h+=`<div class="tra-block" style="margin-top:14px">
-    <div class="tra-hd" style="background:rgba(0,0,0,.2);color:var(--text2)"><span>RÉSULTATS</span></div>
-    <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">TOTAL CHARGES (CV+CF+I)</span><span style="color:var(--red)">${fmt(tc)}</span></div>
+    <div class="tra-hd" style="background:rgba(0,0,0,.2);color:var(--text2)">
+      <span>RÉSULTATS (hors virements internes)</span>
+    </div>
+    <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">TOTAL CHARGES (hors VI)</span><span style="color:var(--red)">${fmt(A.totalCharges+A.totalInvest)}</span></div>
     <div class="tra-result" style="font-size:16px"><span style="color:var(--text2);font-size:13px;font-weight:500">SOLDE NET DU MOIS</span><span style="color:${A.solde>=0?"var(--green)":"var(--red)"}">${fmt(A.solde)}</span></div>
     <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">TAUX D'ÉPARGNE</span><span style="color:var(--blue)">${fmtPct(A.tauxEp)}</span></div>
     <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">CHARGES VARIABLES / Produits</span><span style="color:var(--amber)">${fmtPct(A.tauxCV)}</span></div>
     <div class="tra-result"><span style="color:var(--text2);font-size:13px;font-weight:500">CHARGES FIXES / Produits</span><span style="color:var(--orange)">${fmtPct(A.tauxCF)}</span></div>
+    ${A.byClassAll.VI>0?`<div class="tra-result" style="opacity:.6"><span style="color:var(--text2);font-size:13px;font-weight:500">🔄 Virements internes (info)</span><span style="color:var(--text2)">${fmt(A.byClassAll.VI)}</span></div>`:""}
   </div>`;
   document.getElementById("tra-content").innerHTML=h;
 }
@@ -1204,9 +1340,12 @@ function renderTX(){
 // ─── COMPTES ──────────────────────────────────────────────────────────────────
 function renderComptes(A){
   renderRulesList();
+  renderCustomClassesList();
   let h="";
-  for(const cls of["P","CV","CF","I"]){
-    const accs=PLAN.filter(a=>a.cls===cls),total=A.byClass[cls]||0;
+  // All classes that have accounts
+  const activeCls=[...new Set(PLAN.map(a=>a.cls))];
+  for(const cls of activeCls){
+    const accs=PLAN.filter(a=>a.cls===cls),total=A.byClassAll[cls]||0;
     h+=`<div class="card" style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
         <div style="font-weight:800;font-size:14px;color:${CC[cls]}">${CI[cls]} ${CL[cls]}</div>
@@ -1659,6 +1798,89 @@ function renderAnnualGoals(){
   }).join("");
 }
 
+// ─── CLASSES PERSONNALISÉES ───────────────────────────────────────────────────
+function loadCustomClasses(){
+  try{ CUSTOM_CLASSES=JSON.parse(localStorage.getItem("tra_custom_cls")||"[]"); }catch(e){ CUSTOM_CLASSES=[]; }
+  rebuildClasses();
+}
+function saveCustomClasses(){
+  localStorage.setItem("tra_custom_cls",JSON.stringify(CUSTOM_CLASSES));
+  rebuildClasses();
+}
+
+function addCustomClass(){
+  const code    = document.getElementById("ncls-code").value.trim().toUpperCase();
+  const label   = document.getElementById("ncls-label").value.trim().toUpperCase();
+  const behavior= document.getElementById("ncls-behavior").value;
+  const icon    = document.getElementById("ncls-icon").value.trim()||"🔹";
+  const hexColor= document.getElementById("ncls-color").value;
+  const msgEl   = document.getElementById("ncls-msg");
+
+  if(!code||!label){ msgEl.innerHTML='<div class="alert a-err">Code et libellé obligatoires.</div>'; return; }
+  if(BASE_CLASSES[code]){ msgEl.innerHTML=`<div class="alert a-err">Le code "${code}" est réservé.</div>`; return; }
+  if(CUSTOM_CLASSES.find(c=>c.code===code)){ msgEl.innerHTML=`<div class="alert a-err">La classe "${code}" existe déjà.</div>`; return; }
+
+  // Convert hex to rgba
+  const r=parseInt(hexColor.slice(1,3),16), g=parseInt(hexColor.slice(3,5),16), b=parseInt(hexColor.slice(5,7),16);
+  const newCls = {
+    code, label, icon, behavior,
+    color:`rgb(${r},${g},${b})`,
+    bg:`rgba(${r},${g},${b},.08)`,
+    border:`rgba(${r},${g},${b},.3)`,
+  };
+  CUSTOM_CLASSES.push(newCls);
+  saveCustomClasses();
+
+  // Clear form
+  ["ncls-code","ncls-label","ncls-icon"].forEach(id=>document.getElementById(id).value="");
+  msgEl.innerHTML=`<div class="alert a-ok">✅ Classe ${code} — ${label} créée !</div>`;
+  setTimeout(()=>msgEl.innerHTML="",3000);
+
+  // Update class selector in account form
+  updateClassSelectors();
+  renderCustomClassesList();
+  render();
+}
+
+function deleteCustomClass(code){
+  const inUse = PLAN.some(a=>a.cls===code)||TXS.some(t=>t.cls===code);
+  if(inUse&&!confirm(`La classe ${code} est utilisée par des comptes ou transactions. Supprimer quand même ?`)) return;
+  CUSTOM_CLASSES=CUSTOM_CLASSES.filter(c=>c.code!==code);
+  saveCustomClasses();
+  updateClassSelectors();
+  renderCustomClassesList();
+  render();
+}
+
+function renderCustomClassesList(){
+  const el=document.getElementById("custom-classes-list"); if(!el) return;
+  if(!CUSTOM_CLASSES.length){ el.innerHTML=""; return; }
+  el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">Tes classes personnalisées</div>`+
+  CUSTOM_CLASSES.map(c=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border-radius:var(--rxs);margin-bottom:4px">
+      <span style="font-size:16px">${c.icon}</span>
+      <div style="flex:1">
+        <span style="font-weight:700;font-size:13px;color:${c.color}">${c.code}</span>
+        <span style="margin-left:8px;font-size:12px">${c.label}</span>
+        <span style="margin-left:8px;font-size:11px;color:var(--text3)">(${c.behavior})</span>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="deleteCustomClass('${c.code}')">✕</button>
+    </div>`).join("");
+}
+
+function updateClassSelectors(){
+  // Update the class selector in the new account form
+  const sel=document.getElementById("new-cls"); if(!sel) return;
+  const cur=sel.value;
+  const baseOpts=[
+    {v:"P",l:"💵 Produits"},{v:"CV",l:"📉 Charges Variables"},
+    {v:"CF",l:"📌 Charges Fixes"},{v:"I",l:"💎 Investissements"},
+    {v:"VI",l:"🔄 Virements Internes"},
+  ];
+  const customOpts=CUSTOM_CLASSES.map(c=>({v:c.code,l:`${c.icon} ${c.label}`}));
+  sel.innerHTML=[...baseOpts,...customOpts].map(o=>`<option value="${o.v}"${o.v===cur?" selected":""}>${o.l}</option>`).join("");
+}
+
 // ─── RÈGLES PERMANENTES ──────────────────────────────────────────────────────
 let RULES = [];
 function loadRules(){ try{ RULES=JSON.parse(localStorage.getItem("tra_pm_rules")||"[]"); }catch(e){ RULES=[]; } }
@@ -1783,10 +2005,13 @@ function load(){
     document.getElementById("login-screen").style.display="none";
     loadAnnualGoals();
     loadRules();
+    loadCustomClasses();
     loadCustomAccounts();
     syncShow("syncing","Chargement…");
     loadFromSupabase().then(()=>{
       populateAccountDropdowns();
+      updateClassSelectors();
+      renderCustomClassesList();
       syncShow("ok","Synchronisé ✓");
     });
   }
