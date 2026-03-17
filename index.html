@@ -707,6 +707,49 @@ const PLAN=[
   {code:"VI100",lib:"Virement entre mes comptes",cls:"VI",sub:"Virements internes",kw:["VIR SEPA INST RECU /DE PASCAL MASSOLIN","VIR SEPA INST EMIS /MOTIF VIREMENT DEPUIS","VIREMENT INSTANTANE A MASSOLIN PASCAL","VIR INST MR MASSOLIN PASCAL","VIR INST MONSIEUR PASCAL MASSOLIN"]},
   {code:"VI200",lib:"Flux avec Sarah (neutre)",cls:"VI",sub:"Virements internes",kw:["VIR INST MR MASSOLIN","VIREMENT INSTANTANE DEBIT","VIREMENT INSTANTANE A SARAH MASSOLIN","VIREMENT INSTANTANE DE MLE FLIH SARAH"]},
   {code:"VI300",lib:"Remboursements entre comptes",cls:"VI",sub:"Virements internes",kw:["REMB ENTRE COMPTES"]},
+  {code:"VI400",lib:"Dépôt / retrait espèces",cls:"VI",sub:"Virements internes",kw:["RETRAIT DAB","DEPOT ESPECES","RETRAIT ESPECES"]},
+
+  // ── PRODUITS COMPLÉMENTAIRES ──────────────────────────────────────────────
+  {code:"P140",lib:"Indemnités journalières (IJ)",cls:"P",sub:"Salaires & Traitements",kw:["INDEMNITE JOURNALIERE","CPAM IJ","SECURITE SOCIALE IJ","IJSS"]},
+  {code:"P150",lib:"Revenus IDEL (activité libérale)",cls:"P",sub:"Revenus Professionnels",kw:["HONORAIRES IDE","RECETTES IDEL","FSES INFIRMIER","SELARL"]},
+  {code:"P160",lib:"Dividendes / Intérêts",cls:"P",sub:"Revenus Patrimoniaux",kw:["DIVIDENDE","INTERETS LIVRET","COUPON","DISTRIBUTION ETF"]},
+  {code:"P170",lib:"Plus-values (ventes titres)",cls:"P",sub:"Revenus Patrimoniaux",kw:["PLUS VALUE","CESSION TITRES","VENTE PEA"]},
+  {code:"P180",lib:"Revenus locatifs bruts (hors Century)",cls:"P",sub:"Revenus Patrimoniaux",kw:["LOYER BRUT","VIR LOCATAIRE"]},
+
+  // ── CHARGES VARIABLES COMPLÉMENTAIRES ────────────────────────────────────
+  {code:"CV141",lib:"Enfants — activités & loisirs",cls:"CV",sub:"Famille & Enfants",kw:["ACTIVITE ENFANT","PISCINE MUNICIPALE","CENTRE AERE","COLO","ACCUEIL PERISCOLAIRE"]},
+  {code:"CV142",lib:"Enfants — fournitures scolaires",cls:"CV",sub:"Famille & Enfants",kw:["FOURNITURES","PAPETERIE","LIBRAIRIE SCOLAIRE","FNAC SCOLAIRE"]},
+  {code:"CV143",lib:"Enfants — vêtements enfants",cls:"CV",sub:"Famille & Enfants",kw:["ORCHESTRA","KIABI ENFANT","VERTBAUDET","OKAIDI"]},
+  {code:"CV144",lib:"Cantine scolaire",cls:"CV",sub:"Famille & Enfants",kw:["CANTINE","RESTAURATION SCOLAIRE","MAIRIE THIAIS"]},
+  {code:"CV270",lib:"Virements famille (déjà existant)",cls:"CV",sub:"Famille & Enfants",kw:[]},
+  {code:"CV310",lib:"Animaux de compagnie",cls:"CV",sub:"Consommation",kw:["VETERINAIRE","ANIMALERIE","GAMM VERT","JARDILAND","WANIMO"]},
+  {code:"CV320",lib:"Tabac & divers",cls:"CV",sub:"Consommation",kw:["TABAC","PRESSE","BUREAU DE TABAC"]},
+  {code:"CV330",lib:"Cadeaux & occasions",cls:"CV",sub:"Consommation",kw:["CADEAU","FLEURS","FLORIST","TRUFFAUT FLEURS"]},
+
+  // ── CHARGES FIXES COMPLÉMENTAIRES ────────────────────────────────────────
+  {code:"CF290",lib:"Crèche / garde d'enfants",cls:"CF",sub:"Famille & Enfants",kw:["CRECHE","ASSISTANTE MATERNELLE","RAM ","PAJEMPLOI","GARDE ENFANT"]},
+  {code:"CF300",lib:"Assurance auto",cls:"CF",sub:"Assurances",kw:["ASSURANCE AUTO","ASSUR AUTO","DIRECT ASSURANCE","MATMUT AUTO"]},
+  {code:"CF310",lib:"Assurance professionnelle (IDEL)",cls:"CF",sub:"Assurances",kw:["ASSURANCE PRO","RC PRO","MACSF","BRANCHET","SHAM"]},
+  {code:"CF320",lib:"Véhicule — crédit auto",cls:"CF",sub:"Transport",kw:["CREDIT AUTO","LOA ","LLD ","FINANCEMENT AUTO"]},
+  {code:"CF330",lib:"Véhicule — entretien & contrôle",cls:"CF",sub:"Transport",kw:["CONTROLE TECHNIQUE","NORAUTO","SPEEDY","MIDAS","FEUVERT","FEU VERT"]},
+  {code:"CF340",lib:"Internet / fibre",cls:"CF",sub:"Charges courantes",kw:["ORANGE FIBRE","FREE ","PRLV FREE","PRLV ORANGE","BBOX","LIVEBOX","FREEBOX"]},
+  {code:"CF350",lib:"Cotisation CARPIMKO (retraite IDEL)",cls:"CF",sub:"Fiscalité",kw:["CARPIMKO","COTISATION RETRAITE IDEL"]},
+  {code:"CF360",lib:"Cotisation URSSAF IDEL",cls:"CF",sub:"Fiscalité",kw:["URSSAF LIBERALE","URSSAF IDEL","COTISATION URSSAF"]},
+  {code:"CF370",lib:"Frais de formation (DPC)",cls:"CF",sub:"Charges courantes",kw:["FORMATION DPC","ANDPC","FORMATION INFIRMIER"]},
+
+  // ── INVESTISSEMENTS COMPLÉMENTAIRES ──────────────────────────────────────
+  {code:"I230",lib:"SCPI",cls:"I",sub:"Investissements financiers",kw:["SCPI","CORUM","PRIMONIAL","PERIAL","IROKO"]},
+  {code:"I240",lib:"Or / métaux précieux",cls:"I",sub:"Investissements financiers",kw:["OR ","GOLD","LINGOT","ACHAT OR"]},
+  {code:"I250",lib:"Fonds euros assurance-vie",cls:"I",sub:"Investissements financiers",kw:["FONDS EUROS","VERSEMENT AV EUROS"]},
+  {code:"I310",lib:"Travaux bien locatif",cls:"I",sub:"Immobilier",kw:["TRAVAUX LOCATIF","ARTISAN","RENOVATION THIAIS"]},
+  {code:"I320",lib:"Apport futur achat immobilier",cls:"I",sub:"Immobilier",kw:["APPORT IMMO","PROVISION ACHAT"]},
+  {code:"I330",lib:"Remboursement anticipé prêt",cls:"I",sub:"Immobilier",kw:["REMBOURSEMENT ANTICIPE","REMB CAPITAL PRET"]},
+
+  // ── CHARGES PROFESSIONNELLES IDEL ────────────────────────────────────────
+  {code:"CP100",lib:"Matériel médical & consommables",cls:"CF",sub:"Charges Pro IDEL",kw:["MATERIEL MEDICAL","CONSOMMABLES IDE","PHARMA GROSSISTE","ALLIANCE HEALTHCARE"]},
+  {code:"CP110",lib:"Carburant tournée (pro)",cls:"CF",sub:"Charges Pro IDEL",kw:["CARBURANT PRO","ESSENCE TOURNEE"]},
+  {code:"CP120",lib:"Logiciel de télétransmission",cls:"CF",sub:"Charges Pro IDEL",kw:["ALAXIONE","SYNERGIE INFIRMIER","LOGICIEL IDE","CPSANTE"]},
+  {code:"CP130",lib:"Cotisation syndicale / ordre IDE",cls:"CF",sub:"Charges Pro IDEL",kw:["SYNDICAT INFIRMIER","ORDRE INFIRMIER","COTISATION ORDRE"]},
 ];
 const PLAN_BASE_LENGTH = PLAN.length; // Used to reset custom accounts on merge
 
@@ -1194,13 +1237,16 @@ function renderBVR(){
     <th class="r">Écart</th><th class="r">Écart %</th><th style="text-align:center">Statut</th>
   </tr></thead><tbody>`;
 
-  for(const cls of["P","CV","CF","I"]){
+  // All non-neutral classes in order
+  const bvrClasses=["P","CV","CF","I",...CUSTOM_CLASSES.map(c=>c.code)].filter(k=>!isNeutral(k));
+  for(const cls of bvrClasses){
     const accs=PLAN.filter(a=>a.cls===cls);
-    html+=`<tr class="bvr-section"><td colspan="6" style="color:${CC[cls]}">${CI[cls]} ${CL[cls]}</td></tr>`;
+    if(!accs.length) continue;
+    html+=`<tr class="bvr-section"><td colspan="6" style="color:${cc(cls)}">${ci(cls)} ${cl(cls)}</td></tr>`;
     let co=0,cr=0;
     for(const acc of accs){
       const real=A.totals[acc.code]||0,obj=BUDGETS[acc.code]||0;
-      const ecart=cls==="P"?(real-obj):(obj-real);
+      const ecart=isProduit(cls)?(real-obj):(obj-real);
       const ecPct=obj>0?ecart/obj:0;
       const ec=ecart>0?"eco":ecart<0?"dep":"neu";
       co+=obj;cr+=real;
@@ -1213,12 +1259,12 @@ function renderBVR(){
         <td style="text-align:center;font-size:15px">${real===0?"⬜":ecart>=0?"✅":"🔴"}</td>
       </tr>`;
     }
-    if(cls==="P"){totP_obj=co;totP_real=cr}else{totD_obj+=co;totD_real+=cr}
-    const ec=cls==="P"?(cr-co):(co-cr);
+    if(isProduit(cls)){totP_obj+=co;totP_real+=cr}else if(!isNeutral(cls)){totD_obj+=co;totD_real+=cr}
+    const ec=isProduit(cls)?(cr-co):(co-cr);
     html+=`<tr class="bvr-total">
       <td style="padding-left:12px;color:${CC[cls]}">TOTAL ${CL[cls]}</td>
       <td class="r">${fmt(co)}</td>
-      <td class="r" style="font-weight:800;color:${CC[cls]}">${fmt(cr)}</td>
+      <td class="r" style="font-weight:800;color:${cc(cls)}">${fmt(cr)}</td>
       <td class="r ${ec>=0?"eco":"dep"}">${fmt(ec)}</td>
       <td class="r ${ec>=0?"eco":"dep"}">${co>0?fmtPct(Math.abs(ec/co)):"—"}</td>
       <td style="text-align:center;font-size:15px">${ec>=0?"✅":"🔴"}</td>
@@ -1422,7 +1468,7 @@ function addCustomAccount(){
   const msgEl= document.getElementById("new-acc-msg");
 
   if(!code||!lib){ msgEl.innerHTML='<div class="alert a-err">Code et libellé obligatoires.</div>'; return; }
-  if(!/^[PCVI]/.test(code)){ msgEl.innerHTML='<div class="alert a-err">Le code doit commencer par P, CV, CF ou I (ex: CV300).</div>'; return; }
+  if(code.length<2||code.length>8){ msgEl.innerHTML='<div class="alert a-err">Le code doit faire entre 2 et 8 caractères (ex: CV300, FAM10).</div>'; return; }
   if(PLAN.find(a=>a.code===code)){ msgEl.innerHTML='<div class="alert a-err">Ce code existe déjà.</div>'; return; }
 
   const newAcc = {code, lib, cls, sub:"Personnalisé", kw, custom:true};
@@ -1449,14 +1495,20 @@ function deleteCustomAccount(code){
 
 // ─── POPULATE ACCOUNT DROPDOWNS ──────────────────────────────────────────────
 function populateAccountDropdowns(){
-  const grpLabels={P:"💵 Produits",CV:"📉 Charges Variables",CF:"📌 Charges Fixes",I:"💎 Investissements"};
   ["m-account","edit-account"].forEach(selId=>{
     const sel=document.getElementById(selId); if(!sel) return;
     const current=sel.value;
-    sel.innerHTML=selId==="m-account"?'<option value="">— Sélectionne un compte —</option>':'';
-    ["P","CV","CF","I"].forEach(cls=>{
-      const grp=document.createElement("optgroup"); grp.label=grpLabels[cls];
-      PLAN.filter(a=>a.cls===cls).forEach(acc=>{
+    sel.innerHTML=selId==="m-account"?'<option value="">— Catégorisation automatique —</option>':'';
+    // All classes that have at least one account, in logical order
+    const clsOrder=["P","CV","CF","I","VI",...CUSTOM_CLASSES.map(c=>c.code)];
+    const seen=new Set();
+    clsOrder.forEach(cls=>{
+      if(seen.has(cls)) return; seen.add(cls);
+      const accs=PLAN.filter(a=>a.cls===cls);
+      if(!accs.length) return;
+      const grp=document.createElement("optgroup");
+      grp.label=`${ci(cls)} ${cl(cls)}`;
+      accs.forEach(acc=>{
         const opt=document.createElement("option");
         opt.value=acc.code;
         opt.textContent=`${acc.code} — ${acc.lib}${acc.custom?" ★":""}`;
@@ -1659,17 +1711,19 @@ function renderComparaison(){
     <th class="r">Évolution</th>
   </tr></thead><tbody>`;
 
-  for(const cls of["P","CV","CF","I"]){
+  const cmpClasses=["P","CV","CF","I","VI",...CUSTOM_CLASSES.map(c=>c.code)];
+  for(const cls of cmpClasses){
     const accs = PLAN.filter(a=>a.cls===cls);
+    if(!accs.length) continue;
     const t1=A1.byClass[cls]||0, t2=A2.byClass[cls]||0;
     const obj_cls = accs.reduce((s,a)=>s+(objTotals[a.code]||0),0);
     th+=`<tr class="bvr-section"><td colspan="6" style="color:${CC[cls]}">${CI[cls]} ${CL[cls]}</td></tr>`;
     for(const acc of accs){
       const v1=A1.totals[acc.code]||0, v2=A2.totals[acc.code]||0;
       const obj=objTotals[acc.code]||0;
-      const ecart = cls==="P"?(v2-obj):(obj-v2);
+      const ecart = isProduit(cls)?(v2-obj):(obj-v2);
       const evol = v2-v1;
-      const evolBetter = cls==="P"?evol>=0:evol<=0;
+      const evolBetter = isProduit(cls)?evol>=0:evol<=0;
       const ecartClass = ecart>=0?"eco":ecart<0?"dep":"neu";
       const active = v1>0||v2>0;
       th+=`<tr style="opacity:${active?1:.4}">
@@ -1681,7 +1735,7 @@ function renderComparaison(){
         <td class="r" style="color:${evolBetter?"var(--green)":"var(--red)"};font-weight:600">${(v1>0||v2>0)?(evol>=0?"↑ ":"↓ ")+fmt(Math.abs(evol)):"—"}</td>
       </tr>`;
     }
-    const ecart_cls = cls==="P"?(t2-obj_cls):(obj_cls-t2);
+    const ecart_cls = isProduit(cls)?(t2-obj_cls):(obj_cls-t2);
     th+=`<tr class="bvr-total">
       <td style="color:${CC[cls]}">TOTAL ${CL[cls]}</td>
       <td class="r" style="color:#4d9fff">${fmt(t1)}</td>
@@ -1856,16 +1910,34 @@ function renderCustomClassesList(){
   const el=document.getElementById("custom-classes-list"); if(!el) return;
   if(!CUSTOM_CLASSES.length){ el.innerHTML=""; return; }
   el.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">Tes classes personnalisées</div>`+
-  CUSTOM_CLASSES.map(c=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg2);border-radius:var(--rxs);margin-bottom:4px">
-      <span style="font-size:16px">${c.icon}</span>
+  CUSTOM_CLASSES.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid ${c.border};border-radius:var(--rxs);margin-bottom:4px">
+      <span style="font-size:18px">${c.icon}</span>
       <div style="flex:1">
         <span style="font-weight:700;font-size:13px;color:${c.color}">${c.code}</span>
         <span style="margin-left:8px;font-size:12px">${c.label}</span>
         <span style="margin-left:8px;font-size:11px;color:var(--text3)">(${c.behavior})</span>
       </div>
-      <button class="btn btn-red btn-sm" onclick="deleteCustomClass('${c.code}')">✕</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditClass(${i})" style="margin-right:4px" title="Modifier">✏️</button>
+      <button class="btn btn-red btn-sm" onclick="deleteCustomClass('${c.code}')" title="Supprimer">✕</button>
     </div>`).join("");
+}
+
+// ── Edit class modal (inline, simple) ──
+function openEditClass(idx){
+  const c=CUSTOM_CLASSES[idx];
+  const newLabel=prompt("Nouveau libellé :",c.label);
+  if(newLabel===null) return;
+  const newIcon=prompt("Nouvelle icône :",c.icon);
+  if(newIcon===null) return;
+  const behaviorChoices=["charge","produit","investissement","neutre"];
+  const newBehavior=prompt(`Comportement (${behaviorChoices.join("/")}):`,c.behavior);
+  if(newBehavior===null||!behaviorChoices.includes(newBehavior)) return;
+  CUSTOM_CLASSES[idx]={...c,label:newLabel.toUpperCase(),icon:newIcon,behavior:newBehavior};
+  saveCustomClasses();
+  updateClassSelectors();
+  renderCustomClassesList();
+  render();
 }
 
 function updateClassSelectors(){
