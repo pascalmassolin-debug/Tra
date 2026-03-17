@@ -1972,12 +1972,19 @@ function openEditModal(id){
 
   const sel=document.getElementById("edit-account");
   sel.innerHTML="";
-  const grpLabels={P:"💵 Produits",CV:"📉 Charges Variables",CF:"📌 Charges Fixes",I:"💎 Investissements"};
-  ["P","CV","CF","I"].forEach(cls=>{
-    const grp=document.createElement("optgroup"); grp.label=grpLabels[cls];
-    PLAN.filter(a=>a.cls===cls).forEach(acc=>{
+  // All classes in logical order including VI and custom
+  const clsOrder=["P","CV","CF","I","VI",...CUSTOM_CLASSES.map(c=>c.code)];
+  const seen=new Set();
+  clsOrder.forEach(cls=>{
+    if(seen.has(cls)) return; seen.add(cls);
+    const accs=PLAN.filter(a=>a.cls===cls);
+    if(!accs.length) return;
+    const grp=document.createElement("optgroup");
+    grp.label=`${ci(cls)} ${cl(cls)}`;
+    accs.forEach(acc=>{
       const opt=document.createElement("option");
-      opt.value=acc.code; opt.textContent=`${acc.code} — ${acc.lib}`;
+      opt.value=acc.code;
+      opt.textContent=`${acc.code} — ${acc.lib}${acc.custom?" ★":""}`;
       if(acc.code===t.code) opt.selected=true;
       grp.appendChild(opt);
     });
