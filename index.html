@@ -268,6 +268,20 @@ body.light .login-box{background:#fff}
 .sim-result{padding:12px;background:var(--bg2);border-radius:var(--rs);margin-top:8px;font-size:13px}
 /* ── PATRIMOINE TRACKER ───────────────────────────────────── */
 .pat-input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+/* ── EMPRUNTS ────────────────────────────────────────────── */
+.loan-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px;position:relative}
+.loan-card.active-loan{border-color:rgba(77,159,255,.4)}
+.loan-badge{position:absolute;top:12px;right:12px;background:rgba(77,159,255,.15);color:var(--blue);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.amort-table{width:100%;border-collapse:collapse;font-size:11px}
+.amort-table th{padding:7px 8px;background:var(--bg2);text-align:right;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.amort-table th:first-child{text-align:left}
+.amort-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.03);text-align:right}
+.amort-table td:first-child{text-align:left;color:var(--text2)}
+.amort-table tr:hover td{background:rgba(255,255,255,.02)}
+.amort-table .cur-row td{background:rgba(77,159,255,.08);font-weight:700}
+.kpi-loan{background:var(--bg2);border-radius:var(--rs);padding:12px 14px;text-align:center}
+.kpi-loan-val{font-size:18px;font-weight:800;letter-spacing:-.03em}
+.kpi-loan-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
 /* ── PERIOD PICKER ───────────────────────────────────────── */
 #period-picker{position:fixed;top:56px;right:16px;z-index:600;background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r);padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;min-width:290px}
 #period-picker.open{display:block}
@@ -420,6 +434,7 @@ body.light .login-box{background:#fff}
   <button class="tab" onclick="showTab('planning')">📆 Planning</button>
   <button class="tab" onclick="showTab('simulation')">🎮 Simulation</button>
   <button class="tab" onclick="showTab('patrimoine')">🏛️ Patrimoine</button>
+  <button class="tab" onclick="showTab('emprunts')">🏦 Emprunts</button>
   <button class="tab" onclick="showTab('transactions')">💳 Transactions</button>
   <button class="tab" onclick="showTab('import')">⬆️ Import</button>
   <button class="tab" onclick="showTab('comptes')">⚙️ Comptes</button>
@@ -876,6 +891,95 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
   </div>
 </div>
 
+<!-- ════════════ EMPRUNTS ════════════ -->
+<div id="page-emprunts" class="page">
+  <div class="page-hd"><h1>Gestionnaire d'Emprunts</h1><p>Calcule automatiquement capital, intérêts et assurance — intègre les montants dans tes objectifs</p></div>
+
+  <!-- Formulaire ajout emprunt -->
+  <div class="card" style="margin-bottom:18px;border-color:rgba(77,159,255,.3)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="width:32px;height:32px;background:rgba(77,159,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">🏦</div>
+      <div>
+        <div style="font-weight:700;font-size:14px" id="loan-form-title">Ajouter un emprunt</div>
+        <div style="font-size:12px;color:var(--text2)">Les mensualités seront automatiquement calculées</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Nom de l'emprunt</label>
+        <input type="text" id="ln-name" placeholder="Ex: Résidence principale, Voiture…">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Type</label>
+        <select id="ln-type" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none">
+          <option value="immo">🏠 Immobilier</option>
+          <option value="auto">🚗 Auto</option>
+          <option value="conso">💳 Consommation</option>
+          <option value="pro">💼 Professionnel</option>
+          <option value="autre">📋 Autre</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Capital emprunté (€)</label>
+        <input type="number" id="ln-capital" placeholder="250000" step="1000">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Taux nominal (%/an)</label>
+        <input type="number" id="ln-taux" placeholder="1.95" step="0.01">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Durée (mois)</label>
+        <input type="number" id="ln-duree" placeholder="300" step="12">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Assurance (€/mois)</label>
+        <input type="number" id="ln-assurance" placeholder="82.50" step="0.01">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Date de début</label>
+        <input type="month" id="ln-debut" value="2026-01">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Capital restant dû actuel (€)</label>
+        <input type="number" id="ln-crd" placeholder="213567" step="1" title="Laisse vide pour calcul depuis le début">
+        <div style="font-size:10px;color:var(--text3);margin-top:3px">Facultatif — pour partir de l'état actuel</div>
+      </div>
+    </div>
+
+    <!-- Preview en temps réel -->
+    <div id="loan-preview" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px;margin-bottom:14px;display:none">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Aperçu de la mensualité</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+        <div class="kpi-loan"><div class="kpi-loan-val" id="prev-mensualite" style="color:var(--blue)">—</div><div class="kpi-loan-lbl">Mensualité totale</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" id="prev-capital" style="color:var(--green)">—</div><div class="kpi-loan-lbl">Capital/mois (moy.)</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" id="prev-interets" style="color:var(--red)">—</div><div class="kpi-loan-lbl">Intérêts/mois (moy.)</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" id="prev-assurance" style="color:var(--amber)">—</div><div class="kpi-loan-lbl">Assurance/mois</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" id="prev-cout-total" style="color:var(--text2)">—</div><div class="kpi-loan-lbl">Coût total crédit</div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Notes (optionnel)</label>
+      <input type="text" id="ln-notes" placeholder="Contexte, historique, remarques…">
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-blue" style="flex:1" onclick="saveLoan()">💾 Enregistrer cet emprunt</button>
+      <button class="btn btn-ghost" id="ln-cancel-btn" onclick="cancelLoanEdit()" style="display:none">Annuler</button>
+    </div>
+    <div id="loan-save-msg" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Liste des emprunts -->
+  <div id="loans-list"></div>
+</div>
+
 <!-- ════════════ B. PLANNING / CALENDRIER ════════════ -->
 <div id="page-planning" class="page">
   <div class="page-hd"><h1>Planning des Flux</h1><p>Calendrier mensuel des recettes et dépenses attendues</p></div>
@@ -1164,7 +1268,7 @@ async function doLogin(){
   localStorage.setItem("tra_pm_uid", USER_ID);
   SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById("login-screen").style.display="none";
-  loadTheme(); loadPatrimoine();
+  loadTheme(); loadPatrimoine(); loadLoans();
   loadAnnualGoals(); loadRules(); loadCustomClasses(); loadCustomAccounts();
   syncShow("syncing","Chargement des données…");
   await loadFromSupabase();
@@ -1840,8 +1944,18 @@ function mergeCustomInPlan(){
       PLAN.push({code:acc.code, lib:acc.lib, cls:acc.cls, sub:acc.sub||"Personnalisé", kw:acc.kw||[], custom:true});
     }
   });
-  // Also update DEFAULT_BUDGETS
+  // Update DEFAULT_BUDGETS
   CUSTOM_ACCOUNTS.forEach(acc=>{ if(DEFAULT_BUDGETS[acc.code]===undefined) DEFAULT_BUDGETS[acc.code]=0; });
+  // Sort PLAN: by class order then by numeric suffix of code
+  const CLS_ORDER = ["P","CV","CF","I","VI", ...CUSTOM_CLASSES.map(c=>c.code)];
+  PLAN.sort((a,b)=>{
+    const ca = CLS_ORDER.indexOf(a.cls), cb = CLS_ORDER.indexOf(b.cls);
+    if(ca !== cb) return (ca===-1?999:ca)-(cb===-1?999:cb);
+    // Within same class, sort by numeric part of code
+    const na = parseInt(a.code.replace(/[^0-9]/g,""))||0;
+    const nb = parseInt(b.code.replace(/[^0-9]/g,""))||0;
+    return na - nb;
+  });
 }
 
 function addCustomAccount(){
@@ -1976,6 +2090,7 @@ function showTab(id){
   if(id==="planning")    renderPlanning();
   if(id==="simulation")  renderSimulationPage();
   if(id==="patrimoine")  renderPatrimoinePage();
+  if(id==="emprunts")    renderEmprunts();
 }
 
 // ─── OBJECTIFS ANNUELS ───────────────────────────────────────────────────────
@@ -2613,8 +2728,10 @@ const EXPECTED_MONTHLY = [
   {label:"Loyers Century 21",     amount:1454,   day:22, code:"P200", cls:"P"},
   {label:"Avance crédit impôt",   amount:307,    day:15, code:"P130", cls:"P"},
   // ── CHARGES FIXES ─────────────────────────────────────────────────
-  {label:"Prêt BNP (échéance)",  amount:-1242.27,day:5,  code:"CF100",cls:"CF"},
-  {label:"Cardif IARD",          amount:-219.68, day:5,  code:"CF110",cls:"CF"},
+  // Prêt BNP : mensualité 1242.27€ = capital 812.72 + intérêts 347.05 + assurance BNP 82.50
+  // En tant que flux de trésorerie c'est 1242.27€ qui sort. Analytiquement c'est réparti via VI/I/CF.
+  {label:"Prêt BNP (mensualité)", amount:-1242.27,day:5,  code:"CF100",cls:"CF"},
+  {label:"Cardif IARD (assurance séparée)", amount:-219.68, day:5, code:"CF110",cls:"CF"},
   {label:"PAS DGFIP",            amount:-133,    day:15, code:"CF240",cls:"CF"},
   {label:"Taxe foncière",        amount:-182,    day:15, code:"CF120",cls:"CF"},
   {label:"Frais tenue BNP",      amount:-2.60,   day:3,  code:"CF270",cls:"CF"},
@@ -3358,6 +3475,416 @@ function renderPlanning(){ renderCalendar(); }
 function renderSimulationPage(){ renderSimulation(); renderGoalsTracker(); }
 function renderPatrimoinePage(){ renderPatrimoine(); }
 
+// ═══════════════════════════════════════════════════════
+// 🏦 GESTIONNAIRE D'EMPRUNTS
+// ═══════════════════════════════════════════════════════
+let LOANS = [];
+let EDITING_LOAN_ID = null;
+
+function loadLoans(){
+  try{ LOANS=JSON.parse(localStorage.getItem("tra_loans")||"[]"); }catch(e){ LOANS=[]; }
+  // Pre-populate BNP loan if empty
+  if(!LOANS.length){
+    LOANS=[
+      {
+        // ── PRÊT PRINCIPAL — paramétré depuis le CRD ACTUEL pour une précision au centime ──
+        // CRD mars 2026 = 213 566,80€ · 219 mois restants · fin 05/06/2044
+        // Capital mois 1 = 812,72€ · Intérêts = 347,05€ · Assurance BNP = 82,50€
+        // → Vérification : 347,05 = 213 566,80 × 1,95%/12 ✓ | Capital = 1 159,77 − 347,05 = 812,72 ✓
+        id:"loan_bnp_thiais",
+        name:"Prêt immobilier BNP — Thiais",
+        type:"immo",
+        capital:213566.80,   // CRD actuel = capital restant à amortir
+        taux:1.95,
+        duree:219,           // Amortissements restants au 05/03/2026
+        assurance:82.50,     // Assurance INCLUSE dans la mensualité BNP (≠ Cardif IARD)
+        debut:"2026-03",     // On part du mois courant pour être exact
+        crd:null,            // Pas de CRD distinct — capital = CRD actuel
+        active:true,
+        codeCapital:"I300",
+        codeInterets:"CF100",
+        codeAssurance:"CF110",
+        notes:"Prêt initial 250 000€ · Démarré juil. 2019 · 300 mois · Suspension 1 an (COVID) · CRD au 05/03/2026 : 213 566,80€ · Fin : 05/06/2044. Mensualité 1 242,27€ (capital 812,72 + intérêts 347,05 + assurance BNP 82,50). Assurance Cardif IARD 219,68€/mois = contrat SÉPARÉ → CF110.",
+      },
+      {
+        // ── ASSURANCE CARDIF IARD — modélisée comme charge fixe mensuelle ──
+        // Ce n'est pas un crédit mais une assurance emprunteur distincte à 219,68€/mois
+        // Représentée ici pour mémoire — la vraie entrée est dans CF110
+        id:"loan_cardif_iard",
+        name:"Assurance Cardif IARD (contrat séparé)",
+        type:"autre",
+        capital:0,
+        taux:0,
+        duree:219,
+        assurance:219.68,   // Seul montant réel — prélevé séparément chaque mois
+        debut:"2026-03",
+        crd:null,
+        active:false,       // Inactif = pas de doublon dans les calculs (géré via CF110)
+        codeCapital:"I300",
+        codeInterets:"CF100",
+        codeAssurance:"CF110",
+        notes:"Assurance emprunteur Cardif IARD · 219,68€/mois · Prélevée séparément du prêt BNP · Durée liée au prêt immo (219 mois restants) · Compte CF110 dans le TRA.",
+      },
+      {
+        // ── CRÉDIT CONSO NOTAIRE — SOLDÉ FIN 2024 ──
+        id:"loan_notaire_conso",
+        name:"Crédit conso frais de notaire (19K€) — SOLDÉ",
+        type:"conso",
+        capital:19000,
+        taux:2.5,
+        duree:60,           // ~5 ans, juillet 2019 → ~2024
+        assurance:0,
+        debut:"2019-07",
+        crd:0,
+        active:false,
+        codeCapital:"I300",
+        codeInterets:"CF100",
+        codeAssurance:"CF110",
+        notes:"Crédit personnel pour frais de notaire · 19 000€ · Démarré juil. 2019 · ~400€/mois · Soldé fin 2024. Pendant 2019-2024 : échéance combinée immo+conso ≈ 1 273€/mois (≈800€ + ≈400€).",
+      }
+    ];
+    saveLoans();
+  }
+}
+function saveLoans(){
+  localStorage.setItem("tra_loans",JSON.stringify(LOANS));
+}
+
+// ─── CALCUL AMORTISSEMENT ──────────────────────────────────────────────────
+function calcAmortissement(capital, tauxAnnuel, duree, assurance, crd){
+  const r = tauxAnnuel / 100 / 12;
+  // Mensualité hors assurance (formule PMT)
+  const pmt = r===0 ? capital/duree : capital * r * Math.pow(1+r,duree) / (Math.pow(1+r,duree)-1);
+  
+  // Si on a un capital restant dû, on construit le tableau depuis ce point
+  let capitalRestant = crd !== null && crd !== undefined && crd > 0 ? crd : capital;
+  const rows = [];
+  
+  for(let m=1; m<=duree; m++){
+    const interets = capitalRestant * r;
+    const capitalMois = pmt - interets;
+    capitalRestant = Math.max(0, capitalRestant - capitalMois);
+    rows.push({
+      mois: m,
+      mensualite: pmt,
+      capital: capitalMois,
+      interets: interets,
+      assurance: assurance,
+      total: pmt + assurance,
+      crd: capitalRestant,
+    });
+    if(capitalRestant <= 0.01) break;
+  }
+  return { pmt, rows, totalInterets: rows.reduce((s,r)=>s+r.interets,0) };
+}
+
+// ─── PREVIEW EN TEMPS RÉEL ────────────────────────────────────────────────
+function updateLoanPreview(){
+  const capital = parseFloat(document.getElementById("ln-capital")?.value)||0;
+  const taux    = parseFloat(document.getElementById("ln-taux")?.value)||0;
+  const duree   = parseInt(document.getElementById("ln-duree")?.value)||0;
+  const ass     = parseFloat(document.getElementById("ln-assurance")?.value)||0;
+  const crd     = parseFloat(document.getElementById("ln-crd")?.value)||null;
+  const preview = document.getElementById("loan-preview");
+  
+  if(!capital||!taux||!duree){ if(preview) preview.style.display="none"; return; }
+  if(preview) preview.style.display="block";
+  
+  const {pmt, rows, totalInterets} = calcAmortissement(capital, taux, duree, ass, crd);
+  
+  // Current month values (first row if no CRD, or first row of remaining)
+  const curRow = rows[0] || {capital:0,interets:0};
+  const avgCapital = rows.reduce((s,r)=>s+r.capital,0)/rows.length;
+  const avgInterets = rows.reduce((s,r)=>s+r.interets,0)/rows.length;
+  
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=fmt(v); };
+  set("prev-mensualite", pmt+ass);
+  set("prev-capital", avgCapital);
+  set("prev-interets", avgInterets);
+  set("prev-assurance", ass);
+  
+  const coutTotal = totalInterets + ass*rows.length;
+  set("prev-cout-total", coutTotal);
+}
+
+// Attach listeners to loan form inputs
+document.addEventListener("DOMContentLoaded",()=>{
+  ["ln-capital","ln-taux","ln-duree","ln-assurance","ln-crd"].forEach(id=>{
+    document.getElementById(id)?.addEventListener("input", updateLoanPreview);
+  });
+});
+
+// ─── SAVE / EDIT ──────────────────────────────────────────────────────────
+function saveLoan(){
+  const name     = document.getElementById("ln-name")?.value.trim();
+  const type     = document.getElementById("ln-type")?.value;
+  const capital  = parseFloat(document.getElementById("ln-capital")?.value)||0;
+  const taux     = parseFloat(document.getElementById("ln-taux")?.value)||0;
+  const duree    = parseInt(document.getElementById("ln-duree")?.value)||0;
+  const assurance= parseFloat(document.getElementById("ln-assurance")?.value)||0;
+  const debut    = document.getElementById("ln-debut")?.value||new Date().toISOString().slice(0,7);
+  const crd      = parseFloat(document.getElementById("ln-crd")?.value)||null;
+  const msg      = document.getElementById("loan-save-msg");
+
+  if(!name||!capital||!taux||!duree){ 
+    if(msg) msg.innerHTML='<div class="alert a-err">Remplis au moins : nom, capital, taux et durée.</div>';
+    return;
+  }
+
+  const notes = document.getElementById("ln-notes")?.value.trim()||"";
+  const loan = {
+    id: EDITING_LOAN_ID || "loan_"+Date.now(),
+    name, type, capital, taux, duree, assurance, debut, active:true,
+    crd: crd||null, notes: notes||undefined,
+    codeCapital:"I300", codeInterets:"CF100", codeAssurance:"CF110",
+  };
+
+  if(EDITING_LOAN_ID){
+    const idx=LOANS.findIndex(l=>l.id===EDITING_LOAN_ID);
+    if(idx>=0) LOANS[idx]=loan;
+  } else {
+    LOANS.push(loan);
+  }
+  saveLoans();
+  resetLoanForm();
+  renderEmprunts();
+  syncBudgetsFromLoans();
+  if(msg){ msg.innerHTML='<div class="alert a-ok">✅ Emprunt enregistré et objectifs mis à jour automatiquement.</div>'; setTimeout(()=>msg.innerHTML="",4000); }
+}
+
+function editLoan(id){
+  const l=LOANS.find(x=>x.id===id); if(!l) return;
+  EDITING_LOAN_ID=id;
+  document.getElementById("ln-name").value=l.name;
+  document.getElementById("ln-type").value=l.type;
+  document.getElementById("ln-capital").value=l.capital;
+  document.getElementById("ln-taux").value=l.taux;
+  document.getElementById("ln-duree").value=l.duree;
+  document.getElementById("ln-assurance").value=l.assurance||"";
+  document.getElementById("ln-debut").value=l.debut||"";
+  document.getElementById("ln-crd").value=l.crd||"";
+  document.getElementById("ln-notes").value=l.notes||"";
+  document.getElementById("loan-form-title").textContent="Modifier l'emprunt";
+  document.getElementById("ln-cancel-btn").style.display="inline-flex";
+  updateLoanPreview();
+  document.getElementById("page-emprunts").scrollTo(0,0);
+  window.scrollTo(0,0);
+}
+
+function cancelLoanEdit(){
+  EDITING_LOAN_ID=null;
+  resetLoanForm();
+}
+
+function resetLoanForm(){
+  ["ln-name","ln-capital","ln-taux","ln-duree","ln-assurance","ln-crd","ln-notes"].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value="";
+  });
+  document.getElementById("ln-debut").value=new Date().toISOString().slice(0,7);
+  document.getElementById("ln-type").value="immo";
+  document.getElementById("loan-form-title").textContent="Ajouter un emprunt";
+  document.getElementById("ln-cancel-btn").style.display="none";
+  document.getElementById("loan-preview").style.display="none";
+  EDITING_LOAN_ID=null;
+}
+
+function toggleLoan(id){
+  const l=LOANS.find(x=>x.id===id); if(!l) return;
+  l.active=!l.active;
+  saveLoans();
+  renderEmprunts();
+  syncBudgetsFromLoans();
+}
+
+function deleteLoan(id){
+  const l=LOANS.find(x=>x.id===id);
+  if(!confirm(`Supprimer l'emprunt "${l?.name}" ?`)) return;
+  LOANS=LOANS.filter(x=>x.id!==id);
+  saveLoans();
+  renderEmprunts();
+  syncBudgetsFromLoans();
+}
+
+// ─── SYNC BUDGETS AUTO ────────────────────────────────────────────────────
+function syncBudgetsFromLoans(){
+  // Reset loan-related budgets to 0, then sum active loans
+  BUDGETS["CF100"]=0; BUDGETS["CF110"]=0; BUDGETS["I300"]=0;
+  LOANS.filter(l=>l.active).forEach(l=>{
+    const {pmt,rows}=calcAmortissement(l.capital,l.taux,l.duree,l.assurance||0,l.crd);
+    const curRow=rows[0];
+    if(!curRow) return;
+    BUDGETS[l.codeInterets||"CF100"]=(BUDGETS[l.codeInterets||"CF100"]||0)+curRow.interets;
+    BUDGETS[l.codeCapital||"I300"]=(BUDGETS[l.codeCapital||"I300"]||0)+curRow.capital;
+    if(l.assurance) BUDGETS[l.codeAssurance||"CF110"]=(BUDGETS[l.codeAssurance||"CF110"]||0)+l.assurance;
+  });
+  // Round to 2 decimals
+  ["CF100","CF110","I300"].forEach(k=>{ if(BUDGETS[k]) BUDGETS[k]=Math.round(BUDGETS[k]*100)/100; });
+  localStorage.setItem("tra_pm_bud",JSON.stringify(BUDGETS));
+  // Also push to Supabase if connected
+  if(SB&&USER_ID){
+    const rows=Object.entries(BUDGETS).map(([code,value])=>({user_id:USER_ID,code,value}));
+    SB.from("budgets").delete().eq("user_id",USER_ID).then(()=>{
+      if(rows.length) SB.from("budgets").insert(rows).then(()=>syncShow("ok","Objectifs emprunts mis à jour ✓"));
+    });
+  }
+}
+
+// ─── RENDER EMPRUNTS PAGE ─────────────────────────────────────────────────
+function renderEmprunts(){
+  const el=document.getElementById("loans-list"); if(!el) return;
+  if(!LOANS.length){
+    el.innerHTML='<div class="card" style="text-align:center;padding:40px;border-style:dashed"><div style="font-size:32px;margin-bottom:10px">🏦</div><div style="font-weight:700;margin-bottom:6px">Aucun emprunt</div><div style="color:var(--text3);font-size:13px">Utilise le formulaire ci-dessus pour ajouter ton prêt immobilier BNP.</div></div>';
+    return;
+  }
+
+  el.innerHTML=LOANS.map(l=>{
+    const {pmt,rows,totalInterets}=calcAmortissement(l.capital,l.taux,l.duree,l.assurance||0,l.crd);
+    const today=new Date().toISOString().slice(0,7);
+    // Find current month row
+    const debutDate=new Date(l.debut+"-01");
+    const todayDate=new Date();
+    const moisEcoules=Math.max(0,(todayDate.getFullYear()-debutDate.getFullYear())*12+(todayDate.getMonth()-debutDate.getMonth()));
+    const curRowIdx=l.crd?0:Math.min(moisEcoules, rows.length-1);
+    const curRow=rows[curRowIdx]||rows[0]||{capital:0,interets:0,crd:0,total:0};
+    const moisRestants=rows.length-curRowIdx;
+    const dateFinEstim=new Date(todayDate.getFullYear(),todayDate.getMonth()+moisRestants,1).toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    const pct=Math.max(0,Math.min(100,(1-(curRow.crd/(l.crd||l.capital)))*100));
+
+    const typeIcons={immo:"🏠",auto:"🚗",conso:"💳",pro:"💼",autre:"📋"};
+    const typeIcon=typeIcons[l.type]||"🏦";
+
+    // Amortissement table — show current month ±6 months, then end
+    const startIdx=Math.max(0,curRowIdx-2);
+    const endIdx=Math.min(rows.length-1,curRowIdx+10);
+    let tableRows=rows.slice(startIdx,endIdx+1);
+    
+    return`<div class="loan-card ${l.active?"active-loan":""}">
+      ${l.active?'<span class="loan-badge">✓ Actif</span>':'<span class="loan-badge" style="background:rgba(255,255,255,.06);color:var(--text3)">Inactif</span>'}
+      
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;padding-right:70px">
+        <div style="font-size:24px">${typeIcon}</div>
+        <div>
+          <div style="font-weight:800;font-size:15px">${esc(l.name)}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">
+            ${fmt(l.crd||l.capital)} restant · ${l.taux}% · ${moisRestants} mois · fin ${dateFinEstim}
+          </div>
+          ${l.notes?`<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic">${esc(l.notes)}</div>`:""}
+        </div>
+      </div>
+
+      <!-- KPIs mois courant -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px">
+        <div class="kpi-loan"><div class="kpi-loan-val" style="color:var(--blue)">${fmt(curRow.total)}</div><div class="kpi-loan-lbl">Mensualité totale</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" style="color:var(--green)">${fmt(curRow.capital)}</div><div class="kpi-loan-lbl">💎 Capital ce mois</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" style="color:var(--red)">${fmt(curRow.interets)}</div><div class="kpi-loan-lbl">📌 Intérêts ce mois</div></div>
+        ${l.assurance?`<div class="kpi-loan"><div class="kpi-loan-val" style="color:var(--amber)">${fmt(l.assurance)}</div><div class="kpi-loan-lbl">📌 Assurance</div></div>`:""}
+        <div class="kpi-loan"><div class="kpi-loan-val" style="color:var(--text2)">${fmt(curRow.crd)}</div><div class="kpi-loan-lbl">Capital restant dû</div></div>
+        <div class="kpi-loan"><div class="kpi-loan-val" style="color:var(--text3);font-size:14px">${fmt(totalInterets)}</div><div class="kpi-loan-lbl">Total intérêts sur durée</div></div>
+      </div>
+
+      <!-- Barre de progression remboursement -->
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px">
+          <span>Progression remboursement</span><span>${pct.toFixed(1)}%</span>
+        </div>
+        <div style="height:6px;background:var(--surface);border-radius:3px;overflow:hidden">
+          <div style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--blue));width:${pct.toFixed(1)}%;transition:width .6s"></div>
+        </div>
+      </div>
+
+      <!-- Tableau d'amortissement partiel -->
+      <details>
+        <summary style="font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;margin-bottom:10px;list-style:none;display:flex;align-items:center;gap:6px">
+          ▶ Tableau d'amortissement (mois ${startIdx+1} à ${endIdx+1} sur ${rows.length})
+        </summary>
+        <div style="overflow-x:auto;margin-top:8px">
+          <table class="amort-table">
+            <thead><tr>
+              <th style="text-align:left">Mois</th>
+              <th>Mensualité</th>
+              <th>Capital</th>
+              <th>Intérêts</th>
+              ${l.assurance?'<th>Assurance</th><th>Total</th>':""}
+              <th>Capital Restant Dû</th>
+            </tr></thead>
+            <tbody>${tableRows.map((row,i)=>{
+              const absIdx=startIdx+i;
+              const isCurrent=absIdx===curRowIdx;
+              const rowDate=new Date(debutDate.getFullYear(),debutDate.getMonth()+absIdx,1);
+              const mLabel=rowDate.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"});
+              return`<tr class="${isCurrent?"cur-row":""}">
+                <td>${mLabel}${isCurrent?' <span style="font-size:9px;color:var(--blue);background:rgba(77,159,255,.1);padding:1px 5px;border-radius:3px">CE MOIS</span>':""}</td>
+                <td>${fmt(row.mensualite)}</td>
+                <td style="color:var(--green)">${fmt(row.capital)}</td>
+                <td style="color:var(--red)">${fmt(row.interets)}</td>
+                ${l.assurance?`<td style="color:var(--amber)">${fmt(row.assurance)}</td><td style="font-weight:700">${fmt(row.total)}</td>`:""}
+                <td>${fmt(row.crd)}</td>
+              </tr>`;
+            }).join("")}</tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- Compte analytique assignment -->
+      <details style="margin-top:12px">
+        <summary style="font-size:12px;font-weight:700;color:var(--text3);cursor:pointer;list-style:none">⚙️ Comptes analytiques associés</summary>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+          <div>
+            <label style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">💎 Capital → Compte</label>
+            <select onchange="updateLoanCode('${l.id}','codeCapital',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:11px;font-family:inherit;outline:none">
+              ${PLAN.filter(a=>isInvest(a.cls)).map(a=>`<option value="${a.code}"${(l.codeCapital||"I300")===a.code?" selected":""}>${a.code} — ${a.lib}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">📌 Intérêts → Compte</label>
+            <select onchange="updateLoanCode('${l.id}','codeInterets',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:11px;font-family:inherit;outline:none">
+              ${PLAN.filter(a=>isCharge(a.cls)).map(a=>`<option value="${a.code}"${(l.codeInterets||"CF100")===a.code?" selected":""}>${a.code} — ${a.lib}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">📌 Assurance → Compte</label>
+            <select onchange="updateLoanCode('${l.id}','codeAssurance',this.value)" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:11px;font-family:inherit;outline:none">
+              ${PLAN.filter(a=>isCharge(a.cls)).map(a=>`<option value="${a.code}"${(l.codeAssurance||"CF110")===a.code?" selected":""}>${a.code} — ${a.lib}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="editLoan('${l.id}')">✏️ Modifier</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleLoan('${l.id}')">${l.active?"⏸ Désactiver":"▶ Activer"}</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportLoanTable('${l.id}')">📊 Export CSV</button>
+        <button class="btn btn-red btn-sm" onclick="deleteLoan('${l.id}')">🗑 Supprimer</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function updateLoanCode(id, field, value){
+  const l=LOANS.find(x=>x.id===id); if(!l) return;
+  l[field]=value; saveLoans(); syncBudgetsFromLoans();
+}
+
+function exportLoanTable(id){
+  const l=LOANS.find(x=>x.id===id); if(!l) return;
+  const {rows}=calcAmortissement(l.capital,l.taux,l.duree,l.assurance||0,l.crd);
+  let csv=`Mois;Mensualité;Capital;Intérêts;Assurance;Total;Capital Restant Dû
+`;
+  const debutDate=new Date(l.debut+"-01");
+  rows.forEach((row,i)=>{
+    const dt=new Date(debutDate.getFullYear(),debutDate.getMonth()+i,1);
+    const m=dt.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    csv+=`${m};${row.mensualite.toFixed(2)};${row.capital.toFixed(2)};${row.interets.toFixed(2)};${(l.assurance||0).toFixed(2)};${row.total.toFixed(2)};${row.crd.toFixed(2)}
+`;
+  });
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`Amortissement_${l.name.replace(/\s+/g,"_")}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+  syncShow("ok","Tableau d'amortissement exporté ✓");
+}
+
 load();
 function logout(){
   if(!confirm("Se déconnecter ? Tes données restent en sécurité sur Supabase.")) return;
@@ -3385,7 +3912,7 @@ function load(){
     USER_ID = savedUID;
     SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById("login-screen").style.display="none";
-    loadTheme(); loadPatrimoine();
+    loadTheme(); loadPatrimoine(); loadLoans();
     loadAnnualGoals();
     loadRules();
     loadCustomClasses();
@@ -3395,6 +3922,7 @@ function load(){
       populateAccountDropdowns();
       updateClassSelectors();
       renderCustomClassesList();
+      syncBudgetsFromLoans();
       syncShow("ok","Synchronisé ✓");
     });
   }
