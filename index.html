@@ -268,6 +268,22 @@ body.light .login-box{background:#fff}
 .sim-result{padding:12px;background:var(--bg2);border-radius:var(--rs);margin-top:8px;font-size:13px}
 /* ── PATRIMOINE TRACKER ───────────────────────────────────── */
 .pat-input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+/* ── CHECKLIST ───────────────────────────────────────────── */
+.chk-item{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-radius:var(--rs);margin-bottom:6px;border:1px solid var(--border);background:var(--bg2);transition:all .2s;cursor:pointer}
+.chk-item:hover{border-color:var(--border2)}
+.chk-item.done{background:rgba(16,217,126,.05);border-color:rgba(16,217,126,.2);opacity:.75}
+.chk-item.done .chk-label{text-decoration:line-through;color:var(--text3)}
+.chk-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s;background:var(--bg)}
+.chk-item.done .chk-box{background:var(--green);border-color:var(--green)}
+.chk-label{font-size:13px;font-weight:500;line-height:1.4}
+.chk-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.chk-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:8px;vertical-align:middle}
+.chk-section-hd{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px;padding-left:4px}
+.chk-progress{height:8px;background:var(--surface);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.chk-progress-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.recap-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rs);margin-bottom:5px;font-size:13px}
+.recap-ok{background:rgba(16,217,126,.07);border:1px solid rgba(16,217,126,.2)}
+.recap-ko{background:rgba(255,92,122,.07);border:1px solid rgba(255,92,122,.2)}
 /* ── RAPPROCHEMENT ──────────────────────────────────────── */
 .rappr-ok {background:rgba(16,217,126,.07);border:1px solid rgba(16,217,126,.25);border-radius:var(--rs);padding:14px 16px}
 .rappr-ko {background:rgba(255,92,122,.07);border:1px solid rgba(255,92,122,.25);border-radius:var(--rs);padding:14px 16px}
@@ -445,6 +461,7 @@ body.light .login-box{background:#fff}
   <button class="tab" onclick="showTab('patrimoine')">🏛️ Patrimoine</button>
   <button class="tab" onclick="showTab('emprunts')">🏦 Emprunts</button>
   <button class="tab" onclick="showTab('rapprochement')">✅ Rapprochement</button>
+  <button class="tab" onclick="showTab('checklist')">📋 Checklist</button>
   <button class="tab" onclick="showTab('transactions')">💳 Transactions</button>
   <button class="tab" onclick="showTab('import')">⬆️ Import</button>
   <button class="tab" onclick="showTab('comptes')">⚙️ Comptes</button>
@@ -901,17 +918,72 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
   </div>
 </div>
 
+<!-- ════════════ CHECKLIST MENSUELLE ════════════ -->
+<div id="page-checklist" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+    <div class="page-hd" style="margin:0"><h1>Checklist Mensuelle</h1><p>Tes tâches financières à valider chaque mois</p></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="chk-month-sel" onchange="renderChecklist()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:8px 12px;font-size:13px;font-family:inherit;outline:none"></select>
+      <button class="btn btn-ghost btn-sm" onclick="resetChecklist()">↺ Réinitialiser</button>
+    </div>
+  </div>
+
+  <!-- Récap global -->
+  <div class="card" style="margin-bottom:18px" id="chk-recap-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="card-title" style="margin:0">📊 Avancement du mois</div>
+      <div style="font-size:13px;font-weight:700" id="chk-pct-label">—</div>
+    </div>
+    <div class="chk-progress" style="margin-bottom:12px"><div class="chk-progress-fill" id="chk-progress-fill" style="background:var(--blue)"></div></div>
+    <div id="chk-recap-list"></div>
+  </div>
+
+  <!-- Tâches par section -->
+  <div id="chk-sections"></div>
+
+  <!-- Tâches personnalisées -->
+  <div class="card" style="margin-bottom:14px;border-color:rgba(77,159,255,.3)">
+    <div class="card-title">➕ Ajouter une tâche personnalisée</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="text" id="chk-new-label" placeholder="Ex: Virer loyer à Sarah, Vérifier solde LEP…" style="flex:1;min-width:200px">
+      <select id="chk-new-section" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none">
+        <option value="perso">📌 Personnalisé</option>
+        <option value="import">📥 Import & données</option>
+        <option value="analyse">📊 Analyse</option>
+        <option value="investissement">💎 Investissement</option>
+        <option value="administratif">📂 Administratif</option>
+      </select>
+      <button class="btn btn-blue btn-sm" onclick="addCustomTask()">➕ Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════════════ RAPPROCHEMENT BANCAIRE ════════════ -->
 <div id="page-rapprochement" class="page">
   <div class="page-hd"><h1>Rapprochement Bancaire</h1><p>Contrôle de cohérence entre tes relevés et tes saisies</p></div>
 
   <!-- Sélection compte + période -->
   <div class="card" style="margin-bottom:14px">
-    <div class="card-title">⚙️ Paramètres du rapprochement</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div class="card-title" style="margin:0">⚙️ Paramètres du rapprochement</div>
+      <div id="rappr-status-badge"></div>
+    </div>
+    <!-- Mode de sélection période -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-sm" id="mode-month-btn" onclick="setRapprMode('month')"
+        style="background:rgba(77,159,255,.15);border:1px solid rgba(77,159,255,.3);color:var(--blue);font-size:12px">📅 Par mois</button>
+      <button class="btn btn-ghost btn-sm" id="mode-range-btn" onclick="setRapprMode('range')"
+        style="font-size:12px">📆 Dates exactes du relevé</button>
+      <div style="margin-left:8px;padding:5px 10px;background:var(--bg2);border-radius:var(--rs);font-size:11px;color:var(--text3)">
+        💡 Utilise "Dates exactes" si ton relevé ne commence pas le 1er du mois
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+      <!-- Banque — toujours visible -->
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Banque</label>
-        <select id="rappr-bank" onchange="renderRapprochement()" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;font-family:inherit;outline:none">
+        <select id="rappr-bank" onchange="onRapprChange()" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;font-family:inherit;outline:none">
           <option value="all">Toutes banques</option>
           <option value="BoursoBank">BoursoBank</option>
           <option value="BNP Paribas">BNP Paribas</option>
@@ -919,18 +991,39 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
           <option value="La Banque Postale">La Banque Postale</option>
         </select>
       </div>
-      <div>
+
+      <!-- Mode mois -->
+      <div id="rappr-month-col">
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Mois</label>
-        <select id="rappr-month" onchange="renderRapprochement()" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;font-family:inherit;outline:none"></select>
+        <select id="rappr-month" onchange="onRapprChange()" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:9px 12px;font-size:13px;font-family:inherit;outline:none"></select>
+      </div>
+
+      <!-- Mode dates exactes -->
+      <div id="rappr-date-from-col" style="display:none">
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Du (1ère opération du relevé)</label>
+        <input type="date" id="rappr-date-from" oninput="autoSaveRapprSoldes()">
+      </div>
+      <div id="rappr-date-to-col" style="display:none">
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Au (dernière opération du relevé)</label>
+        <input type="date" id="rappr-date-to" oninput="autoSaveRapprSoldes()">
+      </div>
+
+      <!-- Soldes — toujours visibles -->
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Solde au début du relevé (€)</label>
+        <input type="number" id="rappr-solde-debut" placeholder="Ex: 1 254,30" step="0.01" oninput="autoSaveRapprSoldes()">
       </div>
       <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Solde relevé au début (€)</label>
-        <input type="number" id="rappr-solde-debut" placeholder="Ex: 1 254,30" step="0.01" oninput="renderRapprochement()">
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Solde à la fin du relevé (€)</label>
+        <input type="number" id="rappr-solde-fin" placeholder="Ex: 2 103,80" step="0.01" oninput="autoSaveRapprSoldes()">
       </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Solde relevé à la fin (€)</label>
-        <input type="number" id="rappr-solde-fin" placeholder="Ex: 2 103,80" step="0.01" oninput="renderRapprochement()">
-      </div>
+    </div>
+    <!-- Historique des mois rapprochés -->
+    <div id="rappr-history-bar" style="display:flex;gap:6px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border)"></div>
+    <!-- Boutons action -->
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn btn-blue" onclick="validateRapprochement()" id="btn-validate-rappr">✅ Valider ce mois comme rapproché</button>
+      <button class="btn btn-ghost btn-sm" onclick="unvalidateRapprochement()" id="btn-unvalidate-rappr" style="display:none">↩ Dévalider</button>
     </div>
   </div>
 
@@ -1347,7 +1440,7 @@ async function doLogin(){
   localStorage.setItem("tra_pm_uid", USER_ID);
   SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById("login-screen").style.display="none";
-  loadTheme(); loadPatrimoine(); loadLoans();
+  loadTheme(); loadPatrimoine(); loadLoans(); loadRapprData(); loadChecklist();
   loadAnnualGoals(); loadRules(); loadCustomClasses(); loadCustomAccounts();
   syncShow("syncing","Chargement des données…");
   await loadFromSupabase();
@@ -1632,10 +1725,34 @@ function updateMonthFilter(){
 }
 
 // ─── RENDER MAIN ──────────────────────────────────────────────────────────────
+function updateChecklistBadge(){
+  const m=new Date().toISOString().slice(0,7);
+  const allTasks=[...DEFAULT_TASKS,...(CHK_DATA?.customTasks||[])];
+  const d=(CHK_DATA||{})[m]||{tasks:{}};
+  const remaining=allTasks.filter(t=>!d.tasks[t.id]).length;
+  const btn=document.querySelector('[onclick="showTab(\'checklist\')"]');
+  if(!btn) return;
+  if(remaining>0){
+    btn.textContent=`📋 Checklist`;
+    btn.style.position="relative";
+    // Add/update badge
+    let badge=btn.querySelector(".nav-chk-badge");
+    if(!badge){ badge=document.createElement("span"); badge.className="nav-chk-badge";
+      badge.style.cssText="position:absolute;top:-4px;right:-4px;background:var(--red);color:white;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;";
+      btn.style.position="relative"; btn.appendChild(badge); }
+    badge.textContent=remaining;
+  } else {
+    const badge=btn.querySelector(".nav-chk-badge");
+    if(badge) badge.remove();
+  }
+}
+
 function render(){
   // Always ensure custom classes and accounts are merged before rendering
   rebuildClasses();
   mergeCustomInPlan();
+  // Update checklist badge on nav tab
+  updateChecklistBadge();
   const txs=filteredTxs();const A=analytics(txs);
   document.getElementById("nav-count").textContent=TXS.length+" tx";
   renderDash(txs,A);renderTRA(txs,A);renderBVR();renderProjection();renderTX();renderComptes(A);
@@ -2171,6 +2288,7 @@ function showTab(id){
   if(id==="patrimoine")  renderPatrimoinePage();
   if(id==="emprunts")       renderEmprunts();
   if(id==="rapprochement") renderRapprochement();
+  if(id==="checklist")     renderChecklist();
 }
 
 // ─── OBJECTIFS ANNUELS ───────────────────────────────────────────────────────
@@ -3969,12 +4087,132 @@ function exportLoanTable(id){
 // ✅ RAPPROCHEMENT BANCAIRE
 // ═══════════════════════════════════════════════════════
 
+// RAPPR_DATA: { "YYYY-MM_bank" or "range_YYYY-MM-DD_YYYY-MM-DD_bank": { soldeDebut, soldeFin, dateFrom, dateTo, validated, validatedAt } }
+let RAPPR_DATA = {};
+let RAPPR_MODE = "month"; // "month" | "range"
+
+function setRapprMode(mode){
+  RAPPR_MODE = mode;
+  const isRange = mode==="range";
+  document.getElementById("rappr-month-col").style.display    = isRange ? "none"  : "";
+  document.getElementById("rappr-date-from-col").style.display = isRange ? ""     : "none";
+  document.getElementById("rappr-date-to-col").style.display   = isRange ? ""     : "none";
+  const btnM=document.getElementById("mode-month-btn");
+  const btnR=document.getElementById("mode-range-btn");
+  if(btnM){ btnM.style.background=isRange?"":"rgba(77,159,255,.15)"; btnM.style.borderColor=isRange?"var(--border)":"rgba(77,159,255,.3)"; btnM.style.color=isRange?"var(--text2)":"var(--blue)"; }
+  if(btnR){ btnR.style.background=isRange?"rgba(77,159,255,.15)":""; btnR.style.borderColor=isRange?"rgba(77,159,255,.3)":"var(--border)"; btnR.style.color=isRange?"var(--blue)":"var(--text2)"; }
+  onRapprChange();
+}
+
+function loadRapprData(){
+  try{ RAPPR_DATA=JSON.parse(localStorage.getItem("tra_rappr")||"{}"); }catch(e){ RAPPR_DATA={}; }
+}
+function saveRapprData(){
+  localStorage.setItem("tra_rappr", JSON.stringify(RAPPR_DATA));
+}
+function rapprKey(){
+  const bank=document.getElementById("rappr-bank")?.value||"all";
+  if(RAPPR_MODE==="range"){
+    const from=document.getElementById("rappr-date-from")?.value||"";
+    const to  =document.getElementById("rappr-date-to")?.value||"";
+    return (from&&to) ? `range_${from}_${to}_${bank}` : null;
+  }
+  const month=document.getElementById("rappr-month")?.value||"";
+  return (month&&bank) ? `${month}_${bank}` : null;
+}
+
+// Returns the filtered transactions for the current rappr selection
+function rapprTxs(bank){
+  if(RAPPR_MODE==="range"){
+    const from=document.getElementById("rappr-date-from")?.value||"";
+    const to  =document.getElementById("rappr-date-to")?.value||"";
+    if(!from||!to) return [];
+    let txs=TXS.filter(t=>t.date&&t.date>=from&&t.date<=to);
+    if(bank!=="all") txs=txs.filter(t=>t.bank===bank);
+    return txs.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  const month=document.getElementById("rappr-month")?.value;
+  if(!month) return [];
+  let txs=TXS.filter(t=>t.date?.startsWith(month));
+  if(bank!=="all") txs=txs.filter(t=>t.bank===bank);
+  return txs.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function onRapprChange(){
+  const key=rapprKey(); if(!key){ renderRapprochement(); return; }
+  const saved=RAPPR_DATA[key]||{};
+  const debEl=document.getElementById("rappr-solde-debut");
+  const finEl=document.getElementById("rappr-solde-fin");
+  if(debEl) debEl.value = saved.soldeDebut!==undefined ? saved.soldeDebut : "";
+  if(finEl) finEl.value = saved.soldeFin!==undefined   ? saved.soldeFin   : "";
+  if(RAPPR_MODE==="range"&&saved.dateFrom){
+    const df=document.getElementById("rappr-date-from"); if(df) df.value=saved.dateFrom;
+    const dt=document.getElementById("rappr-date-to");   if(dt) dt.value=saved.dateTo||"";
+  }
+  renderRapprochement();
+}
+
+function autoSaveRapprSoldes(){
+  const key=rapprKey(); if(!key) return;
+  if(!RAPPR_DATA[key]) RAPPR_DATA[key]={};
+  const dv=document.getElementById("rappr-solde-debut")?.value;
+  const fv=document.getElementById("rappr-solde-fin")?.value;
+  if(dv!=="") RAPPR_DATA[key].soldeDebut=parseFloat(dv);
+  if(fv!=="") RAPPR_DATA[key].soldeFin  =parseFloat(fv);
+  if(RAPPR_MODE==="range"){
+    const from=document.getElementById("rappr-date-from")?.value||"";
+    const to  =document.getElementById("rappr-date-to")?.value||"";
+    if(from) RAPPR_DATA[key].dateFrom=from;
+    if(to)   RAPPR_DATA[key].dateTo  =to;
+  }
+  saveRapprData();
+  renderRapprochement();
+}
+
+function validateRapprochement(){
+  const key=rapprKey(); if(!key){ alert("Sélectionne un mois."); return; }
+  if(!RAPPR_DATA[key]) RAPPR_DATA[key]={};
+  RAPPR_DATA[key].validated=true;
+  RAPPR_DATA[key].validatedAt=new Date().toISOString();
+  saveRapprData(); renderRapprochement();
+  syncShow("ok","Mois verrouillé ✓");
+}
+
+function unvalidateRapprochement(){
+  const key=rapprKey(); if(!key) return;
+  if(!confirm("Dévalider ce mois ?")) return;
+  if(RAPPR_DATA[key]) delete RAPPR_DATA[key].validated;
+  saveRapprData(); renderRapprochement();
+}
+
+function renderRapprHistoryBar(){
+  const bar=document.getElementById("rappr-history-bar"); if(!bar) return;
+  const bank=document.getElementById("rappr-bank")?.value||"all";
+  const months=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort().reverse();
+  bar.innerHTML=months.map(m=>{
+    const key=`${m}_${bank}`;
+    const d=RAPPR_DATA[key]||{};
+    const validated=d.validated;
+    const hasData=d.soldeDebut!==undefined||d.soldeFin!==undefined;
+    const bg=validated?"rgba(16,217,126,.15)":hasData?"rgba(245,166,35,.1)":"var(--bg2)";
+    const border=validated?"rgba(16,217,126,.3)":hasData?"rgba(245,166,35,.3)":"var(--border)";
+    const color=validated?"var(--green)":hasData?"var(--amber)":"var(--text3)";
+    const icon=validated?"✅":hasData?"✏️":"○";
+    const tooltip=validated?"Rapproché le "+new Date(d.validatedAt).toLocaleDateString("fr-FR"):hasData?"Soldes saisis, non validé":"Non traité";
+    return `<span onclick="document.getElementById('rappr-month').value='${m}';onRapprChange()"
+      style="cursor:pointer;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;
+             background:${bg};border:1px solid ${border};color:${color};white-space:nowrap;transition:opacity .15s"
+      title="${tooltip}">${icon} ${m}</span>`;
+  }).join("");
+}
+
 function initRapprochementSelectors(){
   const sel=document.getElementById("rappr-month"); if(!sel) return;
   const cur=sel.value;
   const months=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort().reverse();
   sel.innerHTML=months.map(m=>`<option value="${m}"${m===cur?" selected":""}>${m}</option>`).join("");
-  if(!cur&&months.length) sel.value=months[0];
+  if(!cur&&months.length){ sel.value=months[0]; onRapprChange(); }
+  renderRapprHistoryBar();
 }
 
 function renderRapprochement(){
@@ -3983,13 +4221,34 @@ function renderRapprochement(){
   const month=document.getElementById("rappr-month")?.value;
   if(!month) return;
 
+  const key=rapprKey();
+  const saved=RAPPR_DATA[key]||{};
+  const isValidated=!!saved.validated;
+
+  // Update validate/unvalidate buttons
+  const btnVal=document.getElementById("btn-validate-rappr");
+  const btnUnval=document.getElementById("btn-unvalidate-rappr");
+  if(btnVal)  { btnVal.style.display=isValidated?"none":"inline-flex"; }
+  if(btnUnval){ btnUnval.style.display=isValidated?"inline-flex":"none"; }
+
+  // Update status badge
+  const badge=document.getElementById("rappr-status-badge");
+  if(badge) badge.innerHTML=isValidated
+    ? `<span style="background:rgba(16,217,126,.15);border:1px solid rgba(16,217,126,.3);color:var(--green);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">✅ Rapproché le ${new Date(saved.validatedAt).toLocaleDateString("fr-FR")}</span>`
+    : `<span style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:var(--amber);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">⏳ En attente de validation</span>`;
+
+  // Update history bar
+  renderRapprHistoryBar();
+
   const soldeDebut=parseFloat(document.getElementById("rappr-solde-debut")?.value||"NaN");
   const soldeFin  =parseFloat(document.getElementById("rappr-solde-fin")?.value||"NaN");
 
-  // Filter transactions for this bank/month
-  let txs=TXS.filter(t=>t.date?.startsWith(month));
-  if(bank!=="all") txs=txs.filter(t=>t.bank===bank);
-  txs=txs.sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  // Filter transactions using rapprTxs (handles both month and date-range modes)
+  const txs=rapprTxs(bank);
+  // Period label for display
+  const periodLabel = RAPPR_MODE==="range"
+    ? `${document.getElementById("rappr-date-from")?.value||""} → ${document.getElementById("rappr-date-to")?.value||""}`
+    : month;
 
   const totalEntrees =txs.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
   const totalSorties =txs.filter(t=>t.amount<0).reduce((s,t)=>s+t.amount,0);
@@ -4011,7 +4270,7 @@ function renderRapprochement(){
             <div style="font-size:11px;color:var(--text3)">${fmt(soldeDebut)} → ${fmt(soldeFin)}</div></div>
           <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Mouvement saisi</div>
             <div style="font-size:20px;font-weight:800;color:${soldeAppli>=0?"var(--green)":"var(--red)"}">${fmt(soldeAppli)}</div>
-            <div style="font-size:11px;color:var(--text3)">${nTx} transactions${bank!=="all"?" · "+bank:""}</div></div>
+            <div style="font-size:11px;color:var(--text3)">${nTx} transactions · ${periodLabel}${bank!=="all"?" · "+bank:""}</div></div>
           <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Écart</div>
             <div style="font-size:24px;font-weight:800;color:${ok?"var(--green)":Math.abs(ecart)<1?"var(--amber)":"var(--red)"}">${fmt(ecart)}</div>
             <div style="font-size:12px;font-weight:700;color:${ok?"var(--green)":Math.abs(ecart)<1?"var(--amber)":"var(--red)"}">${ok?"✅ RAPPROCHEMENT OK":Math.abs(ecart)<1?"⚠️ Écart mineur":"🔴 ÉCART À CORRIGER"}</div></div>
@@ -4157,7 +4416,7 @@ function renderRapprochement(){
   // ── JOURNAL ─────────────────────────────────────────────
   const journalEl=document.getElementById("rappr-journal");
   const countEl=document.getElementById("rappr-tx-count");
-  if(countEl) countEl.textContent=`${nTx} opérations · ${fmt(soldeAppli)}`;
+  if(countEl) countEl.textContent=`${nTx} opérations · ${periodLabel} · ${fmt(soldeAppli)}`;
 
   // Detect anomaly rows for styling
   const dupKeys=new Set();
@@ -4223,6 +4482,189 @@ Généré le ${new Date().toLocaleDateString("fr-FR")}
   syncShow("ok","Rapprochement exporté ✓");
 }
 
+// ═══════════════════════════════════════════════════════
+// 📋 CHECKLIST MENSUELLE
+// ═══════════════════════════════════════════════════════
+
+// Default tasks — each has: id, label, sub, section, auto (fn to check automatically)
+const DEFAULT_TASKS = [
+  // ── IMPORT & DONNÉES ──────────────────────────────────────────────────────
+  { id:"import_bourso",    section:"import",        label:"Importer relevé BoursoBank",          sub:"Télécharger CSV depuis l'app BoursoBank et importer",                    auto: m => TXS.some(t=>t.bank==="BoursoBank"&&t.date?.startsWith(m)) },
+  { id:"import_bnp",       section:"import",        label:"Importer relevé BNP Paribas",          sub:"Télécharger CSV depuis mabanque.bnpparibas et importer",                 auto: m => TXS.some(t=>t.bank==="BNP Paribas"&&t.date?.startsWith(m)) },
+  { id:"import_lbp",       section:"import",        label:"Importer relevé La Banque Postale",    sub:"Télécharger CSV et importer",                                            auto: m => TXS.some(t=>t.bank==="La Banque Postale"&&t.date?.startsWith(m)) },
+  { id:"import_bnp_credit",section:"import",        label:"Importer relevé BNP Crédit immo",      sub:"Télécharger le relevé du prêt (amortissement)",                          auto: m => TXS.some(t=>t.bank==="BNP Crédit"&&t.date?.startsWith(m)) },
+  { id:"categorize",       section:"import",        label:"Catégoriser les ??? restants",          sub:"Corriger les transactions non catégorisées dans Transactions",            auto: m => { const txs=TXS.filter(t=>t.date?.startsWith(m)); return txs.length>0&&!txs.some(t=>t.code==="???"); } },
+  // ── RAPPROCHEMENT ─────────────────────────────────────────────────────────
+  { id:"rappr_bourso",     section:"rapprochement", label:"Rapprocher BoursoBank",                sub:"Vérifier solde relevé = solde calculé dans ✅ Rapprochement",              auto: m => !!Object.keys(RAPPR_DATA||{}).some(k=>k.includes(m)&&k.includes("BoursoBank")&&RAPPR_DATA[k]?.validated) },
+  { id:"rappr_bnp",        section:"rapprochement", label:"Rapprocher BNP Paribas",               sub:"Vérifier solde relevé = solde calculé dans ✅ Rapprochement",              auto: m => !!Object.keys(RAPPR_DATA||{}).some(k=>k.includes(m)&&k.includes("BNP Paribas")&&RAPPR_DATA[k]?.validated) },
+  { id:"rappr_lbp",        section:"rapprochement", label:"Rapprocher La Banque Postale",         sub:"Vérifier solde relevé = solde calculé",                                   auto: m => !!Object.keys(RAPPR_DATA||{}).some(k=>k.includes(m)&&k.includes("Banque Postale")&&RAPPR_DATA[k]?.validated) },
+  // ── ANALYSE ───────────────────────────────────────────────────────────────
+  { id:"check_tra",        section:"analyse",       label:"Analyser le TRA du mois",              sub:"Vérifier produits / charges / solde dans 📋 TRA",                         auto: null },
+  { id:"check_budget",     section:"analyse",       label:"Vérifier le budget vs réalisé",        sub:"Identifier les postes dépassés dans 🎯 Budget",                           auto: null },
+  { id:"check_anomalies",  section:"analyse",       label:"Contrôler les anomalies",              sub:"Consulter 🔬 Analyses → anomalies du mois",                               auto: null },
+  // ── INVESTISSEMENT ────────────────────────────────────────────────────────
+  { id:"ep_lep",           section:"investissement",label:"Virement épargne LEP / Livret A",      sub:"Alimenter le LEP (objectif 10 000€) ou Livret A",                         auto: m => TXS.some(t=>t.date?.startsWith(m)&&t.code==="I100") },
+  { id:"ep_pea",           section:"investissement",label:"Investissement PEA",                   sub:"Investir sur ETF World dans le PEA BoursoBank",                           auto: m => TXS.some(t=>t.date?.startsWith(m)&&t.code==="I200") },
+  { id:"pat_update",       section:"investissement",label:"Mettre à jour le tracker patrimoine",  sub:"Saisir les soldes actuels dans 🏛️ Patrimoine",                             auto: m => (PATRIMOINE_HISTORY||[]).some(h=>h.month===m) },
+  // ── ADMINISTRATIF ─────────────────────────────────────────────────────────
+  { id:"check_loyer",      section:"administratif", label:"Vérifier virement loyer Century 21",   sub:"Loyer brut ~1 454-1 740€ crédité par Century 21",                         auto: m => TXS.some(t=>t.date?.startsWith(m)&&t.code==="P200") },
+  { id:"check_caf",        section:"administratif", label:"Vérifier virement CAF",                sub:"CAF Val-de-Marne 1 384,25€ crédité le 5",                                 auto: m => TXS.some(t=>t.date?.startsWith(m)&&t.code==="P120") },
+  { id:"check_pret",       section:"administratif", label:"Vérifier prélèvement prêt BNP",        sub:"Échéance 1 242,27€ + Cardif 219,68€ prélevés le 5",                       auto: m => TXS.some(t=>t.date?.startsWith(m)&&(t.code==="CF100"||t.code==="I300")) },
+  { id:"backup",           section:"administratif", label:"Télécharger le backup mensuel",        sub:"💾 Backup dans Transactions → sauvegarder en local",                       auto: null },
+];
+
+const SECTION_META = {
+  import:         { label:"📥 Import & Données",    color:"var(--blue)",   bg:"rgba(77,159,255,.08)"   },
+  rapprochement:  { label:"✅ Rapprochement",        color:"var(--green)",  bg:"rgba(16,217,126,.08)"   },
+  analyse:        { label:"📊 Analyse",              color:"var(--purple)", bg:"rgba(167,139,250,.08)"  },
+  investissement: { label:"💎 Investissement",       color:"var(--amber)",  bg:"rgba(245,166,35,.08)"   },
+  administratif:  { label:"📂 Administratif",        color:"var(--orange)", bg:"rgba(255,107,53,.08)"   },
+  perso:          { label:"📌 Personnalisé",          color:"var(--text2)",  bg:"rgba(255,255,255,.04)"  },
+};
+
+// CHK_DATA: { "YYYY-MM": { taskId: true/false, ... }, customTasks: [...] }
+let CHK_DATA = {};
+
+function loadChecklist(){
+  try{ CHK_DATA=JSON.parse(localStorage.getItem("tra_chk")||"{}"); }catch(e){ CHK_DATA={}; }
+}
+function saveChecklist(){
+  localStorage.setItem("tra_chk", JSON.stringify(CHK_DATA));
+}
+
+function chkMonth(){
+  return document.getElementById("chk-month-sel")?.value || new Date().toISOString().slice(0,7);
+}
+
+function getMonthData(m){
+  if(!CHK_DATA[m]) CHK_DATA[m]={ tasks:{} };
+  if(!CHK_DATA[m].tasks) CHK_DATA[m].tasks={};
+  return CHK_DATA[m];
+}
+
+function toggleTask(taskId){
+  const m=chkMonth();
+  const d=getMonthData(m);
+  d.tasks[taskId] = !d.tasks[taskId];
+  saveChecklist();
+  renderChecklist();
+}
+
+function addCustomTask(){
+  const label=document.getElementById("chk-new-label")?.value.trim();
+  const section=document.getElementById("chk-new-section")?.value||"perso";
+  if(!label) return;
+  if(!CHK_DATA.customTasks) CHK_DATA.customTasks=[];
+  const id="custom_"+Date.now();
+  CHK_DATA.customTasks.push({id, label, section, sub:"Tâche personnalisée", auto:null});
+  saveChecklist();
+  document.getElementById("chk-new-label").value="";
+  renderChecklist();
+}
+
+function deleteCustomTask(id){
+  CHK_DATA.customTasks=(CHK_DATA.customTasks||[]).filter(t=>t.id!==id);
+  saveChecklist(); renderChecklist();
+}
+
+function resetChecklist(){
+  const m=chkMonth();
+  if(!confirm(`Réinitialiser toutes les cases du mois ${m} ?`)) return;
+  if(CHK_DATA[m]) delete CHK_DATA[m].tasks;
+  saveChecklist(); renderChecklist();
+}
+
+function renderChecklist(){
+  // Init month selector
+  const sel=document.getElementById("chk-month-sel"); if(!sel) return;
+  const cur=sel.value;
+  const months=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort().reverse();
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const allMonths=months.includes(thisMonth)?months:[thisMonth,...months];
+  sel.innerHTML=allMonths.map(m=>`<option value="${m}"${m===(cur||thisMonth)?" selected":""}>${m}</option>`).join("");
+  if(!sel.value) sel.value=thisMonth;
+
+  const m=chkMonth();
+  const d=getMonthData(m);
+  const allTasks=[...DEFAULT_TASKS,...(CHK_DATA.customTasks||[])];
+
+  // Auto-detect done tasks
+  allTasks.forEach(task=>{
+    if(task.auto && typeof task.auto==="function"){
+      const autoDone=task.auto(m);
+      // Only set to true automatically; never reset a manual tick
+      if(autoDone && !d.tasks[task.id]) d.tasks[task.id]=true;
+    }
+  });
+  saveChecklist();
+
+  // Stats
+  const total=allTasks.length;
+  const done=allTasks.filter(t=>d.tasks[t.id]).length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const fillEl=document.getElementById("chk-progress-fill");
+  const pctEl=document.getElementById("chk-pct-label");
+  if(fillEl){ fillEl.style.width=pct+"%"; fillEl.style.background=pct===100?"var(--green)":pct>50?"var(--blue)":"var(--amber)"; }
+  if(pctEl) pctEl.textContent=`${done} / ${total} — ${pct}%`;
+
+  // Récap — remaining tasks
+  const remaining=allTasks.filter(t=>!d.tasks[t.id]);
+  const recapEl=document.getElementById("chk-recap-list");
+  if(recapEl){
+    if(pct===100){
+      recapEl.innerHTML=`<div style="text-align:center;padding:16px;color:var(--green);font-weight:700;font-size:15px">🎉 Toutes les tâches sont complètes pour ${m} !</div>`;
+    } else {
+      // Group remaining by section
+      const bySec={};
+      remaining.forEach(t=>{ if(!bySec[t.section]) bySec[t.section]=[]; bySec[t.section].push(t); });
+      recapEl.innerHTML=Object.entries(bySec).map(([sec,tasks])=>{
+        const meta=SECTION_META[sec]||SECTION_META.perso;
+        return`<div class="recap-item recap-ko">
+          <span style="font-size:16px">⬜</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:${meta.color};margin-bottom:2px">${meta.label}</div>
+            <div style="font-size:13px;color:var(--text)">${tasks.map(t=>t.label).join(" · ")}</div>
+          </div>
+        </div>`;
+      }).join("");
+    }
+  }
+
+  // Sections with tasks
+  const sections=["import","rapprochement","analyse","investissement","administratif","perso"];
+  const sectEl=document.getElementById("chk-sections"); if(!sectEl) return;
+  sectEl.innerHTML=sections.map(sec=>{
+    const meta=SECTION_META[sec]||SECTION_META.perso;
+    const tasks=allTasks.filter(t=>t.section===sec);
+    if(!tasks.length) return"";
+    const secDone=tasks.filter(t=>d.tasks[t.id]).length;
+    const isCustom=sec==="perso";
+    return`<div class="card" style="margin-bottom:12px;border-color:${meta.color}30">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-weight:700;font-size:14px;color:${meta.color}">${meta.label}</div>
+        <span style="font-size:12px;font-weight:700;color:${secDone===tasks.length?"var(--green)":"var(--text3)"}">
+          ${secDone}/${tasks.length} ${secDone===tasks.length?"✅":""}
+        </span>
+      </div>
+      ${tasks.map(task=>{
+        const isDone=!!d.tasks[task.id];
+        const isAuto=task.auto&&typeof task.auto==="function"&&isDone&&task.auto(m);
+        return`<div class="chk-item${isDone?" done":""}" onclick="toggleTask('${task.id}')">
+          <div class="chk-box">${isDone?'<svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':""}</div>
+          <div style="flex:1">
+            <div class="chk-label">
+              ${esc(task.label)}
+              ${isAuto?'<span class="chk-badge" style="background:rgba(16,217,126,.15);color:var(--green)">✓ auto</span>':""}
+            </div>
+            <div class="chk-sub">${esc(task.sub)}</div>
+          </div>
+          ${isCustom?`<button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteCustomTask('${task.id}')" style="flex-shrink:0">✕</button>`:""}
+        </div>`;
+      }).join("")}
+    </div>`;
+  }).join("");
+}
+
 load();
 function logout(){
   if(!confirm("Se déconnecter ? Tes données restent en sécurité sur Supabase.")) return;
@@ -4250,7 +4692,7 @@ function load(){
     USER_ID = savedUID;
     SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById("login-screen").style.display="none";
-    loadTheme(); loadPatrimoine(); loadLoans();
+    loadTheme(); loadPatrimoine(); loadLoans(); loadRapprData(); loadChecklist();
     loadAnnualGoals();
     loadRules();
     loadCustomClasses();
