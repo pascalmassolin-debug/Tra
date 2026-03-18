@@ -255,6 +255,24 @@ body.light .login-box{background:#fff}
 /* ── PREDICTED BALANCE ───────────────────────────────────── */
 .pred-bar{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin:6px 0}
 .pred-fill{height:100%;border-radius:3px;transition:width .6s}
+/* ── CALENDAR ────────────────────────────────────────────── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{padding:6px 4px;border-radius:5px;text-align:center;font-size:11px;cursor:default}
+.cal-day.has-in{background:rgba(16,217,126,.15);color:var(--green);font-weight:700}
+.cal-day.has-out{background:rgba(255,107,53,.15);color:var(--orange);font-weight:700}
+.cal-day.has-both{background:rgba(77,159,255,.15);color:var(--blue);font-weight:700}
+.cal-day.today{border:1px solid var(--blue)}
+.cal-day.empty{opacity:0}
+/* ── SIMULATION ──────────────────────────────────────────── */
+.sim-slider{width:100%;accent-color:var(--blue);cursor:pointer;height:4px}
+.sim-result{padding:12px;background:var(--bg2);border-radius:var(--rs);margin-top:8px;font-size:13px}
+/* ── PATRIMOINE TRACKER ───────────────────────────────────── */
+.pat-input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+/* ── PERIOD PICKER ───────────────────────────────────────── */
+#period-picker{position:fixed;top:56px;right:16px;z-index:600;background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r);padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;min-width:290px}
+#period-picker.open{display:block}
+.month-chip{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .15s;margin:3px}
+.month-chip.selected{background:rgba(77,159,255,.2);border-color:var(--blue);color:var(--blue)}
 
 
 /* ── LOGIN SCREEN ────────────────────────────────────────── */
@@ -310,6 +328,23 @@ body.light .login-box{background:#fff}
       💡 <strong>Première utilisation ?</strong> Choisis un code d'accès et retiens-le bien — c'est lui qui lie tes données sur tous tes appareils. Il n'y a pas de récupération par email.
     </div>
   </div>
+</div>
+
+<!-- ── PERIOD PICKER ── -->
+<div id="period-picker">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-weight:700;font-size:13px">📅 Sélectionner les mois</div>
+    <button class="btn btn-ghost btn-sm" onclick="closePeriodPicker()">✕</button>
+  </div>
+  <div id="period-chips" style="margin-bottom:12px"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="selectAllMonths()">Tout</button>
+    <button class="btn btn-ghost btn-sm" onclick="selectNoMonths()">Aucun</button>
+    <button class="btn btn-ghost btn-sm" onclick="selectLastN(1)">Ce mois</button>
+    <button class="btn btn-ghost btn-sm" onclick="selectLastN(3)">3 mois</button>
+    <button class="btn btn-ghost btn-sm" onclick="selectLastN(6)">6 mois</button>
+  </div>
+  <div style="margin-top:10px;padding:8px 10px;background:var(--bg2);border-radius:var(--rs);font-size:12px;color:var(--text3)" id="period-summary">Toute la période sélectionnée</div>
 </div>
 
 <!-- ── SYNC BAR ── -->
@@ -382,14 +417,16 @@ body.light .login-box{background:#fff}
   <button class="tab" onclick="showTab('projection')">🚀 Projection</button>
   <button class="tab" onclick="showTab('comparaison')">📅 Comparaison</button>
   <button class="tab" onclick="showTab('analyses')">🔬 Analyses</button>
+  <button class="tab" onclick="showTab('planning')">📆 Planning</button>
+  <button class="tab" onclick="showTab('simulation')">🎮 Simulation</button>
+  <button class="tab" onclick="showTab('patrimoine')">🏛️ Patrimoine</button>
   <button class="tab" onclick="showTab('transactions')">💳 Transactions</button>
   <button class="tab" onclick="showTab('import')">⬆️ Import</button>
   <button class="tab" onclick="showTab('comptes')">⚙️ Comptes</button>
   <div class="nav-end">
     <span class="tx-badge" id="nav-count">0 tx</span>
-    <select class="month-sel" id="filter-month" onchange="render()">
-      <option value="all">Toute période</option>
-    </select>
+    <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
+    <input type="hidden" id="filter-month" value="all">
     <button class="btn btn-ghost btn-sm" onclick="openGlobalSearch()" title="Recherche globale (Ctrl+K)" style="padding:5px 10px;font-size:13px">🔍</button>
     <button class="btn btn-ghost btn-sm" id="theme-btn" onclick="toggleTheme()" title="Changer le thème" style="padding:5px 10px;font-size:13px">☀️</button>
     <button class="btn btn-ghost btn-sm" onclick="logout()" title="Se déconnecter" style="padding:5px 10px;font-size:11px">⎋</button>
@@ -423,7 +460,14 @@ body.light .login-box{background:#fff}
 
 <!-- ════════════════════ TRA ════════════════════ -->
 <div id="page-tra" class="page">
-  <div class="page-hd"><h1>TRA Analytique</h1><p>Tableau de Résultats Analytique Personnel</p></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+    <div class="page-hd" style="margin:0"><h1>TRA Analytique</h1><p>Tableau de Résultats Analytique Personnel</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="exportTRAPDF()">📄 PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportTRAExcel()">📊 Excel</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportAnnualReport()">📅 Rapport annuel</button>
+    </div>
+  </div>
   <div id="tra-content"></div>
 </div>
 
@@ -832,6 +876,106 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
   </div>
 </div>
 
+<!-- ════════════ B. PLANNING / CALENDRIER ════════════ -->
+<div id="page-planning" class="page">
+  <div class="page-hd"><h1>Planning des Flux</h1><p>Calendrier mensuel des recettes et dépenses attendues</p></div>
+  <div class="two-col" style="margin-bottom:16px">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="card-title" style="margin:0">📅 <span id="cal-month-label">Mars 2026</span></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="calPrev()">←</button>
+          <button class="btn btn-ghost btn-sm" onclick="calNext()">→</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Lun</div>
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Mar</div>
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Mer</div>
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Jeu</div>
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Ven</div>
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Sam</div>
+        <div style="text-align:center;font-size:10px;color:var(--text3);font-weight:700;padding:4px">Dim</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div style="display:flex;gap:12px;margin-top:10px;font-size:11px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(16,217,126,.3)"></div>Recette</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(255,107,53,.3)"></div>Dépense</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(77,159,255,.3)"></div>Les deux</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 Flux du mois attendus</div>
+      <div id="cal-flux-list"></div>
+      <div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:var(--rs)">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+          <span style="color:var(--text2)">Total recettes attendues</span>
+          <span style="color:var(--green);font-weight:700" id="cal-total-in">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+          <span style="color:var(--text2)">Total charges fixes attendues</span>
+          <span style="color:var(--red);font-weight:700" id="cal-total-out">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;border-top:1px solid var(--border);padding-top:8px;margin-top:6px">
+          <span>Solde prévisionnel</span>
+          <span id="cal-total-net" style="color:var(--green)">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- M: Récurrences détectées -->
+  <div class="card">
+    <div class="card-title">🔄 Transactions récurrentes détectées</div>
+    <div id="recurrences-list"></div>
+  </div>
+</div>
+
+<!-- ════════════ H+I. SIMULATION ════════════ -->
+<div id="page-simulation" class="page">
+  <div class="page-hd"><h1>Simulation & Objectifs</h1><p>Et si… + objectifs par poste avec date d'atteinte</p></div>
+
+  <!-- I. Simulation "et si" -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">🎮 Simulation "Et si je changeais ça ?"</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Déplace les curseurs pour voir l'impact sur ta projection et la date d'atteinte du million.</div>
+    <div id="sim-sliders"></div>
+    <div class="sim-result" id="sim-result"></div>
+    <canvas id="chart-sim" height="180" style="margin-top:16px"></canvas>
+  </div>
+
+  <!-- H. Objectifs par poste -->
+  <div class="card">
+    <div class="card-title">🎯 Objectifs par poste — date d'atteinte</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Pour chaque objectif, estimation de quand tu l'atteindras au rythme actuel.</div>
+    <div id="goals-tracker"></div>
+  </div>
+</div>
+
+<!-- ════════════ J. PATRIMOINE TRACKER ════════════ -->
+<div id="page-patrimoine" class="page">
+  <div class="page-hd"><h1>Tracker Patrimoine</h1><p>Saisis tes actifs chaque mois — suis la courbe réelle vs projection</p></div>
+
+  <!-- Saisie mensuelle -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📝 Saisie du mois courant</div>
+    <div class="pat-input-row" id="pat-inputs"></div>
+    <button class="btn btn-blue" onclick="savePatrimoine()" style="width:100%;margin-top:4px">💾 Enregistrer ce mois</button>
+    <div id="pat-save-msg" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Graphique réel vs projection -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📈 Courbe réelle vs Projection</div>
+    <canvas id="chart-pat" height="220"></canvas>
+  </div>
+
+  <!-- Historique -->
+  <div class="card">
+    <div class="card-title">📋 Historique des saisies</div>
+    <div style="overflow-x:auto"><table class="tbl" id="pat-history-table"></table></div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <!-- ── GLOBAL SEARCH OVERLAY ── -->
@@ -1020,7 +1164,7 @@ async function doLogin(){
   localStorage.setItem("tra_pm_uid", USER_ID);
   SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById("login-screen").style.display="none";
-  loadTheme();
+  loadTheme(); loadPatrimoine();
   loadAnnualGoals(); loadRules(); loadCustomClasses(); loadCustomAccounts();
   syncShow("syncing","Chargement des données…");
   await loadFromSupabase();
@@ -1285,15 +1429,23 @@ function monthlyData(){
 }
 
 function filteredTxs(){
-  const f=document.getElementById("filter-month").value;
-  return f==="all"?TXS:TXS.filter(t=>t.date?.substring(0,7)===f);
+  if(SELECTED_MONTHS.length===0) return TXS;
+  return TXS.filter(t=>t.date && SELECTED_MONTHS.includes(t.date.substring(0,7)));
+}
+
+function nbMonthsSelected(){
+  if(SELECTED_MONTHS.length===0){
+    const all=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))];
+    return Math.max(1,all.length);
+  }
+  return Math.max(1,SELECTED_MONTHS.length);
 }
 
 function updateMonthFilter(){
-  const sel=document.getElementById("filter-month");
-  const cur=sel.value;
-  const months=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort().reverse();
-  sel.innerHTML='<option value="all">Toute période</option>'+months.map(m=>`<option value="${m}"${m===cur?" selected":""}>${m}</option>`).join("");
+  // Rebuild chips if picker is open
+  const picker=document.getElementById("period-picker");
+  if(picker?.classList.contains("open")) buildPeriodChips();
+  updatePeriodBtn();
 }
 
 // ─── RENDER MAIN ──────────────────────────────────────────────────────────────
@@ -1357,9 +1509,13 @@ function renderDash(txs,A){
   const dashAno=document.getElementById("dash-anomalies");
   if(dashPred) renderPredicted(A);
   if(dashAno) renderAnomalies(A);
-  // Mirror predicted to dash
-  if(dashPred){const src=document.getElementById("predicted-content");if(src&&dashPred) dashPred.innerHTML=src?.innerHTML||"";}
-  if(dashAno){const src=document.getElementById("anomalies-list");if(src&&dashAno) dashAno.innerHTML=src?.innerHTML||"";}
+  // Mirror to dashboard cards
+  setTimeout(()=>{
+    const src1=document.getElementById("predicted-content");
+    const src2=document.getElementById("anomalies-list");
+    if(dashPred&&src1) dashPred.innerHTML=src1.innerHTML;
+    if(dashAno&&src2) dashAno.innerHTML=src2.innerHTML;
+  },50);
 }
 
 // ─── TRA ──────────────────────────────────────────────────────────────────────
@@ -1433,9 +1589,12 @@ function renderTRA(txs,A){
 function renderBVR(){
   const txs=filteredTxs(),A=analytics(txs);
   let totP_obj=0,totP_real=0,totD_obj=0,totD_real=0;
+  const nm=nbMonthsSelected();
+  const periodLabel=nm===1?"mensuel":nm+" mois";
   let html=`<thead><tr>
     <th style="min-width:175px">Poste</th>
-    <th class="r">Objectif</th><th class="r">Réalisé</th>
+    <th class="r">Objectif <span style="font-weight:400;color:var(--text3);font-size:10px">(${periodLabel})</span></th>
+    <th class="r">Réalisé</th>
     <th class="r">Écart</th><th class="r">Écart %</th><th style="text-align:center">Statut</th>
   </tr></thead><tbody>`;
 
@@ -1449,7 +1608,7 @@ function renderBVR(){
     html+=`<tr class="bvr-section"><td colspan="6" style="color:${cc(cls)}">${ci(cls)} ${cl(cls)}</td></tr>`;
     let co=0,cr=0;
     for(const acc of accs){
-      const real=A.totals[acc.code]||0,obj=BUDGETS[acc.code]||0;
+      const real=A.totals[acc.code]||0,obj=(BUDGETS[acc.code]||0)*nbMonthsSelected();
       const ecart=isProduit(cls)?(real-obj):(obj-real);
       const ecPct=obj>0?ecart/obj:0;
       const ec=ecart>0?"eco":ecart<0?"dep":"neu";
@@ -1812,8 +1971,11 @@ function showTab(id){
   document.getElementById("page-"+id).classList.add("active");
   document.querySelectorAll(".tab").forEach(b=>{if(b.getAttribute("onclick")===`showTab('${id}')`)b.classList.add("active")});
   render();
-  if(id==="analyses") renderAnalyses();
+  if(id==="analyses")    renderAnalyses();
   if(id==="comparaison") renderComparaison();
+  if(id==="planning")    renderPlanning();
+  if(id==="simulation")  renderSimulationPage();
+  if(id==="patrimoine")  renderPatrimoinePage();
 }
 
 // ─── OBJECTIFS ANNUELS ───────────────────────────────────────────────────────
@@ -2183,6 +2345,100 @@ function updateClassSelectors(){
 // V9 FEATURES
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ─── MULTI-MONTH PERIOD PICKER ──────────────────────────────────────────────
+let SELECTED_MONTHS = []; // [] = all, otherwise array of "YYYY-MM" strings
+
+function togglePeriodPicker(){
+  const picker=document.getElementById("period-picker");
+  if(picker.classList.contains("open")){ closePeriodPicker(); return; }
+  buildPeriodChips();
+  picker.classList.add("open");
+}
+function closePeriodPicker(){ document.getElementById("period-picker")?.classList.remove("open"); }
+// Close on outside click
+document.addEventListener("click",e=>{
+  const picker=document.getElementById("period-picker");
+  const btn=document.getElementById("period-btn");
+  if(picker&&!picker.contains(e.target)&&e.target!==btn&&!btn?.contains(e.target)){
+    picker.classList.remove("open");
+  }
+});
+
+function buildPeriodChips(){
+  const allMonths=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort().reverse();
+  const chips=document.getElementById("period-chips"); if(!chips) return;
+  chips.innerHTML=allMonths.map(m=>{
+    const [y,mo]=m.split("-");
+    const lbl=`${["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"][parseInt(mo)-1]} ${y}`;
+    const sel=SELECTED_MONTHS.length===0||SELECTED_MONTHS.includes(m);
+    return`<span class="month-chip${sel?" selected":""}" onclick="toggleMonth('${m}')">${lbl}</span>`;
+  }).join("");
+  updatePeriodSummary();
+}
+
+function toggleMonth(m){
+  // If currently "all", switch to explicit selection of all except this one
+  if(SELECTED_MONTHS.length===0){
+    const all=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort();
+    SELECTED_MONTHS=all.filter(x=>x!==m);
+  } else {
+    const idx=SELECTED_MONTHS.indexOf(m);
+    if(idx>=0) SELECTED_MONTHS.splice(idx,1);
+    else SELECTED_MONTHS.push(m);
+    // If all selected, revert to "all" for cleanliness
+    const all=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))];
+    if(SELECTED_MONTHS.length===all.length) SELECTED_MONTHS=[];
+  }
+  buildPeriodChips();
+  updatePeriodBtn();
+  render();
+}
+
+function selectAllMonths(){ SELECTED_MONTHS=[]; buildPeriodChips(); updatePeriodBtn(); render(); }
+function selectNoMonths(){
+  // Select only current month
+  const cur=new Date().toISOString().slice(0,7);
+  SELECTED_MONTHS=[cur]; buildPeriodChips(); updatePeriodBtn(); render();
+}
+function selectLastN(n){
+  const today=new Date();
+  SELECTED_MONTHS=[];
+  for(let i=0;i<n;i++){
+    const dt=new Date(today.getFullYear(),today.getMonth()-i,1);
+    SELECTED_MONTHS.push(dt.toISOString().slice(0,7));
+  }
+  buildPeriodChips(); updatePeriodBtn(); render();
+}
+
+function updatePeriodBtn(){
+  const btn=document.getElementById("period-btn"); if(!btn) return;
+  if(SELECTED_MONTHS.length===0){ btn.textContent="📅 Toute période ▾"; return; }
+  if(SELECTED_MONTHS.length===1){
+    const [y,mo]=SELECTED_MONTHS[0].split("-");
+    const lbl=`${["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"][parseInt(mo)-1]} ${y}`;
+    btn.textContent=`📅 ${lbl} ▾`;
+  } else {
+    btn.textContent=`📅 ${SELECTED_MONTHS.length} mois ▾`;
+  }
+  updatePeriodSummary();
+}
+
+function updatePeriodSummary(){
+  const el=document.getElementById("period-summary"); if(!el) return;
+  if(SELECTED_MONTHS.length===0){ el.textContent="Toute la période sélectionnée"; return; }
+  const n=SELECTED_MONTHS.length;
+  el.textContent=`${n} mois sélectionné${n>1?"s":""} — objectifs et budgets ×${n}`;
+}
+
+function updateMonthFilter(){
+  // Legacy: keep hidden input in sync for any code that reads it
+  const hidden=document.getElementById("filter-month");
+  if(hidden) hidden.value=SELECTED_MONTHS.length===1?SELECTED_MONTHS[0]:"all";
+}
+
+// Override filteredTxs to use SELECTED_MONTHS
+// (redefine here to override the original below)
+
 // ─── Q: THEME TOGGLE ─────────────────────────────────────────────────────────
 function toggleTheme(){
   const light = document.body.classList.toggle("light");
@@ -2349,15 +2605,25 @@ document.addEventListener("keydown",e=>{
 // ─── A+C: PREDICTED BALANCE ──────────────────────────────────────────────────
 // Expected monthly recurring items (Pascal's profile)
 const EXPECTED_MONTHLY = [
+  // ── RECETTES ──────────────────────────────────────────────────────
   {label:"Salaire CHI Créteil",   amount:750,    day:25, code:"P100", cls:"P"},
   {label:"Salaire CHI Villeneuve",amount:459.90, day:25, code:"P100", cls:"P"},
   {label:"France Travail",        amount:769.42, day:2,  code:"P110", cls:"P"},
   {label:"CAF Val-de-Marne",      amount:1384.25,day:5,  code:"P120", cls:"P"},
   {label:"Loyers Century 21",     amount:1454,   day:22, code:"P200", cls:"P"},
   {label:"Avance crédit impôt",   amount:307,    day:15, code:"P130", cls:"P"},
-  {label:"Prêt BNP",             amount:-1242.27,day:5,  code:"CF100",cls:"CF"},
+  // ── CHARGES FIXES ─────────────────────────────────────────────────
+  {label:"Prêt BNP (échéance)",  amount:-1242.27,day:5,  code:"CF100",cls:"CF"},
   {label:"Cardif IARD",          amount:-219.68, day:5,  code:"CF110",cls:"CF"},
   {label:"PAS DGFIP",            amount:-133,    day:15, code:"CF240",cls:"CF"},
+  {label:"Taxe foncière",        amount:-182,    day:15, code:"CF120",cls:"CF"},
+  {label:"Frais tenue BNP",      amount:-2.60,   day:3,  code:"CF270",cls:"CF"},
+  {label:"Frais tenue LBP",      amount:-26.40,  day:5,  code:"CF270",cls:"CF"},
+  {label:"EDF",                  amount:-59,     day:9,  code:"CF200",cls:"CF"},
+  {label:"Gold's Gym",           amount:-43.96,  day:11, code:"CF220",cls:"CF"},
+  {label:"Bouygues / SFR",       amount:-44,     day:24, code:"CF210",cls:"CF"},
+  {label:"Abonnements numériques",amount:-47,    day:23, code:"CF230",cls:"CF"},
+  {label:"Charges copropriété",  amount:-153,    day:29, code:"CF130",cls:"CF"},
 ];
 function renderPredicted(A){
   const el=document.getElementById("predicted-content"); if(!el) return;
@@ -2379,12 +2645,34 @@ function renderPredicted(A){
   const isNeg=soldeReel<0;
   const isCovered=isNeg&&soldePrev>0;
 
+  // Predicted savings rate
+  const txsThisMonth_I = txThisMonth.filter(t=>isInvest(t.cls));
+  const currentInvest = txsThisMonth_I.reduce((s,t)=>s+Math.abs(t.amount),0);
+  const pendingInvest = pending.filter(e=>isInvest(e.cls)).reduce((s,e)=>s+Math.abs(e.amount),0);
+  const pendingProduits = pending.filter(e=>isProduit(e.cls)).reduce((s,e)=>s+e.amount,0);
+  const totalProduitsPrev = A.totalProduits + pendingProduits;
+  const totalInvestPrev = currentInvest + pendingInvest;
+  const tauxEpPrev = totalProduitsPrev > 0 ? totalInvestPrev / totalProduitsPrev : 0;
+  const tauxEpReel = A.tauxEp;
+
   el.innerHTML=`
-    <div style="display:flex;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <div><div style="font-size:11px;color:var(--text3);margin-bottom:3px">Solde actuel (${dayOfMonth} du mois)</div>
-        <div style="font-size:22px;font-weight:800;color:${soldeReel>=0?"var(--green)":"var(--red)"}">${fmt(soldeReel)}</div></div>
-      <div style="text-align:right"><div style="font-size:11px;color:var(--text3);margin-bottom:3px">Prévision fin de mois</div>
-        <div style="font-size:22px;font-weight:800;color:${soldePrev>=0?"var(--green)":"var(--red)"}">${fmt(soldePrev)}</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="text-align:center;padding:10px;background:var(--bg2);border-radius:var(--rs)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em">Solde actuel</div>
+        <div style="font-size:18px;font-weight:800;color:${soldeReel>=0?"var(--green)":"var(--red)"}">${fmt(soldeReel)}</div>
+        <div style="font-size:10px;color:var(--text3)">J${dayOfMonth}</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--bg2);border-radius:var(--rs)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em">Solde fin de mois</div>
+        <div style="font-size:18px;font-weight:800;color:${soldePrev>=0?"var(--green)":"var(--red)"}">${fmt(soldePrev)}</div>
+        <div style="font-size:10px;color:var(--text3)">Prévisionnel</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:${tauxEpPrev>=0.15?"rgba(16,217,126,.08)":"rgba(245,166,35,.08)"};border:1px solid ${tauxEpPrev>=0.15?"rgba(16,217,126,.2)":"rgba(245,166,35,.2)"};border-radius:var(--rs)">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em">Taux épargne</div>
+        <div style="font-size:14px;color:var(--text3)">${fmtPct(tauxEpReel)} <span style="font-size:10px">actuel</span></div>
+        <div style="font-size:18px;font-weight:800;color:${tauxEpPrev>=0.15?"var(--green)":"var(--amber)"}">${fmtPct(tauxEpPrev)}</div>
+        <div style="font-size:10px;color:var(--text3)">Prévisionnel</div>
+      </div>
     </div>
     ${isCovered?`<div style="padding:8px 12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);border-radius:var(--rs);font-size:12px;color:var(--amber);margin-bottom:10px">
       ⚠️ Solde négatif temporaire — couvert par <strong>${fmt(pendingIn)}</strong> de recettes attendues ce mois
@@ -2472,17 +2760,20 @@ function renderTrends(){
 function renderAnomalies(A){
   const el=document.getElementById("anomalies-list"); if(!el) return;
   const today=new Date();
-  const curM=today.toISOString().slice(0,7);
+  // Use the currently filtered transactions for current period
+  const curTxs=filteredTxs();
+  const curA=analytics(curTxs);
+  // Reference = 3 months before the current selection, always from full TXS
   const prevMs=[-1,-2,-3].map(d=>{
     const dt=new Date(today.getFullYear(),today.getMonth()+d,1);
     return dt.toISOString().slice(0,7);
   });
   const anomalies=[];
-  // Check each non-neutral account for unusual spending
   PLAN.filter(a=>!isNeutral(a.cls)&&isCharge(a.cls)).forEach(acc=>{
-    const curVal=A.totals[acc.code]||0; if(!curVal) return;
+    const curVal=curA.totals[acc.code]||0; if(!curVal) return;
     const prevVals=prevMs.map(m=>analytics(TXS.filter(t=>t.date?.startsWith(m))).totals[acc.code]||0);
-    const avg=prevVals.reduce((s,v)=>s+v,0)/prevVals.filter(v=>v>0).length||0;
+    const prevFiltered=prevVals.filter(v=>v>0);
+    const avg=prevFiltered.length?prevVals.reduce((s,v)=>s+v,0)/prevFiltered.length:0;
     if(avg>20&&curVal>avg*1.8){
       anomalies.push({acc,cur:curVal,avg,ratio:(curVal/avg)});
     }
@@ -2638,6 +2929,435 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 });
 
+// ═══════════════════════════════════════════════════════
+// PASSE 2 FEATURES
+// ═══════════════════════════════════════════════════════
+
+// ─── B: CALENDAR ─────────────────────────────────────────────────────────────
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function renderCalendar(){
+  const MONTHS_FR=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  document.getElementById("cal-month-label").textContent=`${MONTHS_FR[calMonth]} ${calYear}`;
+  const key=`${calYear}-${String(calMonth+1).padStart(2,"0")}`;
+  const firstDay=new Date(calYear,calMonth,1).getDay()||7; // Mon=1
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+
+  // Build day→flux map from EXPECTED_MONTHLY
+  const dayMap={};
+  EXPECTED_MONTHLY.forEach(e=>{
+    if(!dayMap[e.day]) dayMap[e.day]={in:0,out:0,items:[]};
+    if(e.amount>0) dayMap[e.day].in+=e.amount;
+    else dayMap[e.day].out+=Math.abs(e.amount);
+    dayMap[e.day].items.push(e);
+  });
+  // Also add real transactions for this month
+  TXS.filter(t=>t.date?.startsWith(key)).forEach(t=>{
+    const d=parseInt(t.date.split("-")[2]);
+    if(!dayMap[d]) dayMap[d]={in:0,out:0,items:[]};
+    if(t.amount>0) dayMap[d].in+=t.amount;
+    else dayMap[d].out+=Math.abs(t.amount);
+  });
+
+  const grid=document.getElementById("cal-grid"); if(!grid) return;
+  let html="";
+  for(let i=1;i<firstDay;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dm=dayMap[d];
+    const hasIn=dm&&dm.in>0, hasOut=dm&&dm.out>0;
+    const cls=hasIn&&hasOut?"has-both":hasIn?"has-in":hasOut?"has-out":"";
+    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    html+=`<div class="cal-day ${cls}${isToday?" today":""}" title="${dm?dm.items.map(i=>i.label).join(", "):""}">${d}</div>`;
+  }
+  grid.innerHTML=html;
+
+  // Flux list
+  const flux=document.getElementById("cal-flux-list"); if(!flux) return;
+  const sorted=Object.entries(dayMap).sort((a,b)=>parseInt(a[0])-parseInt(b[0]));
+  let totalIn=0,totalOut=0;
+  flux.innerHTML=sorted.map(([day,dm])=>{
+    totalIn+=dm.in; totalOut+=dm.out;
+    return dm.items.map(item=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <div><span style="background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:10px;font-family:monospace;margin-right:7px">J${day}</span>
+        <span style="font-size:12px">${esc(item.label)}</span></div>
+      <span style="font-weight:700;font-size:12px;color:${item.amount>0?"var(--green)":"var(--red)"}">${fmt(item.amount)}</span>
+    </div>`).join("");
+  }).join("");
+
+  const net=totalIn-totalOut;
+  const el_in=document.getElementById("cal-total-in");
+  const el_out=document.getElementById("cal-total-out");
+  const el_net=document.getElementById("cal-total-net");
+  if(el_in) el_in.textContent=fmt(totalIn);
+  if(el_out) el_out.textContent=fmt(-totalOut);
+  if(el_net){ el_net.textContent=fmt(net); el_net.style.color=net>=0?"var(--green)":"var(--red)"; }
+
+  // M: Detect recurrences
+  renderRecurrences();
+}
+
+// ─── M: RECURRENCE DETECTION ─────────────────────────────────────────────────
+function renderRecurrences(){
+  const el=document.getElementById("recurrences-list"); if(!el) return;
+  const months=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort();
+  if(months.length<2){ el.innerHTML='<div style="color:var(--text3);font-size:13px">Pas assez de données — importe au moins 2 mois de relevés.</div>'; return; }
+  // Group by label prefix (first 20 chars), check if appears in 2+ months
+  const groups={};
+  TXS.forEach(t=>{
+    const key=t.label.substring(0,25).toUpperCase().trim();
+    if(!groups[key]) groups[key]={label:t.label,amounts:[],months:new Set(),code:t.code,cls:t.cls};
+    groups[key].months.add(t.date?.substring(0,7));
+    groups[key].amounts.push(Math.abs(t.amount));
+  });
+  const recurrent=Object.values(groups)
+    .filter(g=>g.months.size>=2)
+    .map(g=>({...g,avg:g.amounts.reduce((s,v)=>s+v,0)/g.amounts.length,count:g.months.size}))
+    .sort((a,b)=>b.avg-a.avg)
+    .slice(0,15);
+  el.innerHTML=`<div style="font-size:12px;color:var(--text3);margin-bottom:10px">${recurrent.length} transactions récurrentes détectées sur ${months.length} mois</div>`+
+  recurrent.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+    <div><span class="badge b-${g.cls||'q'}" style="margin-right:7px">${g.cls||"?"}</span>
+      <span style="font-size:12px">${esc(g.label.substring(0,40))}</span></div>
+    <div style="text-align:right">
+      <div style="font-weight:700;font-size:12px">${fmt(g.avg)}/mois</div>
+      <div style="font-size:10px;color:var(--text3)">${g.count} mois sur ${months.length}</div>
+    </div>
+  </div>`).join("");
+}
+
+// ─── I: SIMULATION ───────────────────────────────────────────────────────────
+let chartSim=null;
+const SIM_PARAMS=[
+  {id:"sim-ep-ide",  label:"Épargne mensuelle IDE (€)",  min:0,  max:1000, step:50,  default:300,  key:"epIDE"},
+  {id:"sim-ep-idel", label:"Épargne mensuelle IDEL (€)", min:0,  max:8000, step:200, default:4000, key:"epIDEL"},
+  {id:"sim-rend",    label:"Rendement portefeuille (%)", min:1,  max:12,   step:0.5, default:7,    key:"rend"},
+  {id:"sim-cv",      label:"Réduction charges variables (€/mois)", min:0, max:500, step:25, default:0, key:"cvReduc"},
+  {id:"sim-immo",    label:"Appréciation immobilière (%/an)", min:0, max:5, step:0.5, default:2, key:"immoG"},
+];
+
+function renderSimulation(){
+  const sliders=document.getElementById("sim-sliders"); if(!sliders) return;
+  sliders.innerHTML=SIM_PARAMS.map(p=>`
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <span style="color:var(--text2)">${p.label}</span>
+        <span style="font-weight:700;color:var(--blue)" id="${p.id}-val">${p.default}</span>
+      </div>
+      <input type="range" class="sim-slider" id="${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.default}"
+        oninput="document.getElementById('${p.id}-val').textContent=this.value;updateSimulation()">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)"><span>${p.min}</span><span>${p.max}</span></div>
+    </div>`).join("");
+  updateSimulation();
+}
+
+function updateSimulation(){
+  const get=id=>parseFloat(document.getElementById(id)?.value||0);
+  const epIDE=get("sim-ep-ide"), epIDEL=get("sim-ep-idel");
+  const rend=get("sim-rend")/100, immoG=get("sim-immo")/100;
+  const cvReduc=get("sim-cv");
+  const P0=101748, immoV=310000, dette=213567, pretM=813;
+  const NOW=new Date().getFullYear();
+
+  // Baseline (no changes)
+  const baseRows=projectRows(300,4000,.07,.02,P0,immoV,dette,pretM,NOW,0);
+  // Simulation
+  const simRows=projectRows(epIDE,epIDEL,rend,immoG,P0,immoV,dette,pretM,NOW,cvReduc);
+
+  const baseMil=baseRows.find(r=>r.total>=1e6);
+  const simMil=simRows.find(r=>r.total>=1e6);
+  const diff=simMil&&baseMil?(baseMil.year-simMil.year):null;
+
+  const res=document.getElementById("sim-result"); if(!res) return;
+  res.innerHTML=`<div style="display:flex;gap:20px;flex-wrap:wrap">
+    <div><div style="font-size:11px;color:var(--text3)">Référence (params actuels)</div>
+      <div style="font-weight:700;color:var(--text2)">${baseMil?`${baseMil.year} — âge ${baseMil.age} ans`:"Non atteint"}</div></div>
+    <div><div style="font-size:11px;color:var(--text3)">Avec ces paramètres</div>
+      <div style="font-weight:700;color:${simMil&&baseMil&&diff>0?"var(--green)":"var(--amber)"}">${simMil?`${simMil.year} — âge ${simMil.age} ans`:"Non atteint"}</div></div>
+    ${diff!==null?`<div><div style="font-size:11px;color:var(--text3)">Gain</div>
+      <div style="font-weight:800;font-size:16px;color:${diff>=0?"var(--green)":"var(--red)"}">${diff>=0?"+":""} ${diff} ans</div></div>`:""}
+  </div>`;
+
+  // Chart
+  if(chartSim) chartSim.destroy();
+  const ctx=document.getElementById("chart-sim")?.getContext("2d"); if(!ctx) return;
+  const labels=baseRows.map(r=>String(r.year));
+  chartSim=new Chart(ctx,{type:"line",
+    data:{labels,datasets:[
+      {label:"Référence",data:baseRows.map(r=>r.total),borderColor:"rgba(148,163,184,.5)",borderDash:[4,3],tension:.4,borderWidth:1.5,pointRadius:0},
+      {label:"Simulation",data:simRows.map(r=>r.total),borderColor:"#4d9fff",backgroundColor:"rgba(77,159,255,.06)",fill:true,tension:.4,borderWidth:2.5,pointRadius:0},
+      {label:"Objectif 1M€",data:baseRows.map(()=>1e6),borderColor:"rgba(16,217,126,.3)",borderDash:[6,4],borderWidth:1,pointRadius:0},
+    ]},
+    options:{plugins:{legend:{position:"top",labels:{color:"#8fa3c4",font:{size:11},boxWidth:12,padding:10}}},
+      scales:{x:{ticks:{color:"#4d6690",font:{size:10},maxTicksLimit:11},grid:{color:"rgba(26,45,80,.4)"}},
+        y:{ticks:{color:"#4d6690",font:{size:10},callback:v=>v>=1e6?`${(v/1e6).toFixed(1)}M`:`${(v/1000).toFixed(0)}k`},grid:{color:"rgba(26,45,80,.4)"}}},
+      animation:{duration:300}}});
+}
+
+function projectRows(epIDE,epIDEL,rend,immoG,P0,immoV,dette,pretM,NOW,cvReduc){
+  let finPat=P0-immoV+dette, immoVal=immoV, detteR=dette;
+  const rows=[];
+  for(let y=0;y<=20;y++){
+    const year=NOW+y, age=35+y, isIDEL=year>=2028;
+    const ep=isIDEL?epIDEL:epIDE;
+    const extraEp=cvReduc*12; // savings from reduced charges
+    finPat=finPat*(1+rend)+(ep+extraEp)*12;
+    immoVal*=(1+immoG); detteR=Math.max(0,detteR-pretM*12);
+    rows.push({year,age,total:finPat+immoVal-detteR});
+  }
+  return rows;
+}
+
+// ─── H: GOALS TRACKER ────────────────────────────────────────────────────────
+const GOAL_ITEMS=[
+  {key:"epargne_total",label:"💎 Patrimoine financier 500K€",target:500000,type:"patrimoine"},
+  {key:"epargne_pea",  label:"📈 PEA plein (150K€)",         target:150000,type:"pea"},
+  {key:"ep_lep",       label:"🏦 LEP plein (10K€)",           target:10000, type:"lep"},
+  {key:"million",      label:"🎯 1 Million € net",             target:1000000,type:"patrimoine"},
+  {key:"solde_positif",label:"✅ Taux épargne 20%/mois",       target:0.20, type:"rate"},
+];
+function renderGoalsTracker(){
+  const el=document.getElementById("goals-tracker"); if(!el) return;
+  const A=analytics(filteredTxs());
+  const monthlyEp=A.totalInvest||300;
+  el.innerHTML=GOAL_ITEMS.map(g=>{
+    let current=0,pct=0,eta="";
+    if(g.type==="patrimoine"||g.type==="pea"||g.type==="lep"){
+      current=g.type==="patrimoine"?101748:g.type==="pea"?425:2448;
+      pct=Math.min(100,(current/g.target*100));
+      const remaining=g.target-current;
+      const mths=monthlyEp>0?Math.ceil(remaining/monthlyEp):999;
+      const dt=new Date(); dt.setMonth(dt.getMonth()+mths);
+      eta=mths<999?`${dt.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})} (${mths} mois)`:"Au-delà de 20 ans";
+    } else if(g.type==="rate"){
+      current=A.tauxEp; pct=Math.min(100,(current/g.target*100));
+      eta=current>=g.target?"✅ Objectif atteint !":"Augmente ton épargne mensuelle";
+    }
+    return`<div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+        <span style="font-weight:500">${g.label}</span>
+        <span style="font-weight:700;color:var(--blue)">${pct.toFixed(0)}%</span>
+      </div>
+      <div class="prog-bg" style="height:8px;margin-bottom:5px"><div class="prog-fill" style="width:${pct.toFixed(0)}%;background:${pct>=100?"var(--green)":"var(--blue)"}"></div></div>
+      <div style="font-size:11px;color:var(--text3)">📍 Atteinte estimée : ${eta}</div>
+    </div>`;
+  }).join("");
+}
+
+// ─── J: PATRIMOINE TRACKER ───────────────────────────────────────────────────
+let PATRIMOINE_HISTORY=[], chartPat=null;
+const PAT_FIELDS=[
+  {key:"lep",label:"LEP / Livret A (€)"},{key:"pea",label:"PEA (€)"},
+  {key:"av",label:"Assurance-vie (€)"},{key:"crypto",label:"Crypto (€)"},
+  {key:"immo_net",label:"Immobilier net (€)"},{key:"autres",label:"Autres actifs (€)"},
+];
+function loadPatrimoine(){ try{PATRIMOINE_HISTORY=JSON.parse(localStorage.getItem("tra_pat_hist")||"[]")}catch(e){PATRIMOINE_HISTORY=[]} }
+function savePatrimoine(){
+  const month=new Date().toISOString().slice(0,7);
+  const entry={month};
+  let total=0;
+  PAT_FIELDS.forEach(f=>{
+    const v=parseFloat(document.getElementById("pat-"+f.key)?.value||0)||0;
+    entry[f.key]=v; total+=v;
+  });
+  entry.total=total;
+  PATRIMOINE_HISTORY=PATRIMOINE_HISTORY.filter(h=>h.month!==month);
+  PATRIMOINE_HISTORY.push(entry);
+  PATRIMOINE_HISTORY.sort((a,b)=>a.month.localeCompare(b.month));
+  localStorage.setItem("tra_pat_hist",JSON.stringify(PATRIMOINE_HISTORY));
+  const msg=document.getElementById("pat-save-msg");
+  if(msg){msg.innerHTML=`<div class="alert a-ok">✅ Patrimoine de ${month} sauvegardé — Total : ${fmt(total)}</div>`;setTimeout(()=>msg.innerHTML="",3000);}
+  renderPatrimoine();
+}
+function renderPatrimoine(){
+  loadPatrimoine();
+  const inputs=document.getElementById("pat-inputs"); if(!inputs) return;
+  const curMonth=new Date().toISOString().slice(0,7);
+  const curEntry=PATRIMOINE_HISTORY.find(h=>h.month===curMonth)||{};
+  inputs.innerHTML=PAT_FIELDS.map(f=>`<div>
+    <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">${f.label}</label>
+    <input type="number" id="pat-${f.key}" value="${curEntry[f.key]||""}" placeholder="0">
+  </div>`).join("");
+
+  // Build projection for comparison
+  const P0=101748, NOW=new Date().getFullYear();
+  const projRows=[];
+  let finPat=P0-310000+213567, immoVal=310000, detteR=213567;
+  for(let y=0;y<=5;y++){
+    const year=NOW+y, ep=year>=2028?4000:300;
+    finPat=finPat*(1.07)+ep*12; immoVal*=1.02; detteR=Math.max(0,detteR-813*12);
+    projRows.push({month:`${year}-06`,total:Math.round(finPat+immoVal-detteR)});
+  }
+
+  if(chartPat) chartPat.destroy();
+  const ctx=document.getElementById("chart-pat")?.getContext("2d"); if(!ctx) return;
+  const allMonths=[...new Set([...PATRIMOINE_HISTORY.map(h=>h.month),...projRows.map(r=>r.month)])].sort();
+  chartPat=new Chart(ctx,{type:"line",
+    data:{labels:allMonths,datasets:[
+      {label:"Réel",data:allMonths.map(m=>{const h=PATRIMOINE_HISTORY.find(x=>x.month===m);return h?h.total:null}),
+        borderColor:"#10d97e",backgroundColor:"rgba(16,217,126,.08)",fill:true,tension:.4,borderWidth:2.5,
+        pointRadius:5,pointBackgroundColor:"#10d97e",spanGaps:false},
+      {label:"Projection",data:allMonths.map(m=>{const r=projRows.find(x=>x.month===m);return r?r.total:null}),
+        borderColor:"rgba(77,159,255,.5)",borderDash:[5,3],tension:.4,borderWidth:1.5,pointRadius:0,spanGaps:true},
+    ]},
+    options:{plugins:{legend:{position:"top",labels:{color:"#8fa3c4",font:{size:11},boxWidth:12}}},
+      scales:{x:{ticks:{color:"#4d6690",font:{size:10},maxTicksLimit:8},grid:{color:"rgba(26,45,80,.4)"}},
+        y:{ticks:{color:"#4d6690",font:{size:10},callback:v=>v>=1e6?`${(v/1e6).toFixed(1)}M`:`${(v/1000).toFixed(0)}k`},grid:{color:"rgba(26,45,80,.4)"}}},
+      animation:{duration:400}}});
+
+  // History table
+  const tbl=document.getElementById("pat-history-table"); if(!tbl) return;
+  tbl.innerHTML=`<thead><tr><th>Mois</th>${PAT_FIELDS.map(f=>`<th class="r">${f.label.split(" ")[0]}</th>`).join("")}<th class="r" style="color:var(--blue)">TOTAL</th></tr></thead>
+  <tbody>${[...PATRIMOINE_HISTORY].reverse().map(h=>`<tr>
+    <td style="font-weight:600;font-size:12px">${h.month}</td>
+    ${PAT_FIELDS.map(f=>`<td class="r" style="font-size:12px;color:var(--text2)">${h[f.key]?fmt(h[f.key]):"—"}</td>`).join("")}
+    <td class="r" style="font-weight:800;color:var(--blue)">${fmt(h.total)}</td>
+  </tr>`).join("")}</tbody>`;
+}
+
+// ─── N: PDF EXPORT ───────────────────────────────────────────────────────────
+function exportTRAPDF(){
+  const A=analytics(filteredTxs());
+  const nm=nbMonthsSelected();
+  const period=nm===1?"mensuel":`${nm} mois`;
+  let html=`<html><head><meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a2540;margin:30px}
+    h1{font-size:18px;font-weight:800;margin-bottom:4px}
+    .sub{font-size:11px;color:#666;margin-bottom:20px}
+    table{width:100%;border-collapse:collapse;margin-bottom:20px}
+    th{background:#1f4e79;color:white;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+    td{padding:7px 10px;border-bottom:1px solid #e0e0e0;font-size:12px}
+    .section{background:#f5f5f5;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#555}
+    .total{font-weight:800;background:#e8f0fe}
+    .result{font-weight:800;font-size:14px;background:#1f4e79;color:white}
+    .r{text-align:right}
+    .green{color:#0a7a47} .red{color:#c0392b}
+  </style></head><body>
+  <h1>TRA·PM — TABLEAU DE RÉSULTATS ANALYTIQUE</h1>
+  <div class="sub">Pascal MASSOLIN · Période : ${period} · Généré le ${new Date().toLocaleDateString("fr-FR")}</div>
+  <table><thead><tr><th>Code</th><th>Libellé</th><th class="r">Montant (€)</th><th class="r">% Produits</th></tr></thead><tbody>`;
+
+  const activeCls=[...new Set(PLAN.map(a=>a.cls))];
+  activeCls.forEach(cls=>{
+    const accs=PLAN.filter(a=>a.cls===cls);
+    const total=A.byClassAll[cls]||0;
+    html+=`<tr class="section"><td colspan="2">${ci(cls)} ${cl(cls)}</td><td class="r">${fmt(total)}</td><td></td></tr>`;
+    accs.forEach(acc=>{
+      const v=A.totals[acc.code]||0; if(!v) return;
+      const pct=A.totalProduits>0?v/A.totalProduits:0;
+      html+=`<tr><td style="color:#666;font-family:monospace;font-size:10px">${acc.code}</td><td>${acc.lib}</td><td class="r">${fmt(v)}</td><td class="r">${fmtPct(pct)}</td></tr>`;
+    });
+    html+=`<tr class="total"><td colspan="2">TOTAL ${cl(cls)}</td><td class="r">${fmt(total)}</td><td class="r">${A.totalProduits>0?fmtPct(total/A.totalProduits):"—"}</td></tr>`;
+  });
+  html+=`<tr class="result"><td colspan="2">SOLDE NET</td><td class="r ${A.solde>=0?"green":"red"}">${fmt(A.solde)}</td><td></td></tr>
+  <tr class="result"><td colspan="2">TAUX D'ÉPARGNE</td><td class="r">${fmtPct(A.tauxEp)}</td><td></td></tr>
+  </tbody></table></body></html>`;
+
+  const w=window.open("","_blank");
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),500);
+}
+
+// ─── O: EXCEL EXPORT ─────────────────────────────────────────────────────────
+function exportTRAExcel(){
+  const A=analytics(filteredTxs());
+  const nm=nbMonthsSelected();
+  let csv=`TRA·PM — TABLEAU DE RÉSULTATS ANALYTIQUE
+Pascal MASSOLIN — Période ${nm} mois — ${new Date().toLocaleDateString("fr-FR")}
+
+`;
+  csv+=`Code;Libellé;Classe;Montant (€);% Produits
+`;
+  const activeCls=[...new Set(PLAN.map(a=>a.cls))];
+  activeCls.forEach(cls=>{
+    csv+=`;;;;
+`;
+    csv+=`[${cl(cls)}];;${cl(cls)};${(A.byClassAll[cls]||0).toFixed(2)};
+`;
+    PLAN.filter(a=>a.cls===cls).forEach(acc=>{
+      const v=A.totals[acc.code]||0; if(!v) return;
+      const pct=A.totalProduits>0?(v/A.totalProduits*100).toFixed(1):"0";
+      csv+=`${acc.code};${acc.lib};${cls};${v.toFixed(2)};${pct}%
+`;
+    });
+    csv+=`TOTAL;${cl(cls)};;${(A.byClassAll[cls]||0).toFixed(2)};
+`;
+  });
+  csv+=`
+SOLDE NET;;;${A.solde.toFixed(2)};
+`;
+  csv+=`TAUX D'ÉPARGNE;;;${(A.tauxEp*100).toFixed(1)}%;
+`;
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`TRA_${new Date().toISOString().slice(0,7)}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+  syncShow("ok","Export Excel téléchargé ✓");
+}
+
+// ─── P: RAPPORT ANNUEL ───────────────────────────────────────────────────────
+function exportAnnualReport(){
+  const year=new Date().getFullYear();
+  const monthsData=MONTHS.map((m,i)=>{
+    const key=`${year}-${String(i+1).padStart(2,"0")}`;
+    const txs=TXS.filter(t=>t.date?.startsWith(key));
+    return{month:m,key,A:analytics(txs),count:txs.length};
+  }).filter(d=>d.count>0);
+  if(!monthsData.length){alert("Aucune donnée pour "+year);return;}
+  const totA=analytics(TXS.filter(t=>t.date?.startsWith(String(year))));
+
+  let html=`<html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a2540;margin:30px}
+    h1{font-size:20px;font-weight:800;margin-bottom:4px}
+    h2{font-size:14px;font-weight:700;margin:20px 0 8px;color:#1f4e79}
+    .sub{font-size:11px;color:#666;margin-bottom:24px}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px}
+    th{background:#1f4e79;color:white;padding:7px 8px;text-align:right;white-space:nowrap}
+    th:first-child{text-align:left}
+    td{padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:right}
+    td:first-child{text-align:left;font-weight:600}
+    .total{background:#e8f0fe;font-weight:800}
+    .green{color:#0a7a47} .red{color:#c0392b}
+  </style></head><body>
+  <h1>RAPPORT ANNUEL ${year}</h1>
+  <div class="sub">Pascal MASSOLIN · TRA·PM · Généré le ${new Date().toLocaleDateString("fr-FR")}</div>
+  <h2>Synthèse annuelle</h2>
+  <table><tr class="total"><td>PRODUITS TOTAUX</td><td class="green">${fmt(totA.totalProduits)}</td></tr>
+  <tr class="total"><td>CHARGES TOTALES</td><td class="red">${fmt(totA.totalCharges+totA.totalInvest)}</td></tr>
+  <tr class="total"><td>INVESTISSEMENTS</td><td>${fmt(totA.totalInvest)}</td></tr>
+  <tr class="total"><td>SOLDE NET</td><td class="${totA.solde>=0?"green":"red"}">${fmt(totA.solde)}</td></tr>
+  <tr class="total"><td>TAUX D'ÉPARGNE ANNUEL</td><td>${fmtPct(totA.tauxEp)}</td></tr></table>
+  <h2>Évolution mensuelle</h2>
+  <table><thead><tr><th>Mois</th>${monthsData.map(d=>`<th>${d.month}</th>`).join("")}<th>TOTAL</th></tr></thead><tbody>`;
+
+  [
+    {l:"Produits",fn:A=>A.totalProduits,c:"green"},
+    {l:"Ch. Variables",fn:A=>A.byClass.CV||0,c:""},
+    {l:"Ch. Fixes",fn:A=>A.byClass.CF||0,c:""},
+    {l:"Investissements",fn:A=>A.totalInvest,c:""},
+    {l:"Solde Net",fn:A=>A.solde,c:""},
+    {l:"Taux épargne",fn:A=>A.tauxEp,pct:true,c:""},
+  ].forEach(row=>{
+    html+=`<tr><td>${row.l}</td>${monthsData.map(d=>{
+      const v=row.fn(d.A);
+      return`<td class="${row.c||""}">${row.pct?fmtPct(v):fmt(v)}</td>`;
+    }).join("")}<td class="total ${row.c||""}">${row.pct?fmtPct(row.fn(totA)):fmt(row.fn(totA))}</td></tr>`;
+  });
+  html+=`</tbody></table></body></html>`;
+  const w=window.open("","_blank"); w.document.write(html); w.document.close();
+  setTimeout(()=>w.print(),500);
+}
+
+// ─── RENDER PASSE 2 TABS ──────────────────────────────────────────────────────
+function renderPlanning(){ renderCalendar(); }
+function renderSimulationPage(){ renderSimulation(); renderGoalsTracker(); }
+function renderPatrimoinePage(){ renderPatrimoine(); }
+
 load();
 function logout(){
   if(!confirm("Se déconnecter ? Tes données restent en sécurité sur Supabase.")) return;
@@ -2665,7 +3385,7 @@ function load(){
     USER_ID = savedUID;
     SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById("login-screen").style.display="none";
-    loadTheme();
+    loadTheme(); loadPatrimoine();
     loadAnnualGoals();
     loadRules();
     loadCustomClasses();
