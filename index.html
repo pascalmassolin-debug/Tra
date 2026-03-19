@@ -268,6 +268,44 @@ body.light .login-box{background:#fff}
 .sim-result{padding:12px;background:var(--bg2);border-radius:var(--rs);margin-top:8px;font-size:13px}
 /* ── PATRIMOINE TRACKER ───────────────────────────────────── */
 .pat-input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+/* ── NAV GROUPS ─────────────────────────────────────────── */
+.nav-group{position:relative;flex-shrink:0}
+.nav-group-btn{
+  background:none;border:none;cursor:pointer;
+  padding:8px 12px;border-radius:var(--rxs);
+  font-size:12px;font-weight:600;color:var(--text2);
+  white-space:nowrap;transition:all .15s;font-family:inherit;
+  display:flex;align-items:center;gap:5px;
+}
+.nav-group-btn:hover{background:var(--surface);color:var(--text)}
+.nav-group.open .nav-group-btn{background:rgba(77,159,255,.12);color:var(--blue)}
+.ng-arrow{font-size:10px;transition:transform .2s}
+.nav-group.open .ng-arrow{transform:rotate(180deg)}
+.nav-dropdown{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:300;
+  background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r);
+  padding:6px;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+.nav-group.open .nav-dropdown{display:block}
+.nav-dropdown button{
+  display:block;width:100%;text-align:left;
+  background:none;border:none;cursor:pointer;
+  padding:9px 12px;border-radius:var(--rxs);
+  font-size:13px;font-weight:500;color:var(--text2);
+  font-family:inherit;transition:all .15s;
+}
+.nav-dropdown button:hover{background:var(--surface);color:var(--text)}
+.nav-dropdown button.active-sub{background:rgba(77,159,255,.12);color:var(--blue);font-weight:700}
+/* ── PAGINATION ──────────────────────────────────────────── */
+.pag-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.pag-info{font-size:12px;color:var(--text3)}
+.pag-btns{display:flex;gap:6px;align-items:center}
+.pag-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rxs);padding:5px 11px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .15s}
+.pag-btn:hover{border-color:var(--border2);color:var(--text)}
+.pag-btn.active{background:rgba(77,159,255,.15);border-color:rgba(77,159,255,.4);color:var(--blue)}
+.pag-btn:disabled{opacity:.3;cursor:not-allowed}
+/* ── SPLIT MODAL ─────────────────────────────────────────── */
+.split-row{display:grid;grid-template-columns:1fr 130px 150px 36px;gap:8px;align-items:center;margin-bottom:8px}
 /* ── CHECKLIST ───────────────────────────────────────────── */
 .chk-item{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-radius:var(--rs);margin-bottom:6px;border:1px solid var(--border);background:var(--bg2);transition:all .2s;cursor:pointer}
 .chk-item:hover{border-color:var(--border2)}
@@ -450,21 +488,52 @@ body.light .login-box{background:#fff}
     <div class="logo-icon">₱</div>
     <div class="logo-text">TRA<em>·</em>PM</div>
   </a>
-  <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
-  <button class="tab" onclick="showTab('tra')">📋 TRA</button>
-  <button class="tab" onclick="showTab('budget')">🎯 Budget vs Réel</button>
-  <button class="tab" onclick="showTab('projection')">🚀 Projection</button>
-  <button class="tab" onclick="showTab('comparaison')">📅 Comparaison</button>
-  <button class="tab" onclick="showTab('analyses')">🔬 Analyses</button>
-  <button class="tab" onclick="showTab('planning')">📆 Planning</button>
-  <button class="tab" onclick="showTab('simulation')">🎮 Simulation</button>
-  <button class="tab" onclick="showTab('patrimoine')">🏛️ Patrimoine</button>
-  <button class="tab" onclick="showTab('emprunts')">🏦 Emprunts</button>
-  <button class="tab" onclick="showTab('rapprochement')">✅ Rapprochement</button>
-  <button class="tab" onclick="showTab('checklist')">📋 Checklist</button>
-  <button class="tab" onclick="showTab('transactions')">💳 Transactions</button>
-  <button class="tab" onclick="showTab('import')">⬆️ Import</button>
-  <button class="tab" onclick="showTab('comptes')">⚙️ Comptes</button>
+  <!-- Direct tabs -->
+  <button class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
+
+  <!-- Groupe Analyse -->
+  <div class="nav-group" id="ng-analyse">
+    <button class="nav-group-btn" onclick="toggleNavGroup('ng-analyse')">📈 Analyse <span class="ng-arrow">▾</span></button>
+    <div class="nav-dropdown">
+      <button onclick="showTab('tra');closeNavGroups()">📋 TRA Analytique</button>
+      <button onclick="showTab('budget');closeNavGroups()">🎯 Budget vs Réel</button>
+      <button onclick="showTab('comparaison');closeNavGroups()">📅 Comparaison</button>
+      <button onclick="showTab('analyses');closeNavGroups()">🔬 Analyses</button>
+    </div>
+  </div>
+
+  <!-- Groupe Pilotage -->
+  <div class="nav-group" id="ng-pilotage">
+    <button class="nav-group-btn" onclick="toggleNavGroup('ng-pilotage')">🎯 Pilotage <span class="ng-arrow">▾</span></button>
+    <div class="nav-dropdown">
+      <button onclick="showTab('projection');closeNavGroups()">🚀 Projection patrimoine</button>
+      <button onclick="showTab('simulation');closeNavGroups()">🎮 Simulation "Et si"</button>
+      <button onclick="showTab('planning');closeNavGroups()">📆 Planning des flux</button>
+      <button onclick="showTab('patrimoine');closeNavGroups()">🏛️ Tracker patrimoine</button>
+    </div>
+  </div>
+
+  <!-- Groupe Opérations -->
+  <div class="nav-group" id="ng-operations">
+    <button class="nav-group-btn" onclick="toggleNavGroup('ng-operations')">💳 Opérations <span class="ng-arrow">▾</span></button>
+    <div class="nav-dropdown">
+      <button onclick="showTab('transactions');closeNavGroups()">💳 Transactions</button>
+      <button onclick="showTab('import');closeNavGroups()">⬆️ Import CSV</button>
+      <button onclick="showTab('rapprochement');closeNavGroups()">✅ Rapprochement</button>
+    </div>
+  </div>
+
+  <!-- Groupe Paramètres -->
+  <div class="nav-group" id="ng-params">
+    <button class="nav-group-btn" onclick="toggleNavGroup('ng-params')">⚙️ Paramètres <span class="ng-arrow">▾</span></button>
+    <div class="nav-dropdown">
+      <button onclick="showTab('emprunts');closeNavGroups()">🏦 Emprunts</button>
+      <button onclick="showTab('comptes');closeNavGroups()">⚙️ Plan de comptes</button>
+    </div>
+  </div>
+
+  <!-- Checklist seul (badge important) -->
+  <button class="tab" id="tab-checklist" onclick="showTab('checklist')" style="position:relative">📋 Checklist</button>
   <div class="nav-end">
     <span class="tx-badge" id="nav-count">0 tx</span>
     <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
@@ -662,18 +731,52 @@ body.light .login-box{background:#fff}
   </div>
 
   <!-- Filtres -->
-  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-    <input type="text" id="search" placeholder="🔍 Rechercher dans les libellés…" style="flex:1;min-width:200px" oninput="renderTX()">
-    <select id="filter-bank" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rs);padding:9px 12px;font-size:12px;font-family:inherit;outline:none" onchange="renderTX()">
-      <option value="all">Toutes banques</option>
-      <option value="BoursoBank">BoursoBank</option>
-      <option value="BNP Paribas">BNP Paribas</option>
-      <option value="BNP Crédit">BNP Crédit</option>
-      <option value="La Banque Postale">La Banque Postale</option>
-    </select>
-    <select id="filter-cls" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rs);padding:9px 12px;font-size:12px;font-family:inherit;outline:none" onchange="renderTX()">
-      <option value="all">Toutes classes</option>
-    </select>
+  <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
+    <input type="text" id="search" placeholder="🔍 Rechercher dans les libellés…" oninput="renderTX()">
+    <button class="btn btn-ghost btn-sm" onclick="toggleTxFilters()" id="btn-tx-filters">🔽 Filtres</button>
+  </div>
+  <div id="tx-filters-panel" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Banque</label>
+        <select id="filter-bank" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-family:inherit;outline:none" onchange="renderTX()">
+          <option value="all">Toutes banques</option>
+          <option value="BoursoBank">BoursoBank</option>
+          <option value="BNP Paribas">BNP Paribas</option>
+          <option value="BNP Crédit">BNP Crédit</option>
+          <option value="La Banque Postale">La Banque Postale</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Classe</label>
+        <select id="filter-cls" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-family:inherit;outline:none" onchange="renderTX()">
+          <option value="all">Toutes classes</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Du</label>
+        <input type="date" id="filter-date-from" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-family:inherit;outline:none" oninput="renderTX()">
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Au</label>
+        <input type="date" id="filter-date-to" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-family:inherit;outline:none" oninput="renderTX()">
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Montant min (€)</label>
+        <input type="number" id="filter-amt-min" placeholder="Ex: 100" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-family:inherit;outline:none" oninput="renderTX()">
+      </div>
+      <div>
+        <label style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Type</label>
+        <select id="filter-type" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-family:inherit;outline:none" onchange="renderTX()">
+          <option value="all">Tout</option>
+          <option value="credit">Entrées uniquement</option>
+          <option value="debit">Sorties uniquement</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:8px;text-align:right">
+      <button class="btn btn-ghost btn-sm" onclick="clearTxFilters()">✕ Réinitialiser les filtres</button>
+    </div>
   </div>
 
   <div class="card" style="padding:0;overflow:hidden">
@@ -688,7 +791,23 @@ body.light .login-box{background:#fff}
         <tbody id="tx-tbody"></tbody>
       </table>
     </div>
-    <div id="tx-more" style="display:none;padding:10px;text-align:center;font-size:12px;color:var(--text3)">Affichage limité à 100 — filtre par mois pour voir plus</div>
+  </div>
+  <!-- Pagination bar -->
+  <div class="pag-bar" id="tx-pagination" style="display:none">
+    <div class="pag-info" id="pag-info"></div>
+    <div class="pag-btns">
+      <button class="pag-btn" id="pag-first"  onclick="goPage(1)"            title="Première page">«</button>
+      <button class="pag-btn" id="pag-prev"   onclick="goPage(TX_PAGE-1)"    title="Page précédente">‹</button>
+      <div id="pag-pages" style="display:flex;gap:4px"></div>
+      <button class="pag-btn" id="pag-next"   onclick="goPage(TX_PAGE+1)"    title="Page suivante">›</button>
+      <button class="pag-btn" id="pag-last"   onclick="goPage(TX_PAGES)"     title="Dernière page">»</button>
+    </div>
+    <select id="pag-size" onchange="TX_PER_PAGE=parseInt(this.value);TX_PAGE=1;renderTX()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rxs);padding:5px 8px;font-size:11px;font-family:inherit;outline:none">
+      <option value="25">25 / page</option>
+      <option value="50" selected>50 / page</option>
+      <option value="100">100 / page</option>
+      <option value="200">200 / page</option>
+    </select>
   </div>
 
   <!-- Bulk action bar -->
@@ -1254,6 +1373,31 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
 
 </div><!-- /app -->
 
+<!-- ── SPLIT / VENTILATION MODAL ── -->
+<div id="split-modal" style="display:none;position:fixed;inset:0;z-index:9001;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg1);border:1px solid var(--border2);border-radius:18px;padding:28px;width:100%;max-width:620px;box-shadow:0 24px 80px rgba(0,0,0,.7);max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:17px;font-weight:800">✂️ Ventiler la transaction</div>
+      <button onclick="closeSplitModal()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:13px;font-family:inherit">✕</button>
+    </div>
+    <div id="split-origin" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:11px 14px;margin-bottom:16px;font-size:13px"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Lignes de ventilation</div>
+    <div style="display:grid;grid-template-columns:1fr 110px 145px 36px;gap:6px;margin-bottom:6px;padding:0 2px">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Libellé</div>
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;text-align:right">Montant (€)</div>
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Compte</div>
+      <div></div>
+    </div>
+    <div id="split-lines"></div>
+    <button class="btn btn-ghost btn-sm" onclick="addSplitLine()" style="margin-bottom:14px;width:100%">➕ Ajouter une ligne</button>
+    <div id="split-balance" style="padding:10px 14px;border-radius:var(--rs);margin-bottom:16px;font-size:13px;font-weight:700"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-blue" style="flex:1" onclick="saveSplit()">✂️ Ventiler</button>
+      <button class="btn btn-ghost" onclick="closeSplitModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── GLOBAL SEARCH OVERLAY ── -->
 <div id="global-search-box" onclick="if(event.target===this)closeGlobalSearch()">
   <div class="gsearch-inner">
@@ -1747,6 +1891,165 @@ function updateChecklistBadge(){
   }
 }
 
+// ─── NAV GROUPS ───────────────────────────────────────────────────────────────
+function toggleNavGroup(id){
+  const el=document.getElementById(id);
+  const wasOpen=el.classList.contains("open");
+  closeNavGroups();
+  if(!wasOpen) el.classList.add("open");
+}
+function closeNavGroups(){
+  document.querySelectorAll(".nav-group").forEach(g=>g.classList.remove("open"));
+}
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".nav-group")) closeNavGroups();
+});
+
+// Map each page to its group for active state
+const PAGE_TO_GROUP={
+  tra:"ng-analyse",budget:"ng-analyse",comparaison:"ng-analyse",analyses:"ng-analyse",
+  projection:"ng-pilotage",simulation:"ng-pilotage",planning:"ng-pilotage",patrimoine:"ng-pilotage",
+  transactions:"ng-operations",import:"ng-operations",rapprochement:"ng-operations",
+  emprunts:"ng-params",comptes:"ng-params",
+};
+function updateNavActive(id){
+  // Clear all active states
+  document.querySelectorAll(".tab,.nav-group-btn,.nav-dropdown button").forEach(b=>{
+    b.classList.remove("active");
+    b.classList.remove("active-sub");
+  });
+  // Dashboard direct tab
+  const dashTab=document.getElementById("tab-dashboard");
+  if(id==="dashboard"&&dashTab) dashTab.classList.add("active");
+  // Checklist direct tab
+  const chkTab=document.getElementById("tab-checklist");
+  if(id==="checklist"&&chkTab) chkTab.classList.add("active");
+  // Group button
+  const groupId=PAGE_TO_GROUP[id];
+  if(groupId){
+    const groupBtn=document.querySelector(`#${groupId} .nav-group-btn`);
+    if(groupBtn) groupBtn.classList.add("active");
+    // Sub-item
+    const subBtn=document.querySelector(`#${groupId} .nav-dropdown button[onclick*="'${id}'"]`);
+    if(subBtn) subBtn.classList.add("active-sub");
+  }
+}
+
+// ─── TX FILTER PANEL ──────────────────────────────────────────────────────────
+let txFiltersOpen=false;
+function toggleTxFilters(){
+  txFiltersOpen=!txFiltersOpen;
+  const panel=document.getElementById("tx-filters-panel");
+  const btn=document.getElementById("btn-tx-filters");
+  if(panel) panel.style.display=txFiltersOpen?"block":"none";
+  if(btn) btn.style.background=txFiltersOpen?"rgba(77,159,255,.15)":"";
+}
+function clearTxFilters(){
+  ["filter-bank","filter-type"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="all";});
+  ["filter-date-from","filter-date-to","filter-amt-min"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  renderTX();
+}
+
+// ─── PAGINATION ───────────────────────────────────────────────────────────────
+let TX_PAGE=1, TX_PER_PAGE=50, TX_PAGES=1;
+function goPage(p){
+  TX_PAGE=Math.max(1,Math.min(TX_PAGES,p));
+  renderTX();
+  document.getElementById("page-transactions")?.scrollTo(0,0);
+  window.scrollTo(0,200);
+}
+
+// ─── SPLIT / VENTILATION ──────────────────────────────────────────────────────
+let SPLIT_TX_ID=null;
+function openSplitModal(id){
+  const t=TXS.find(x=>String(x.id)===String(id)); if(!t) return;
+  SPLIT_TX_ID=id;
+  const origin=document.getElementById("split-origin");
+  if(origin) origin.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+    <div><span style="font-family:monospace;font-size:11px;color:var(--text3);margin-right:8px">${t.date}</span><strong>${esc(t.label)}</strong></div>
+    <span style="font-weight:800;font-size:15px;color:${t.amount>=0?"var(--green)":"var(--red)"}">${fmt(t.amount)}</span>
+  </div>`;
+  // Pre-fill with 2 lines splitting the original
+  const lines=document.getElementById("split-lines"); if(!lines) return;
+  const half=(t.amount/2);
+  lines.innerHTML="";
+  addSplitLine(t.label+" (1)", half, t.code);
+  addSplitLine(t.label+" (2)", half, t.code);
+  updateSplitBalance();
+  const modal=document.getElementById("split-modal");
+  if(modal) modal.style.display="flex";
+}
+function closeSplitModal(){
+  const modal=document.getElementById("split-modal");
+  if(modal) modal.style.display="none";
+  SPLIT_TX_ID=null;
+}
+function addSplitLine(label="", amount="", code=""){
+  const lines=document.getElementById("split-lines"); if(!lines) return;
+  const idx=lines.children.length;
+  const row=document.createElement("div");
+  row.className="split-row";
+  row.dataset.idx=idx;
+
+  // Build account options
+  const clsOrder=["P","CV","CF","I","VI",...CUSTOM_CLASSES.map(c=>c.code)];
+  const seen=new Set();
+  let opts='<option value="">— Compte —</option>';
+  clsOrder.forEach(cls=>{
+    if(seen.has(cls)) return; seen.add(cls);
+    const accs=PLAN.filter(a=>a.cls===cls); if(!accs.length) return;
+    opts+=`<optgroup label="${ci(cls)} ${cl(cls)}">`;
+    accs.forEach(acc=>{ opts+=`<option value="${acc.code}"${acc.code===code?" selected":""}>${acc.code} — ${acc.lib}</option>`; });
+    opts+="</optgroup>";
+  });
+
+  row.innerHTML=`
+    <input type="text" value="${esc(label)}" placeholder="Libellé" style="font-size:12px" oninput="updateSplitBalance()">
+    <input type="number" value="${amount||""}" placeholder="Montant" style="font-size:12px;text-align:right" oninput="updateSplitBalance()">
+    <select style="background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:7px 8px;font-size:11px;font-family:inherit;outline:none">${opts}</select>
+    <button onclick="this.closest('.split-row').remove();updateSplitBalance()" style="background:var(--red-2,rgba(255,92,122,.1));border:1px solid rgba(255,92,122,.2);color:var(--red);border-radius:6px;width:32px;height:32px;cursor:pointer;font-size:14px">✕</button>`;
+  lines.appendChild(row);
+}
+function updateSplitBalance(){
+  const t=TXS.find(x=>String(x.id)===String(SPLIT_TX_ID)); if(!t) return;
+  const lines=document.querySelectorAll("#split-lines .split-row");
+  let summed=0;
+  lines.forEach(row=>{
+    const v=parseFloat(row.querySelector("input[type=number]")?.value||0)||0;
+    summed+=v;
+  });
+  const diff=Math.round((t.amount-summed)*100)/100;
+  const el=document.getElementById("split-balance"); if(!el) return;
+  const ok=Math.abs(diff)<0.01;
+  el.style.background=ok?"rgba(16,217,126,.08)":"rgba(255,92,122,.08)";
+  el.style.border=`1px solid ${ok?"rgba(16,217,126,.2)":"rgba(255,92,122,.2)"}`;
+  el.style.color=ok?"var(--green)":"var(--red)";
+  el.textContent=ok?"✅ Équilibre — le total correspond au montant original.":
+    `Écart : ${fmt(diff)} — le total (${fmt(summed)}) doit égaler ${fmt(t.amount)}`;
+}
+async function saveSplit(){
+  const t=TXS.find(x=>String(x.id)===String(SPLIT_TX_ID)); if(!t) return;
+  const lines=document.querySelectorAll("#split-lines .split-row");
+  const newTxs=[];
+  let sum=0;
+  for(const row of lines){
+    const label=row.querySelector("input[type=text]")?.value.trim()||t.label;
+    const amount=parseFloat(row.querySelector("input[type=number]")?.value||0)||0;
+    const code=row.querySelector("select")?.value||t.code;
+    const acc=PLAN.find(a=>a.code===code)||{code,lib:code,cls:"?"};
+    if(!amount) continue;
+    sum+=amount;
+    newTxs.push({id:Date.now()+Math.random(),date:t.date,label,amount,bank:t.bank,code:acc.code,lib:acc.lib,cls:acc.cls});
+  }
+  if(Math.abs(sum-t.amount)>0.01){ alert(`Écart de ${fmt(t.amount-sum)} — ajuste les montants.`); return; }
+  // Remove original, add split lines
+  TXS=TXS.filter(x=>String(x.id)!==String(SPLIT_TX_ID));
+  TXS.push(...newTxs);
+  closeSplitModal();
+  await save();
+  syncShow("ok",`Transaction ventilée en ${newTxs.length} lignes ✓`);
+}
+
 function render(){
   // Always ensure custom classes and accounts are merged before rendering
   rebuildClasses();
@@ -2028,17 +2331,52 @@ function renderTX(){
   const f=document.getElementById("filter-month").value;
   const fBank=(document.getElementById("filter-bank")?.value)||"all";
   const fCls=(document.getElementById("filter-cls")?.value)||"all";
+  const fDateFrom=document.getElementById("filter-date-from")?.value||"";
+  const fDateTo  =document.getElementById("filter-date-to")?.value||"";
+  const fAmtMin  =parseFloat(document.getElementById("filter-amt-min")?.value)||0;
+  const fType    =(document.getElementById("filter-type")?.value)||"all";
 
-  let txs=f==="all"?[...TXS]:TXS.filter(t=>t.date?.substring(0,7)===f);
-  if(s)   txs=txs.filter(t=>t.label.toLowerCase().includes(s)||(t.note||"").toLowerCase().includes(s));
-  if(fBank!=="all") txs=txs.filter(t=>t.bank===fBank);
-  if(fCls!=="all")  txs=txs.filter(t=>t.cls===fCls);
+  let txs=SELECTED_MONTHS.length>0
+    ? TXS.filter(t=>t.date&&SELECTED_MONTHS.includes(t.date.substring(0,7)))
+    : f==="all"?[...TXS]:TXS.filter(t=>t.date?.substring(0,7)===f);
+  if(s)            txs=txs.filter(t=>t.label.toLowerCase().includes(s)||(t.note||"").toLowerCase().includes(s));
+  if(fBank!=="all")txs=txs.filter(t=>t.bank===fBank);
+  if(fCls!=="all") txs=txs.filter(t=>t.cls===fCls);
+  if(fDateFrom)    txs=txs.filter(t=>(t.date||"")>=fDateFrom);
+  if(fDateTo)      txs=txs.filter(t=>(t.date||"")<=fDateTo);
+  if(fAmtMin>0)    txs=txs.filter(t=>Math.abs(t.amount)>=fAmtMin);
+  if(fType==="credit") txs=txs.filter(t=>t.amount>0);
+  if(fType==="debit")  txs=txs.filter(t=>t.amount<0);
   txs.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
 
-  document.getElementById("tx-lbl").textContent=txs.length+" transactions";
-  document.getElementById("tx-more").style.display=txs.length>100?"block":"none";
+  const total=txs.length;
+  TX_PAGES=Math.max(1,Math.ceil(total/TX_PER_PAGE));
+  TX_PAGE=Math.max(1,Math.min(TX_PAGE,TX_PAGES));
+  const start=(TX_PAGE-1)*TX_PER_PAGE;
+  const pageItems=txs.slice(start, start+TX_PER_PAGE);
 
-  document.getElementById("tx-tbody").innerHTML=txs.slice(0,100).map(t=>`
+  document.getElementById("tx-lbl").textContent=total+" transactions";
+
+  // Pagination
+  const pagEl=document.getElementById("tx-pagination");
+  if(pagEl) pagEl.style.display=total>TX_PER_PAGE?"flex":"none";
+  const infoEl=document.getElementById("pag-info");
+  if(infoEl) infoEl.textContent=`${start+1}–${Math.min(start+TX_PER_PAGE,total)} sur ${total}`;
+  ["pag-first","pag-prev"].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=TX_PAGE===1;});
+  ["pag-next","pag-last"].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=TX_PAGE===TX_PAGES;});
+  const pagesEl=document.getElementById("pag-pages");
+  if(pagesEl){
+    const sp=Math.max(1,TX_PAGE-2), ep=Math.min(TX_PAGES,sp+4);
+    pagesEl.innerHTML='';
+    for(let p=sp;p<=ep;p++){
+      const btn=document.createElement("button");
+      btn.className="pag-btn"+(p===TX_PAGE?" active":"");
+      btn.textContent=p; btn.onclick=()=>goPage(p);
+      pagesEl.appendChild(btn);
+    }
+  }
+
+  document.getElementById("tx-tbody").innerHTML=pageItems.map(t=>`
     <tr>
       <td><input type="checkbox" class="tx-checkbox tx-row-cb" data-id="${t.id}"
         ${SELECTED_IDS.has(String(t.id))?"checked":""}
@@ -2054,8 +2392,9 @@ function renderTX(){
       <td><span class="badge b-${t.cls||"q"}">${t.cls||"?"}</span></td>
       <td class="r" style="font-weight:700;white-space:nowrap;color:${t.amount>0?"var(--green)":"var(--red)"}">${fmt(t.amount)}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="openNoteModal('${t.id}')" style="margin-right:2px" title="Ajouter une note">📝</button>
+        <button class="btn btn-ghost btn-sm" onclick="openNoteModal('${t.id}')" style="margin-right:2px" title="Note">📝</button>
         <button class="btn btn-ghost btn-sm" onclick="openEditModal('${t.id}')" style="margin-right:2px" title="Modifier">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="openSplitModal('${t.id}')" style="margin-right:2px" title="Ventiler">✂️</button>
         <button class="btn btn-red btn-sm" onclick="delTx('${t.id}')" title="Supprimer">✕</button>
       </td>
     </tr>`).join("");
@@ -2277,9 +2616,10 @@ function clearAll(){if(!confirm("Supprimer TOUTES les transactions ?"))return;TX
 // ─── NAV ──────────────────────────────────────────────────────────────────────
 function showTab(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  document.getElementById("page-"+id).classList.add("active");
-  document.querySelectorAll(".tab").forEach(b=>{if(b.getAttribute("onclick")===`showTab('${id}')`)b.classList.add("active")});
+  document.getElementById("page-"+id)?.classList.add("active");
+  updateNavActive(id);
+  closeNavGroups();
+  if(id==="transactions") TX_PAGE=1;
   render();
   if(id==="analyses")    renderAnalyses();
   if(id==="comparaison") renderComparaison();
@@ -3951,10 +4291,8 @@ function renderEmprunts(){
     const typeIcons={immo:"🏠",auto:"🚗",conso:"💳",pro:"💼",autre:"📋"};
     const typeIcon=typeIcons[l.type]||"🏦";
 
-    // Amortissement table — show current month ±6 months, then end
-    const startIdx=Math.max(0,curRowIdx-2);
-    const endIdx=Math.min(rows.length-1,curRowIdx+10);
-    let tableRows=rows.slice(startIdx,endIdx+1);
+    // Full amortization table — all rows, current month highlighted
+    let tableRows=rows; // show every row
     
     return`<div class="loan-card ${l.active?"active-loan":""}">
       ${l.active?'<span class="loan-badge">✓ Actif</span>':'<span class="loan-badge" style="background:rgba(255,255,255,.06);color:var(--text3)">Inactif</span>'}
@@ -3993,7 +4331,7 @@ function renderEmprunts(){
       <!-- Tableau d'amortissement partiel -->
       <details>
         <summary style="font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;margin-bottom:10px;list-style:none;display:flex;align-items:center;gap:6px">
-          ▶ Tableau d'amortissement (mois ${startIdx+1} à ${endIdx+1} sur ${rows.length})
+          ▶ Tableau d'amortissement complet — ${rows.length} échéances · mois courant surligné
         </summary>
         <div style="overflow-x:auto;margin-top:8px">
           <table class="amort-table">
@@ -4006,7 +4344,7 @@ function renderEmprunts(){
               <th>Capital Restant Dû</th>
             </tr></thead>
             <tbody>${tableRows.map((row,i)=>{
-              const absIdx=startIdx+i;
+              const absIdx=i;
               const isCurrent=absIdx===curRowIdx;
               const rowDate=new Date(debutDate.getFullYear(),debutDate.getMonth()+absIdx,1);
               const mLabel=rowDate.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"});
