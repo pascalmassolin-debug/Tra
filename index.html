@@ -43,28 +43,100 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 ::-webkit-scrollbar-track{background:var(--bg1)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 
-/* ── NAV ──────────────────────────────────────────────────── */
-#nav{
-  position:sticky;top:0;z-index:200;
-  background:rgba(5,9,18,.92);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:2px;
-  padding:0 16px;overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  height:52px;
+/* ── SIDEBAR ───────────────────────────────────────────────── */
+#sidebar{
+  position:fixed;left:0;top:0;bottom:0;z-index:400;
+  width:240px;
+  background:var(--bg1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;overflow-x:hidden;
+  transition:width .25s cubic-bezier(.4,0,.2,1);
 }
-#nav::-webkit-scrollbar{display:none}
-.logo{display:flex;align-items:center;gap:9px;padding-right:16px;border-right:1px solid var(--border);margin-right:6px;flex-shrink:0;text-decoration:none}
-.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#1a6fe8,#7c3aed);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;box-shadow:0 2px 12px rgba(100,80,240,.4)}
-.logo-text{font-weight:800;font-size:15px;letter-spacing:-.03em;color:var(--text)}
-.logo-text em{color:var(--blue);font-style:normal}
-.tab{background:none;border:none;cursor:pointer;padding:8px 12px;border-radius:var(--rxs);font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;transition:all .15s;flex-shrink:0;font-family:inherit;letter-spacing:.01em}
-.tab:hover{background:var(--surface);color:var(--text)}
-.tab.active{background:rgba(77,159,255,.12);color:var(--blue);border:1px solid rgba(77,159,255,.2)}
-.nav-end{margin-left:auto;display:flex;align-items:center;gap:10px;padding-left:10px;flex-shrink:0}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+body.sidebar-collapsed #sidebar{width:60px}
+body.sidebar-collapsed .sb-label{display:none}
+body.sidebar-collapsed .sb-arrow{display:none}
+body.sidebar-collapsed .sb-group-label{display:none}
+body.sidebar-collapsed .sb-logo-text{display:none}
+body.sidebar-collapsed .sb-submenu{display:none!important}
+#app{margin-left:240px;transition:margin-left .25s cubic-bezier(.4,0,.2,1)}
+body.sidebar-collapsed #app{margin-left:60px}
+
+/* Logo zone */
+.sb-logo{display:flex;align-items:center;gap:11px;padding:20px 16px 16px;border-bottom:1px solid var(--border);flex-shrink:0;cursor:pointer}
+.sb-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#1a6fe8,#7c3aed);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:white;flex-shrink:0;box-shadow:0 2px 14px rgba(100,80,240,.4)}
+.sb-logo-text{font-weight:800;font-size:15px;letter-spacing:-.03em;color:var(--text)}
+.sb-logo-text em{color:var(--blue);font-style:normal}
+
+/* Top bar (now just topbar with period + search) */
+#topbar{
+  position:fixed;left:240px;top:0;right:0;z-index:300;height:48px;
+  background:rgba(5,9,18,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;padding:0 16px;
+  transition:left .25s cubic-bezier(.4,0,.2,1);
+}
+body.sidebar-collapsed #topbar{left:60px}
+#app{padding-top:48px}
+
+/* Nav items */
+.sb-section{padding:8px 0}
+.sb-group-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:6px 16px 4px;margin-top:4px}
+.sb-item{
+  display:flex;align-items:center;gap:12px;
+  padding:9px 16px;
+  border-radius:0;
+  cursor:pointer;
+  border:none;background:none;
+  width:100%;text-align:left;
+  font-family:inherit;font-size:13px;font-weight:500;
+  color:var(--text2);
+  transition:all .15s;
+  position:relative;
+}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.sb-item.active{background:rgba(77,159,255,.1);color:var(--blue);font-weight:600}
+.sb-item.active::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.sb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-arrow{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.sb-group.open .sb-arrow{transform:rotate(90deg)}
+.sb-submenu{display:none;background:rgba(0,0,0,.15)}
+.sb-group.open .sb-submenu{display:block}
+.sb-subitem{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 16px 7px 46px;
+  cursor:pointer;border:none;background:none;
+  width:100%;text-align:left;
+  font-family:inherit;font-size:12px;font-weight:500;
+  color:var(--text3);transition:all .15s;
+  position:relative;
+}
+.sb-subitem:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sb-subitem.active{color:var(--blue);font-weight:600}
+.sb-subitem.active::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.sb-badge{background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:800;flex-shrink:0}
+
+/* Bottom zone */
+.sb-bottom{margin-top:auto;border-top:1px solid var(--border);padding:12px 8px}
+.sb-bottom-btn{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;font-size:12px;color:var(--text3);transition:all .15s}
+.sb-bottom-btn:hover{background:var(--surface);color:var(--text)}
+
+/* Month selector in topbar */
+.month-sel{background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rxs);padding:5px 10px;font-size:11px;font-family:inherit;cursor:pointer;outline:none}
 .tx-badge{background:var(--surface);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--text2);font-weight:600}
-select.month-sel{background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:var(--rxs);padding:5px 10px;font-size:11px;font-family:inherit;cursor:pointer;outline:none}
+
+@media(max-width:640px){
+  #sidebar{width:60px}
+  body.sidebar-collapsed #sidebar{width:0;border:none}
+  #app{margin-left:60px}
+  body.sidebar-collapsed #app{margin-left:0}
+  #topbar{left:60px}
+  body.sidebar-collapsed #topbar{left:0}
+  .sb-label,.sb-arrow,.sb-group-label,.sb-logo-text,.sb-submenu{display:none}
+}
 
 /* ── LAYOUT ───────────────────────────────────────────────── */
 #app{padding:22px 18px;max-width:1200px;margin:0 auto}
@@ -282,7 +354,8 @@ body.light .login-box{background:#fff}
 .ng-arrow{font-size:10px;transition:transform .2s}
 .nav-group.open .ng-arrow{transform:rotate(180deg)}
 .nav-dropdown{
-  display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:300;
+  display:none;position:fixed;top:58px;z-index:9999;
+  pointer-events:all;
   background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r);
   padding:6px;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5);
 }
@@ -424,6 +497,20 @@ body.light .login-box{background:#fff}
   <div style="margin-top:10px;padding:8px 10px;background:var(--bg2);border-radius:var(--rs);font-size:12px;color:var(--text3)" id="period-summary">Toute la période sélectionnée</div>
 </div>
 
+<!-- ── NAV PORTAL DROPDOWN (rendered at body level to avoid z-index traps) ── -->
+<div id="nav-portal" style="
+  display:none;
+  position:fixed;
+  z-index:99999;
+  background:var(--bg1);
+  border:1px solid var(--border2);
+  border-radius:var(--r);
+  padding:6px;
+  min-width:210px;
+  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  pointer-events:all;
+"></div>
+
 <!-- ── SYNC BAR ── -->
 <div id="sync-bar">
   <div class="sync-dot" id="sync-dot"></div>
@@ -483,66 +570,96 @@ body.light .login-box{background:#fff}
 </div>
 
 <!-- ── NAV ── -->
-<nav id="nav">
-  <a class="logo" href="#" onclick="showTab('dashboard');return false">
-    <div class="logo-icon">₱</div>
-    <div class="logo-text">TRA<em>·</em>PM</div>
-  </a>
-  <!-- Direct tabs -->
-  <button class="tab active" id="tab-dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
+<!-- ── SIDEBAR ── -->
+<aside id="sidebar">
+  <!-- Logo -->
+  <div class="sb-logo" onclick="toggleSidebar()">
+    <div class="sb-logo-icon">₱</div>
+    <div class="sb-logo-text">TRA<em style="color:var(--blue);font-style:normal">·</em>PM</div>
+  </div>
 
-  <!-- Groupe Analyse -->
-  <div class="nav-group" id="ng-analyse">
-    <button class="nav-group-btn" onclick="toggleNavGroup('ng-analyse')">📈 Analyse <span class="ng-arrow">▾</span></button>
-    <div class="nav-dropdown">
-      <button onclick="showTab('tra');closeNavGroups()">📋 TRA Analytique</button>
-      <button onclick="showTab('budget');closeNavGroups()">🎯 Budget vs Réel</button>
-      <button onclick="showTab('comparaison');closeNavGroups()">📅 Comparaison</button>
-      <button onclick="showTab('analyses');closeNavGroups()">🔬 Analyses</button>
+  <div class="sb-section">
+    <!-- Dashboard -->
+    <button class="sb-item active" id="sb-dashboard" onclick="showTab('dashboard')">
+      <span class="sb-icon">📊</span><span class="sb-label">Dashboard</span>
+    </button>
+
+    <!-- Analyse -->
+    <div class="sb-group" id="sbg-analyse">
+      <button class="sb-item" onclick="toggleSbGroup('sbg-analyse')">
+        <span class="sb-icon">📈</span><span class="sb-label">Analyse</span>
+        <span class="sb-arrow">›</span>
+      </button>
+      <div class="sb-submenu">
+        <button class="sb-subitem" id="sb-tra"         onclick="showTab('tra')">TRA Analytique</button>
+        <button class="sb-subitem" id="sb-budget"      onclick="showTab('budget')">Budget vs Réel</button>
+        <button class="sb-subitem" id="sb-comparaison" onclick="showTab('comparaison')">Comparaison</button>
+        <button class="sb-subitem" id="sb-analyses"    onclick="showTab('analyses')">Analyses avancées</button>
+      </div>
+    </div>
+
+    <!-- Pilotage -->
+    <div class="sb-group" id="sbg-pilotage">
+      <button class="sb-item" onclick="toggleSbGroup('sbg-pilotage')">
+        <span class="sb-icon">🎯</span><span class="sb-label">Pilotage</span>
+        <span class="sb-arrow">›</span>
+      </button>
+      <div class="sb-submenu">
+        <button class="sb-subitem" id="sb-projection"  onclick="showTab('projection')">Projection patrimoine</button>
+        <button class="sb-subitem" id="sb-simulation"  onclick="showTab('simulation')">Simulation "Et si"</button>
+        <button class="sb-subitem" id="sb-planning"    onclick="showTab('planning')">Planning des flux</button>
+        <button class="sb-subitem" id="sb-patrimoine"  onclick="showTab('patrimoine')">Tracker patrimoine</button>
+      </div>
+    </div>
+
+    <!-- Opérations -->
+    <div class="sb-group" id="sbg-operations">
+      <button class="sb-item" onclick="toggleSbGroup('sbg-operations')">
+        <span class="sb-icon">💳</span><span class="sb-label">Opérations</span>
+        <span class="sb-arrow">›</span>
+      </button>
+      <div class="sb-submenu">
+        <button class="sb-subitem" id="sb-transactions"    onclick="showTab('transactions')">Transactions</button>
+        <button class="sb-subitem" id="sb-import"          onclick="showTab('import')">Import CSV</button>
+        <button class="sb-subitem" id="sb-rapprochement"   onclick="showTab('rapprochement')">Rapprochement</button>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <button class="sb-item" id="sb-checklist" onclick="showTab('checklist')" style="position:relative">
+      <span class="sb-icon">✅</span><span class="sb-label">Checklist</span>
+      <span class="sb-badge" id="chk-nav-badge" style="display:none">0</span>
+    </button>
+
+    <!-- Paramètres -->
+    <div class="sb-group" id="sbg-params">
+      <button class="sb-item" onclick="toggleSbGroup('sbg-params')">
+        <span class="sb-icon">⚙️</span><span class="sb-label">Paramètres</span>
+        <span class="sb-arrow">›</span>
+      </button>
+      <div class="sb-submenu">
+        <button class="sb-subitem" id="sb-emprunts" onclick="showTab('emprunts')">Emprunts</button>
+        <button class="sb-subitem" id="sb-comptes"  onclick="showTab('comptes')">Plan de comptes</button>
+      </div>
     </div>
   </div>
 
-  <!-- Groupe Pilotage -->
-  <div class="nav-group" id="ng-pilotage">
-    <button class="nav-group-btn" onclick="toggleNavGroup('ng-pilotage')">🎯 Pilotage <span class="ng-arrow">▾</span></button>
-    <div class="nav-dropdown">
-      <button onclick="showTab('projection');closeNavGroups()">🚀 Projection patrimoine</button>
-      <button onclick="showTab('simulation');closeNavGroups()">🎮 Simulation "Et si"</button>
-      <button onclick="showTab('planning');closeNavGroups()">📆 Planning des flux</button>
-      <button onclick="showTab('patrimoine');closeNavGroups()">🏛️ Tracker patrimoine</button>
-    </div>
+  <!-- Bottom actions -->
+  <div class="sb-bottom">
+    <button class="sb-bottom-btn" id="theme-btn" onclick="toggleTheme()"><span style="font-size:15px">☀️</span><span class="sb-label">Thème</span></button>
+    <button class="sb-bottom-btn" onclick="logout()"><span style="font-size:15px">⎋</span><span class="sb-label">Déconnexion</span></button>
   </div>
+</aside>
 
-  <!-- Groupe Opérations -->
-  <div class="nav-group" id="ng-operations">
-    <button class="nav-group-btn" onclick="toggleNavGroup('ng-operations')">💳 Opérations <span class="ng-arrow">▾</span></button>
-    <div class="nav-dropdown">
-      <button onclick="showTab('transactions');closeNavGroups()">💳 Transactions</button>
-      <button onclick="showTab('import');closeNavGroups()">⬆️ Import CSV</button>
-      <button onclick="showTab('rapprochement');closeNavGroups()">✅ Rapprochement</button>
-    </div>
+<!-- ── TOPBAR ── -->
+<div id="topbar">
+  <span class="tx-badge" id="nav-count">0 tx</span>
+  <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
+  <input type="hidden" id="filter-month" value="all">
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <button class="btn btn-ghost btn-sm" onclick="openGlobalSearch()" title="Recherche (Ctrl+K)" style="padding:5px 10px;font-size:13px">🔍</button>
   </div>
-
-  <!-- Groupe Paramètres -->
-  <div class="nav-group" id="ng-params">
-    <button class="nav-group-btn" onclick="toggleNavGroup('ng-params')">⚙️ Paramètres <span class="ng-arrow">▾</span></button>
-    <div class="nav-dropdown">
-      <button onclick="showTab('emprunts');closeNavGroups()">🏦 Emprunts</button>
-      <button onclick="showTab('comptes');closeNavGroups()">⚙️ Plan de comptes</button>
-    </div>
-  </div>
-
-  <!-- Checklist seul (badge important) -->
-  <button class="tab" id="tab-checklist" onclick="showTab('checklist')" style="position:relative">📋 Checklist</button>
-  <div class="nav-end">
-    <span class="tx-badge" id="nav-count">0 tx</span>
-    <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
-    <input type="hidden" id="filter-month" value="all">
-    <button class="btn btn-ghost btn-sm" onclick="openGlobalSearch()" title="Recherche globale (Ctrl+K)" style="padding:5px 10px;font-size:13px">🔍</button>
-    <button class="btn btn-ghost btn-sm" id="theme-btn" onclick="toggleTheme()" title="Changer le thème" style="padding:5px 10px;font-size:13px">☀️</button>
-    <button class="btn btn-ghost btn-sm" onclick="logout()" title="Se déconnecter" style="padding:5px 10px;font-size:11px">⎋</button>
-  </div>
-</nav>
+</div>
 
 <div id="app">
 
@@ -1409,6 +1526,38 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
 </div>
 
 <script>
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+function toggleSidebar(){
+  document.body.classList.toggle("sidebar-collapsed");
+  localStorage.setItem("sb_collapsed", document.body.classList.contains("sidebar-collapsed")?"1":"0");
+}
+function loadSidebarState(){
+  if(localStorage.getItem("sb_collapsed")==="1") document.body.classList.add("sidebar-collapsed");
+}
+const PAGE_TO_GROUP={
+  tra:"sbg-analyse",budget:"sbg-analyse",comparaison:"sbg-analyse",analyses:"sbg-analyse",
+  projection:"sbg-pilotage",simulation:"sbg-pilotage",planning:"sbg-pilotage",patrimoine:"sbg-pilotage",
+  transactions:"sbg-operations",import:"sbg-operations",rapprochement:"sbg-operations",
+  emprunts:"sbg-params",comptes:"sbg-params",
+};
+function toggleSbGroup(id){
+  const el=document.getElementById(id); if(!el) return;
+  const isOpen=el.classList.contains("open");
+  document.querySelectorAll(".sb-group.open").forEach(g=>{ if(g.id!==id) g.classList.remove("open"); });
+  el.classList.toggle("open",!isOpen);
+}
+function closeNavGroups(){} // legacy compat
+function updateNavActive(id){
+  document.querySelectorAll(".sb-item,.sb-subitem").forEach(b=>b.classList.remove("active"));
+  const direct=document.getElementById("sb-"+id);
+  if(direct) direct.classList.add("active");
+  const groupId=PAGE_TO_GROUP[id];
+  if(groupId){
+    const grp=document.getElementById(groupId);
+    if(grp){ grp.classList.add("open"); grp.querySelector(".sb-item")?.classList.add("active"); }
+  }
+}
+
 // ─── PLAN DE COMPTES ──────────────────────────────────────────────────────────
 const PLAN=[
   {code:"P100",lib:"Salaire infirmier",cls:"P",sub:"Salaires",kw:["TRESORERIE HOSPITALIERE","PAYE DU MOIS","CHI CRETEIL","CHI VILLENEUVE"]},
@@ -1584,7 +1733,7 @@ async function doLogin(){
   localStorage.setItem("tra_pm_uid", USER_ID);
   SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById("login-screen").style.display="none";
-  loadTheme(); loadPatrimoine(); loadLoans(); loadRapprData(); loadChecklist();
+  loadTheme(); loadSidebarState(); loadPatrimoine(); loadLoans(); loadRapprData(); loadChecklist();
   loadAnnualGoals(); loadRules(); loadCustomClasses(); loadCustomAccounts();
   syncShow("syncing","Chargement des données…");
   await loadFromSupabase();
@@ -1874,21 +2023,8 @@ function updateChecklistBadge(){
   const allTasks=[...DEFAULT_TASKS,...(CHK_DATA?.customTasks||[])];
   const d=(CHK_DATA||{})[m]||{tasks:{}};
   const remaining=allTasks.filter(t=>!d.tasks[t.id]).length;
-  const btn=document.querySelector('[onclick="showTab(\'checklist\')"]');
-  if(!btn) return;
-  if(remaining>0){
-    btn.textContent=`📋 Checklist`;
-    btn.style.position="relative";
-    // Add/update badge
-    let badge=btn.querySelector(".nav-chk-badge");
-    if(!badge){ badge=document.createElement("span"); badge.className="nav-chk-badge";
-      badge.style.cssText="position:absolute;top:-4px;right:-4px;background:var(--red);color:white;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;";
-      btn.style.position="relative"; btn.appendChild(badge); }
-    badge.textContent=remaining;
-  } else {
-    const badge=btn.querySelector(".nav-chk-badge");
-    if(badge) badge.remove();
-  }
+  const badge=document.getElementById("chk-nav-badge");
+  if(badge){ badge.textContent=remaining; badge.style.display=remaining>0?"inline-flex":"none"; }
 }
 
 // ─── NAV GROUPS ───────────────────────────────────────────────────────────────
@@ -1896,44 +2032,29 @@ function toggleNavGroup(id){
   const el=document.getElementById(id);
   const wasOpen=el.classList.contains("open");
   closeNavGroups();
-  if(!wasOpen) el.classList.add("open");
-}
-function closeNavGroups(){
-  document.querySelectorAll(".nav-group").forEach(g=>g.classList.remove("open"));
-}
-document.addEventListener("click",e=>{
-  if(!e.target.closest(".nav-group")) closeNavGroups();
-});
-
-// Map each page to its group for active state
-const PAGE_TO_GROUP={
-  tra:"ng-analyse",budget:"ng-analyse",comparaison:"ng-analyse",analyses:"ng-analyse",
-  projection:"ng-pilotage",simulation:"ng-pilotage",planning:"ng-pilotage",patrimoine:"ng-pilotage",
-  transactions:"ng-operations",import:"ng-operations",rapprochement:"ng-operations",
-  emprunts:"ng-params",comptes:"ng-params",
-};
-function updateNavActive(id){
-  // Clear all active states
-  document.querySelectorAll(".tab,.nav-group-btn,.nav-dropdown button").forEach(b=>{
-    b.classList.remove("active");
-    b.classList.remove("active-sub");
-  });
-  // Dashboard direct tab
-  const dashTab=document.getElementById("tab-dashboard");
-  if(id==="dashboard"&&dashTab) dashTab.classList.add("active");
-  // Checklist direct tab
-  const chkTab=document.getElementById("tab-checklist");
-  if(id==="checklist"&&chkTab) chkTab.classList.add("active");
-  // Group button
-  const groupId=PAGE_TO_GROUP[id];
-  if(groupId){
-    const groupBtn=document.querySelector(`#${groupId} .nav-group-btn`);
-    if(groupBtn) groupBtn.classList.add("active");
-    // Sub-item
-    const subBtn=document.querySelector(`#${groupId} .nav-dropdown button[onclick*="'${id}'"]`);
-    if(subBtn) subBtn.classList.add("active-sub");
+  if(!wasOpen){
+    el.classList.add("open");
+    // Render items into the portal dropdown
+    const items=el.querySelectorAll(".nav-dropdown button");
+    const btn=el.querySelector(".nav-group-btn");
+    if(!btn) return;
+    const rect=btn.getBoundingClientRect();
+    const portal=document.getElementById("nav-portal");
+    portal.innerHTML='';
+    items.forEach(item=>{
+      const clone=item.cloneNode(true);
+      // Copy onclick by re-extracting and re-setting
+      const oc=item.getAttribute("onclick");
+      if(oc) clone.setAttribute("onclick",oc);
+      if(item.classList.contains("active-sub")) clone.classList.add("active-sub");
+      portal.appendChild(clone);
+    });
+    portal.style.left=Math.min(rect.left, window.innerWidth-220)+"px";
+    portal.style.top=(rect.bottom+4)+"px";
+    portal.style.display="block";
   }
 }
+// Kept for legacy event listeners — no-op
 
 // ─── TX FILTER PANEL ──────────────────────────────────────────────────────────
 let txFiltersOpen=false;
@@ -5030,7 +5151,7 @@ function load(){
     USER_ID = savedUID;
     SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById("login-screen").style.display="none";
-    loadTheme(); loadPatrimoine(); loadLoans(); loadRapprData(); loadChecklist();
+    loadTheme(); loadSidebarState(); loadPatrimoine(); loadLoans(); loadRapprData(); loadChecklist();
     loadAnnualGoals();
     loadRules();
     loadCustomClasses();
