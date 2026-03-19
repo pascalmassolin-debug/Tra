@@ -61,6 +61,8 @@ body.sidebar-collapsed .sb-arrow{display:none}
 body.sidebar-collapsed .sb-group-label{display:none}
 body.sidebar-collapsed .sb-logo-text{display:none}
 body.sidebar-collapsed .sb-submenu{display:none!important}
+body.sidebar-collapsed #period-btn{display:none}
+body.sidebar-collapsed #nav-count{display:none}
 #app{margin-left:240px;transition:margin-left .25s cubic-bezier(.4,0,.2,1)}
 body.sidebar-collapsed #app{margin-left:60px}
 
@@ -71,23 +73,10 @@ body.sidebar-collapsed #app{margin-left:60px}
 .sb-logo-text em{color:var(--blue);font-style:normal}
 
 /* Top bar (now just topbar with period + search) */
-#topbar{
-  position:fixed;left:240px;top:0;right:0;z-index:300;height:44px;
-  background:rgba(5,9,18,.95);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px;padding:0 20px;
-  transition:left .25s cubic-bezier(.4,0,.2,1);
-  overflow:hidden;
-}
-body.light #topbar{background:rgba(240,244,248,.97);border-bottom-color:var(--border)}
-body.sidebar-collapsed #topbar{left:60px}
-#app{padding-top:60px}
+/* No topbar — full height content area */
+#app{padding-top:0}
 #sidebar{top:0}
-/* Page title block — now inline in topbar, single line */
-.topbar-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.02em;white-space:nowrap}
-.topbar-sub{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
-#topbar-title-block{overflow:hidden;min-width:0;border-left:1px solid var(--border);padding-left:14px;margin-left:4px}
-/* Page heading shown inside page content, below topbar */
+/* Page heading */
 .page-heading{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .page-heading h1{font-size:20px;font-weight:800;letter-spacing:-.04em;margin-bottom:3px}
 .page-heading p{color:var(--text2);font-size:13px}
@@ -669,6 +658,16 @@ body.light .login-box{background:#fff}
     </div>
   </div>
 
+  <!-- Stats + periode dans la sidebar -->
+  <div style="padding:10px 12px;border-top:1px solid var(--border);margin-top:auto">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 4px">
+      <span class="tx-badge" id="nav-count" style="font-size:11px">0 tx</span>
+      <button class="btn btn-ghost" id="period-btn" onclick="togglePeriodPicker()"
+        style="font-size:11px;padding:4px 9px;white-space:nowrap;flex:1">📅 Toute période ▾</button>
+      <button class="btn btn-ghost" onclick="openGlobalSearch()" title="Ctrl+K"
+        style="padding:4px 8px;font-size:13px">🔍</button>
+    </div>
+  </div>
   <!-- Bottom actions -->
   <div class="sb-bottom">
     <button class="sb-bottom-btn" id="theme-btn" onclick="toggleTheme()"><span style="font-size:15px">☀️</span><span class="sb-label">Thème</span></button>
@@ -676,19 +675,8 @@ body.light .login-box{background:#fff}
   </div>
 </aside>
 
-<!-- ── TOPBAR ── -->
-<div id="topbar">
-  <span class="tx-badge" id="nav-count">0 tx</span>
-  <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
-  <input type="hidden" id="filter-month" value="all">
-  <!-- Page title (single line, compact) -->
-  <div id="topbar-title-block">
-    <div class="topbar-title" id="topbar-title">📊 Tableau de Bord</div>
-  </div>
-  <div style="margin-left:auto;display:flex;gap:8px">
-    <button class="btn btn-ghost btn-sm" onclick="openGlobalSearch()" title="Recherche (Ctrl+K)" style="padding:5px 10px;font-size:13px">🔍</button>
-  </div>
-</div>
+<!-- filter-month hidden input (needed by JS) -->
+<input type="hidden" id="filter-month" value="all">
 
 <div id="app">
 
@@ -1896,18 +1884,42 @@ function categorize(label,amount){
   return{code:"???",lib:"Non catégorisé",cls:"?",sub:"?"};
 }
 
-// Full amortization from original capital (past + future rows)
-function calcFullAmortissement(capitalOriginal, tauxAnnuel, dureeOriginal, assurance){
+// Full amortization — reconstructs past + future using REAL PMT
+// Uses reverse reconstruction from known CRD to get past rows accurately
+function calcFullAmortissement(capitalOriginal, tauxAnnuel, dureeOriginal, assurance, crdCurrent, dureeRestante){
   const r = tauxAnnuel / 100 / 12;
-  const pmt = r===0 ? capitalOriginal/dureeOriginal : capitalOriginal * r * Math.pow(1+r,dureeOriginal) / (Math.pow(1+r,dureeOriginal)-1);
-  let cap = capitalOriginal;
+  // If we have the real CRD and remaining months, use real PMT
+  const realCRD     = (crdCurrent && crdCurrent > 0) ? crdCurrent : capitalOriginal;
+  const realDuree   = (dureeRestante && dureeRestante > 0) ? dureeRestante : dureeOriginal;
+  const pmt = r===0 ? realCRD/realDuree : realCRD * r * Math.pow(1+r,realDuree) / (Math.pow(1+r,realDuree)-1);
+  const nPastMonths = dureeOriginal - realDuree; // months already paid
+
+  // Reconstruct past CRDs backwards from realCRD
+  const pastCRDs = [realCRD];
+  let cap = realCRD;
+  for(let i=0; i<nPastMonths; i++){
+    cap = (cap + pmt) / (1 + r);
+    pastCRDs.push(cap);
+  }
+  pastCRDs.reverse(); // now pastCRDs[0] = reconstructed start, pastCRDs[n] = realCRD
+
   const allRows = [];
-  for(let m=1; m<=dureeOriginal; m++){
-    const interets = cap * r;
+  // Past rows
+  for(let i=0; i<nPastMonths; i++){
+    const capBefore = pastCRDs[i];
+    const interets  = capBefore * r;
     const capitalMois = pmt - interets;
-    cap = Math.max(0, cap - capitalMois);
-    allRows.push({ mois:m, mensualite:pmt, capital:capitalMois, interets, assurance, total:pmt+assurance, crd:cap });
-    if(cap <= 0.01) break;
+    const capAfter  = pastCRDs[i+1];
+    allRows.push({ mois:i+1, mensualite:pmt, capital:capitalMois, interets, assurance, total:pmt+assurance, crd:capAfter, past:true });
+  }
+  // Future rows (from realCRD)
+  let capF = realCRD;
+  for(let m=1; m<=realDuree; m++){
+    const interets   = capF * r;
+    const capitalMois = pmt - interets;
+    capF = Math.max(0, capF - capitalMois);
+    allRows.push({ mois:nPastMonths+m, mensualite:pmt, capital:capitalMois, interets, assurance, total:pmt+assurance, crd:capF, past:false });
+    if(capF <= 0.01) break;
   }
   return allRows;
 }
@@ -2840,16 +2852,9 @@ function showTab(id){
   updateNavActive(id);
   closeNavGroups();
   if(id==="transactions") TX_PAGE=1;
-  // Update topbar title (compact, single line)
+  // Inject page heading inside the page
   const pt=PAGE_TITLES[id];
   if(pt){
-    const icons={dashboard:"📊",tra:"📋",budget:"🎯",comparaison:"📅",analyses:"🔬",
-      projection:"🚀",simulation:"🎮",planning:"📆",patrimoine:"🏛️",
-      transactions:"💳",import:"⬆️",rapprochement:"✅",checklist:"✅",emprunts:"🏦",comptes:"⚙️"};
-    const icon=icons[id]||"";
-    const t=document.getElementById("topbar-title");
-    if(t) t.textContent=`${icon} ${pt[0]}`;
-    // Inject page heading inside the page
     const page=document.getElementById("page-"+id);
     if(page){
       let ph=page.querySelector(".page-heading");
@@ -4548,9 +4553,11 @@ function renderEmprunts(){
     const capitalOriginal = l.capitalOriginal || l.capital;
     const dureeOriginal   = l.dureeOriginal   || l.duree;
     const debutOrigStr    = l.debutOriginal   || l.debut; // "2019-07" for BNP
-    const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0);
-    // Find current month: row where CRD ≈ curRow.crd (CRD AFTER this payment)
-    const curFullIdx = allRows.findIndex(row=>Math.abs(row.crd - curRow.crd) < 5);
+    // Pass real CRD and remaining months so PMT is reconstructed accurately
+    const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0, l.capital, l.duree);
+    // Current month = first future row (index = nPastMonths)
+    const nPastMonths = dureeOriginal - l.duree;
+    const curFullIdx  = nPastMonths; // current month is right after the last past row
     const nPast = curFullIdx >= 0 ? curFullIdx : 0;
     const nFuture = allRows.length - nPast - 1;
     const tableRows = allRows;
@@ -4676,11 +4683,8 @@ function exportLoanTable(id){
   const capitalOriginal = l.capitalOriginal || l.capital;
   const dureeOriginal   = l.dureeOriginal   || l.duree;
   const debutOrigStr    = l.debutOriginal   || l.debut;
-  const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0);
-  // Find current month index
-  const {rows:futureRows} = calcAmortissement(l.capital, l.taux, l.duree, l.assurance||0, l.crd);
-  const curCRD = futureRows[0]?.crd || 0;
-  const curIdx = allRows.findIndex(row=>Math.abs(row.crd-curCRD)<5);
+  const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0, l.capital, l.duree);
+  const curIdx = dureeOriginal - l.duree; // months already paid
   let csv=`Mois;Statut;Mensualité;Capital;Intérêts;Assurance;Total;Capital Restant Dû\n`;
   const debutParts=debutOrigStr.split("-");
   allRows.forEach((row,i)=>{
