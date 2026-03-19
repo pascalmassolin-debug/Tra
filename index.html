@@ -72,14 +72,20 @@ body.sidebar-collapsed #app{margin-left:60px}
 
 /* Top bar (now just topbar with period + search) */
 #topbar{
-  position:fixed;left:240px;top:0;right:0;z-index:300;height:48px;
-  background:rgba(5,9,18,.92);backdrop-filter:blur(20px);
+  position:fixed;left:240px;top:0;right:0;z-index:300;height:56px;
+  background:rgba(5,9,18,.95);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;padding:0 16px;
+  display:flex;align-items:center;gap:12px;padding:0 20px;
   transition:left .25s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
 }
+body.light #topbar{background:rgba(240,244,248,.97);border-bottom-color:var(--border)}
 body.sidebar-collapsed #topbar{left:60px}
-#app{padding-top:48px}
+#app{padding-top:56px}
+#sidebar{top:0}
+.topbar-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.02em;white-space:nowrap}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#topbar-title-block{overflow:hidden;min-width:0}
 
 /* Nav items */
 .sb-section{padding:8px 0}
@@ -656,6 +662,11 @@ body.light .login-box{background:#fff}
   <span class="tx-badge" id="nav-count">0 tx</span>
   <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
   <input type="hidden" id="filter-month" value="all">
+  <!-- Page title + greeting -->
+  <div id="topbar-title-block" style="margin-left:16px;border-left:1px solid var(--border);padding-left:16px">
+    <div class="topbar-title" id="topbar-title">Tableau de Bord</div>
+    <div class="topbar-sub" id="topbar-sub">Bonjour Pascal 👋 — Vue d'ensemble de ta situation financière</div>
+  </div>
   <div style="margin-left:auto;display:flex;gap:8px">
     <button class="btn btn-ghost btn-sm" onclick="openGlobalSearch()" title="Recherche (Ctrl+K)" style="padding:5px 10px;font-size:13px">🔍</button>
   </div>
@@ -1534,6 +1545,23 @@ function toggleSidebar(){
 function loadSidebarState(){
   if(localStorage.getItem("sb_collapsed")==="1") document.body.classList.add("sidebar-collapsed");
 }
+const PAGE_TITLES={
+  'dashboard':['Tableau de Bord','Bonjour Pascal 👋 — Vue d\'ensemble de ta situation financière'],
+  'tra':['TRA Analytique','Tableau de Résultats Analytique — détail par compte'],
+  'budget':['Budget vs Réel','Compare tes objectifs avec tes dépenses réelles'],
+  'comparaison':['Comparaison','Analyse mois par mois et objectifs annuels'],
+  'analyses':['Analyses Avancées','Score financier, tendances, anomalies et prévisions'],
+  'projection':['Projection Patrimoine','Ta trajectoire vers 1 million € sur 20 ans'],
+  'simulation':['Simulation','Et si tu changeais tes habitudes ? Joue avec les curseurs'],
+  'planning':['Planning des Flux','Calendrier des recettes et dépenses attendues ce mois'],
+  'patrimoine':['Tracker Patrimoine','Saisis tes actifs chaque mois — courbe réelle vs projection'],
+  'transactions':['Transactions','Toutes tes opérations bancaires — filtre, modifie, ventile'],
+  'import':['Import CSV','Glisse ou colle tes relevés — format détecté automatiquement'],
+  'rapprochement':['Rapprochement Bancaire','Contrôle de cohérence entre tes relevés et tes saisies'],
+  'checklist':['Checklist Mensuelle','Tes tâches financières à valider chaque mois'],
+  'emprunts':['Gestionnaire d\'Emprunts','Tableau d\'amortissement et objectifs automatiques'],
+  'comptes':['Plan de Comptes','Classes, comptes prédéfinis et règles de catégorisation'],
+};
 const PAGE_TO_GROUP={
   tra:"sbg-analyse",budget:"sbg-analyse",comparaison:"sbg-analyse",analyses:"sbg-analyse",
   projection:"sbg-pilotage",simulation:"sbg-pilotage",planning:"sbg-pilotage",patrimoine:"sbg-pilotage",
@@ -2741,6 +2769,12 @@ function showTab(id){
   updateNavActive(id);
   closeNavGroups();
   if(id==="transactions") TX_PAGE=1;
+  // Update topbar title
+  const pt=PAGE_TITLES[id];
+  if(pt){
+    const t=document.getElementById("topbar-title"); if(t) t.textContent=pt[0];
+    const s=document.getElementById("topbar-sub");   if(s) s.textContent=pt[1];
+  }
   render();
   if(id==="analyses")    renderAnalyses();
   if(id==="comparaison") renderComparaison();
