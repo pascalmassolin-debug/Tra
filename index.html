@@ -551,10 +551,22 @@ body.light .login-box{background:#fff}
       </div>
     </div>
 
-    <!-- Compte analytique -->
-    <div style="margin-bottom:20px">
-      <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Compte analytique</label>
-      <select id="edit-account" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none"></select>
+    <!-- Compte analytique + Banque -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Compte analytique</label>
+        <select id="edit-account" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:5px">Banque</label>
+        <select id="edit-bank" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none">
+          <option value="">— Saisie manuelle —</option>
+          <option value="BoursoBank">BoursoBank</option>
+          <option value="BNP Paribas">BNP Paribas</option>
+          <option value="BNP Crédit">BNP Crédit</option>
+          <option value="La Banque Postale">La Banque Postale</option>
+        </select>
+      </div>
     </div>
 
     <!-- Règle permanente -->
@@ -3733,6 +3745,12 @@ function openEditModal(id){
   });
   document.getElementById("edit-rule").onchange=updateRulePreview;
   sel.onchange=updateRulePreview;
+  // Pre-fill bank
+  const bankSel=document.getElementById("edit-bank");
+  if(bankSel){
+    const banks=["BoursoBank","BNP Paribas","BNP Crédit","La Banque Postale"];
+    bankSel.value=banks.includes(t.bank)?t.bank:"";
+  }
   document.getElementById("edit-modal").style.display="flex";
   setTimeout(()=>document.getElementById("edit-label").focus(),100);
 }
@@ -3769,6 +3787,9 @@ async function saveEdit(){
   // Update the transaction
   t.label=newLabel; t.date=newDate; t.amount=newAmount;
   t.code=newCode; t.lib=acc.lib; t.cls=acc.cls;
+  // Update bank if changed
+  const newBank=document.getElementById("edit-bank")?.value||"";
+  t.bank = newBank || t.bank || "Saisie manuelle";
 
   // Create + apply permanent rule
   if(createRule&&newLabel){
