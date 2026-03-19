@@ -148,7 +148,8 @@ body.sidebar-collapsed #topbar{left:60px}
 #app{padding:22px 18px;max-width:1200px;margin:0 auto}
 .page{display:none}
 .page.active{display:block}
-.page-hd{margin-bottom:22px}
+/* page-hd now hidden — topbar handles page titles */
+.page-hd{display:none}
 .page-hd h1{font-size:22px;font-weight:800;letter-spacing:-.04em}
 .page-hd p{color:var(--text2);font-size:13px;margin-top:3px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -271,6 +272,7 @@ input:not(.bvr-inp):not(.param-inp):focus,textarea:focus{border-color:var(--blue
 .bank-bnp{background:rgba(16,217,126,.1);color:var(--green);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
 .bank-lbp{background:rgba(245,166,35,.1);color:var(--amber);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
 .bank-bnpcredit{background:rgba(167,139,250,.1);color:var(--purple);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.bank-manual{background:rgba(255,255,255,.06);color:var(--text3);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;border:1px dashed var(--border)}
 
 /* ── MOBILE ───────────────────────────────────────────────── */
 @media(max-width:480px){
@@ -840,11 +842,21 @@ body.light .login-box{background:#fff}
       <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Libellé</label>
       <input type="text" id="m-label" placeholder="Description de la transaction">
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
       <div>
         <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Compte analytique</label>
         <select id="m-account" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none" onchange="updateManualClass()">
           <option value="">— Catégorisation automatique —</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px">Banque</label>
+        <select id="m-bank" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:var(--rs);padding:10px 12px;font-size:13px;font-family:inherit;outline:none">
+          <option value="">— Saisie manuelle —</option>
+          <option value="BoursoBank">BoursoBank</option>
+          <option value="BNP Paribas">BNP Paribas</option>
+          <option value="BNP Crédit">BNP Crédit</option>
+          <option value="La Banque Postale">La Banque Postale</option>
         </select>
       </div>
       <div>
@@ -856,6 +868,7 @@ body.light .login-box{background:#fff}
       <button class="btn btn-blue" style="flex:1" onclick="addManual()">➕ Ajouter la transaction</button>
       <div style="font-size:12px;color:var(--text3)" id="m-class-preview"></div>
     </div>
+    <div id="m-confirm"></div>
   </div>
 
   <!-- Filtres -->
@@ -1537,6 +1550,11 @@ BNP Crédit : 05/01/2026;;;AMORTISSEMENT PRET 01812...;808,77" style="resize:ver
 </div>
 
 <script>
+// ─── DATE HELPERS ─────────────────────────────────────────────────────────────
+// Always use local time — never toISOString() for current month (UTC shift bug)
+function localYearMonth(date){ const d=date||new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; }
+function localISODate(date){ const d=date||new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+
 // ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 function toggleSidebar(){
   document.body.classList.toggle("sidebar-collapsed");
@@ -1836,7 +1854,7 @@ function fmt(n){return new Intl.NumberFormat("fr-FR",{style:"currency",currency:
 function fmtPct(n){return((n||0)*100).toFixed(1)+"%"}
 function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
 function bankClass(b){
-  if(!b) return "b-q";
+  if(!b||b==="Saisie manuelle") return "bank-manual";
   const u=b.toLowerCase();
   if(u.includes("bourso")) return "bank-bourso";
   if(u.includes("crédit")||u.includes("credit")) return "bank-bnpcredit";
@@ -1860,6 +1878,22 @@ function categorize(label,amount){
     }
   }
   return{code:"???",lib:"Non catégorisé",cls:"?",sub:"?"};
+}
+
+// Full amortization from original capital (past + future rows)
+function calcFullAmortissement(capitalOriginal, tauxAnnuel, dureeOriginal, assurance){
+  const r = tauxAnnuel / 100 / 12;
+  const pmt = r===0 ? capitalOriginal/dureeOriginal : capitalOriginal * r * Math.pow(1+r,dureeOriginal) / (Math.pow(1+r,dureeOriginal)-1);
+  let cap = capitalOriginal;
+  const allRows = [];
+  for(let m=1; m<=dureeOriginal; m++){
+    const interets = cap * r;
+    const capitalMois = pmt - interets;
+    cap = Math.max(0, cap - capitalMois);
+    allRows.push({ mois:m, mensualite:pmt, capital:capitalMois, interets, assurance, total:pmt+assurance, crd:cap });
+    if(cap <= 0.01) break;
+  }
+  return allRows;
 }
 
 // ─── PARSERS ──────────────────────────────────────────────────────────────────
@@ -2047,7 +2081,7 @@ function updateMonthFilter(){
 
 // ─── RENDER MAIN ──────────────────────────────────────────────────────────────
 function updateChecklistBadge(){
-  const m=new Date().toISOString().slice(0,7);
+  const m=localYearMonth();
   const allTasks=[...DEFAULT_TASKS,...(CHK_DATA?.customTasks||[])];
   const d=(CHK_DATA||{})[m]||{tasks:{}};
   const remaining=allTasks.filter(t=>!d.tasks[t.id]).length;
@@ -2746,18 +2780,39 @@ function addManual(){
   const label=document.getElementById("m-label").value.trim();
   const amount=parseFloat(document.getElementById("m-amt").value.replace(",","."));
   const selCode=document.getElementById("m-account").value;
+  const bank=(document.getElementById("m-bank")?.value||"").trim();
   const note=(document.getElementById("m-note")?.value||"").trim();
   if(!date||!label||isNaN(amount)){ alert("Date, libellé et montant obligatoires."); return; }
   let acc;
   if(selCode){ acc=PLAN.find(a=>a.code===selCode)||{code:selCode,lib:"Personnalisé",cls:"?"}; }
   else { acc=categorize(label,amount); }
-  const tx={id:Date.now()+Math.random(),date,label,amount,code:acc.code,lib:acc.lib,cls:acc.cls};
+  const tx={id:Date.now()+Math.random(),date,label,amount,
+    bank: bank||"Saisie manuelle",
+    code:acc.code,lib:acc.lib,cls:acc.cls};
   if(note) tx.note=note;
   TXS.push(tx);
   save();
+  // Reset form
   ["m-date","m-label","m-amt","m-note"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   document.getElementById("m-account").value="";
+  document.getElementById("m-bank").value="";
   document.getElementById("m-class-preview").innerHTML="";
+  // Show confirmation + scroll to new transaction in the list
+  const confirmEl=document.getElementById("m-confirm");
+  if(confirmEl){
+    confirmEl.innerHTML=`<div class="alert a-ok" style="margin-top:8px">✅ Transaction ajoutée — <strong>${label}</strong> · ${fmt(amount)}</div>`;
+    setTimeout(()=>confirmEl.innerHTML="",3000);
+  }
+  // Filter to show the right month so user sees the transaction
+  if(date){
+    const m=date.substring(0,7);
+    SELECTED_MONTHS=[m];
+    updatePeriodBtn();
+    TX_PAGE=1;
+    renderTX();
+    // Scroll to transaction list
+    setTimeout(()=>document.getElementById("tx-tbody")?.closest(".card")?.scrollIntoView({behavior:"smooth",block:"start"}),100);
+  }
 }
 function delTx(id){TXS=TXS.filter(t=>String(t.id)!==String(id));save()}
 function clearAll(){if(!confirm("Supprimer TOUTES les transactions ?"))return;TXS=[];save()}
@@ -3205,7 +3260,7 @@ function toggleMonth(m){
 function selectAllMonths(){ SELECTED_MONTHS=[]; buildPeriodChips(); updatePeriodBtn(); render(); }
 function selectNoMonths(){
   // Select only current month
-  const cur=new Date().toISOString().slice(0,7);
+  const cur=localYearMonth();
   SELECTED_MONTHS=[cur]; buildPeriodChips(); updatePeriodBtn(); render();
 }
 function selectLastN(n){
@@ -3213,7 +3268,9 @@ function selectLastN(n){
   SELECTED_MONTHS=[];
   for(let i=0;i<n;i++){
     const dt=new Date(today.getFullYear(),today.getMonth()-i,1);
-    SELECTED_MONTHS.push(dt.toISOString().slice(0,7));
+    // Manual format to avoid UTC timezone shift (toISOString décale en UTC)
+    const m=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}`;
+    SELECTED_MONTHS.push(m);
   }
   buildPeriodChips(); updatePeriodBtn(); render();
 }
@@ -3439,7 +3496,7 @@ function renderPredicted(A){
   const el=document.getElementById("predicted-content"); if(!el) return;
   const today=new Date();
   const dayOfMonth=today.getDate();
-  const currentMonth=today.toISOString().slice(0,7);
+  const currentMonth=localYearMonth(today);
   // Already received/paid this month
   const txThisMonth=TXS.filter(t=>t.date?.startsWith(currentMonth));
   // What's expected but not yet arrived
@@ -3528,7 +3585,7 @@ function renderTrends(){
   const today=new Date();
   const months3=[-2,-1,0].map(d=>{
     const dt=new Date(today.getFullYear(),today.getMonth()+d,1);
-    return dt.toISOString().slice(0,7);
+    return localYearMonth(dt);
   });
   const monthsData=months3.map(m=>({m,A:analytics(TXS.filter(t=>t.date?.startsWith(m)))}));
   const cur=monthsData[2].A, prev=monthsData[1].A, prev2=monthsData[0].A;
@@ -3576,7 +3633,7 @@ function renderAnomalies(A){
   // Reference = 3 months before the current selection, always from full TXS
   const prevMs=[-1,-2,-3].map(d=>{
     const dt=new Date(today.getFullYear(),today.getMonth()+d,1);
-    return dt.toISOString().slice(0,7);
+    return localYearMonth(dt);
   });
   const anomalies=[];
   PLAN.filter(a=>!isNeutral(a.cls)&&isCharge(a.cls)).forEach(acc=>{
@@ -3984,7 +4041,7 @@ function savePatrimoine(){
 function renderPatrimoine(){
   loadPatrimoine();
   const inputs=document.getElementById("pat-inputs"); if(!inputs) return;
-  const curMonth=new Date().toISOString().slice(0,7);
+  const curMonth=localYearMonth();
   const curEntry=PATRIMOINE_HISTORY.find(h=>h.month===curMonth)||{};
   inputs.innerHTML=PAT_FIELDS.map(f=>`<div>
     <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">${f.label}</label>
@@ -4188,6 +4245,9 @@ function loadLoans(){
         name:"Prêt immobilier BNP — Thiais",
         type:"immo",
         capital:213566.80,   // CRD actuel = capital restant à amortir
+        capitalOriginal:250000, // Capital initial du prêt
+        dureeOriginal:300,      // Durée initiale (hors suspension)
+        debutOriginal:"2019-07",// Date de début du prêt original
         taux:1.95,
         duree:219,           // Amortissements restants au 05/03/2026
         assurance:82.50,     // Assurance INCLUSE dans la mensualité BNP (≠ Cardif IARD)
@@ -4315,7 +4375,7 @@ function saveLoan(){
   const taux     = parseFloat(document.getElementById("ln-taux")?.value)||0;
   const duree    = parseInt(document.getElementById("ln-duree")?.value)||0;
   const assurance= parseFloat(document.getElementById("ln-assurance")?.value)||0;
-  const debut    = document.getElementById("ln-debut")?.value||new Date().toISOString().slice(0,7);
+  const debut    = document.getElementById("ln-debut")?.value||localYearMonth();
   const crd      = parseFloat(document.getElementById("ln-crd")?.value)||null;
   const msg      = document.getElementById("loan-save-msg");
 
@@ -4446,8 +4506,13 @@ function renderEmprunts(){
     const typeIcons={immo:"🏠",auto:"🚗",conso:"💳",pro:"💼",autre:"📋"};
     const typeIcon=typeIcons[l.type]||"🏦";
 
-    // Full amortization table — all rows, current month highlighted
-    let tableRows=rows; // show every row
+    // Full amortization table — past (greyed) + future, current month highlighted
+    const capitalOriginal = l.capitalOriginal || l.capital;
+    const dureeOriginal   = l.dureeOriginal   || l.duree;
+    const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0);
+    const curCRD  = curRow.crd + curRow.capital;
+    const curFullIdx = allRows.findIndex(row=>Math.abs(row.crd - curCRD) < 10);
+    const tableRows = allRows;
     
     return`<div class="loan-card ${l.active?"active-loan":""}">
       ${l.active?'<span class="loan-badge">✓ Actif</span>':'<span class="loan-badge" style="background:rgba(255,255,255,.06);color:var(--text3)">Inactif</span>'}
@@ -4500,11 +4565,12 @@ function renderEmprunts(){
             </tr></thead>
             <tbody>${tableRows.map((row,i)=>{
               const absIdx=i;
-              const isCurrent=absIdx===curRowIdx;
-              const rowDate=new Date(debutDate.getFullYear(),debutDate.getMonth()+absIdx,1);
+              const isCurrent=(curFullIdx>=0)?(absIdx===curFullIdx):(absIdx===curRowIdx);
+              const isPast=(curFullIdx>=0)?(absIdx<curFullIdx):(absIdx<curRowIdx);
+              const rowDate=new Date(new Date(l.debut+'-01').getFullYear(), new Date(l.debut+'-01').getMonth()+absIdx, 1);
               const mLabel=rowDate.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"});
-              return`<tr class="${isCurrent?"cur-row":""}">
-                <td>${mLabel}${isCurrent?' <span style="font-size:9px;color:var(--blue);background:rgba(77,159,255,.1);padding:1px 5px;border-radius:3px">CE MOIS</span>':""}</td>
+              return`<tr class="${isCurrent?"cur-row":""}" style="${isPast?"opacity:.45;font-style:italic":""}">
+                <td>${mLabel}${isCurrent?' <span style="font-size:9px;color:var(--blue);background:rgba(77,159,255,.1);padding:1px 5px;border-radius:3px">CE MOIS</span>':isPast?' <span style="font-size:9px;color:var(--text3);background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px">payé</span>':""}</td>
                 <td>${fmt(row.mensualite)}</td>
                 <td style="color:var(--green)">${fmt(row.capital)}</td>
                 <td style="color:var(--red)">${fmt(row.interets)}</td>
@@ -5026,7 +5092,7 @@ function saveChecklist(){
 }
 
 function chkMonth(){
-  return document.getElementById("chk-month-sel")?.value || new Date().toISOString().slice(0,7);
+  return document.getElementById("chk-month-sel")?.value || localYearMonth();
 }
 
 function getMonthData(m){
@@ -5072,7 +5138,7 @@ function renderChecklist(){
   const sel=document.getElementById("chk-month-sel"); if(!sel) return;
   const cur=sel.value;
   const months=[...new Set(TXS.map(t=>t.date?.substring(0,7)).filter(Boolean))].sort().reverse();
-  const thisMonth=new Date().toISOString().slice(0,7);
+  const thisMonth=localYearMonth();
   const allMonths=months.includes(thisMonth)?months:[thisMonth,...months];
   sel.innerHTML=allMonths.map(m=>`<option value="${m}"${m===(cur||thisMonth)?" selected":""}>${m}</option>`).join("");
   if(!sel.value) sel.value=thisMonth;
