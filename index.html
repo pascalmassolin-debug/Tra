@@ -81,7 +81,7 @@ body.sidebar-collapsed #app{margin-left:60px}
 }
 body.light #topbar{background:rgba(240,244,248,.97);border-bottom-color:var(--border)}
 body.sidebar-collapsed #topbar{left:60px}
-#app{padding-top:44px}
+#app{padding-top:60px}
 #sidebar{top:0}
 /* Page title block — now inline in topbar, single line */
 .topbar-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.02em;white-space:nowrap}
@@ -4541,8 +4541,6 @@ function renderEmprunts(){
     const curRow=rows[curRowIdx]||rows[0]||{capital:0,interets:0,crd:0,total:0};
     const moisRestants=rows.length-curRowIdx;
     const dateFinEstim=new Date(todayDate.getFullYear(),todayDate.getMonth()+moisRestants,1).toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
-    const pct=Math.max(0,Math.min(100,(1-(curRow.crd/(l.crd||l.capital)))*100));
-
     const typeIcons={immo:"🏠",auto:"🚗",conso:"💳",pro:"💼",autre:"📋"};
     const typeIcon=typeIcons[l.type]||"🏦";
 
@@ -4556,6 +4554,11 @@ function renderEmprunts(){
     const nPast = curFullIdx >= 0 ? curFullIdx : 0;
     const nFuture = allRows.length - nPast - 1;
     const tableRows = allRows;
+
+    // Real progression — based on actual months elapsed since original start
+    const pct = curFullIdx >= 0
+      ? Math.max(0, Math.min(100, (curFullIdx / allRows.length) * 100))
+      : Math.max(0, Math.min(100,(1-(curRow.crd/(l.crd||l.capital)))*100));
     
     return`<div class="loan-card ${l.active?"active-loan":""}">
       ${l.active?'<span class="loan-badge">✓ Actif</span>':'<span class="loan-badge" style="background:rgba(255,255,255,.06);color:var(--text3)">Inactif</span>'}
@@ -4610,8 +4613,8 @@ function renderEmprunts(){
               const absIdx=i;
               const isCurrent=(curFullIdx>=0)?(absIdx===curFullIdx):(absIdx===curRowIdx);
               const isPast=(curFullIdx>=0)?(absIdx<curFullIdx):(absIdx<curRowIdx);
-              const debutParts=debutOrigStr.split("-");
-              const rowDate=new Date(parseInt(debutParts[0]), parseInt(debutParts[1])-1+absIdx, 1);
+              const _dp=debutOrigStr.split("-");
+              const rowDate=new Date(parseInt(_dp[0]), parseInt(_dp[1])-1+absIdx, 1);
               const mLabel=rowDate.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"});
               return`<tr class="${isCurrent?"cur-row":""}" style="${isPast?"opacity:.45;font-style:italic":""}">
                 <td>${mLabel}${isCurrent?' <span style="font-size:9px;color:var(--blue);background:rgba(77,159,255,.1);padding:1px 5px;border-radius:3px">CE MOIS</span>':isPast?' <span style="font-size:9px;color:var(--text3);background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px">payé</span>':""}</td>
