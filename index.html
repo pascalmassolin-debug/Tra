@@ -72,7 +72,7 @@ body.sidebar-collapsed #app{margin-left:60px}
 
 /* Top bar (now just topbar with period + search) */
 #topbar{
-  position:fixed;left:240px;top:0;right:0;z-index:300;height:56px;
+  position:fixed;left:240px;top:0;right:0;z-index:300;height:44px;
   background:rgba(5,9,18,.95);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:12px;padding:0 20px;
@@ -81,11 +81,16 @@ body.sidebar-collapsed #app{margin-left:60px}
 }
 body.light #topbar{background:rgba(240,244,248,.97);border-bottom-color:var(--border)}
 body.sidebar-collapsed #topbar{left:60px}
-#app{padding-top:56px}
+#app{padding-top:44px}
 #sidebar{top:0}
+/* Page title block — now inline in topbar, single line */
 .topbar-title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.02em;white-space:nowrap}
-.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#topbar-title-block{overflow:hidden;min-width:0}
+.topbar-sub{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
+#topbar-title-block{overflow:hidden;min-width:0;border-left:1px solid var(--border);padding-left:14px;margin-left:4px}
+/* Page heading shown inside page content, below topbar */
+.page-heading{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.page-heading h1{font-size:20px;font-weight:800;letter-spacing:-.04em;margin-bottom:3px}
+.page-heading p{color:var(--text2);font-size:13px}
 
 /* Nav items */
 .sb-section{padding:8px 0}
@@ -676,10 +681,9 @@ body.light .login-box{background:#fff}
   <span class="tx-badge" id="nav-count">0 tx</span>
   <button class="btn btn-ghost btn-sm" id="period-btn" onclick="togglePeriodPicker()" style="font-size:11px;padding:5px 10px;white-space:nowrap">📅 Toute période ▾</button>
   <input type="hidden" id="filter-month" value="all">
-  <!-- Page title + greeting -->
-  <div id="topbar-title-block" style="margin-left:16px;border-left:1px solid var(--border);padding-left:16px">
-    <div class="topbar-title" id="topbar-title">Tableau de Bord</div>
-    <div class="topbar-sub" id="topbar-sub">Bonjour Pascal 👋 — Vue d'ensemble de ta situation financière</div>
+  <!-- Page title (single line, compact) -->
+  <div id="topbar-title-block">
+    <div class="topbar-title" id="topbar-title">📊 Tableau de Bord</div>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px">
     <button class="btn btn-ghost btn-sm" onclick="openGlobalSearch()" title="Recherche (Ctrl+K)" style="padding:5px 10px;font-size:13px">🔍</button>
@@ -2836,11 +2840,26 @@ function showTab(id){
   updateNavActive(id);
   closeNavGroups();
   if(id==="transactions") TX_PAGE=1;
-  // Update topbar title
+  // Update topbar title (compact, single line)
   const pt=PAGE_TITLES[id];
   if(pt){
-    const t=document.getElementById("topbar-title"); if(t) t.textContent=pt[0];
-    const s=document.getElementById("topbar-sub");   if(s) s.textContent=pt[1];
+    const icons={dashboard:"📊",tra:"📋",budget:"🎯",comparaison:"📅",analyses:"🔬",
+      projection:"🚀",simulation:"🎮",planning:"📆",patrimoine:"🏛️",
+      transactions:"💳",import:"⬆️",rapprochement:"✅",checklist:"✅",emprunts:"🏦",comptes:"⚙️"};
+    const icon=icons[id]||"";
+    const t=document.getElementById("topbar-title");
+    if(t) t.textContent=`${icon} ${pt[0]}`;
+    // Inject page heading inside the page
+    const page=document.getElementById("page-"+id);
+    if(page){
+      let ph=page.querySelector(".page-heading");
+      if(!ph){
+        ph=document.createElement("div");
+        ph.className="page-heading";
+        page.insertBefore(ph, page.firstChild);
+      }
+      ph.innerHTML=`<h1>${pt[0]}</h1><p>${pt[1]}</p>`;
+    }
   }
   render();
   if(id==="analyses")    renderAnalyses();
@@ -4527,12 +4546,15 @@ function renderEmprunts(){
     const typeIcons={immo:"🏠",auto:"🚗",conso:"💳",pro:"💼",autre:"📋"};
     const typeIcon=typeIcons[l.type]||"🏦";
 
-    // Full amortization table — past (greyed) + future, current month highlighted
+    // Full amortization table — ALL rows from original loan start
     const capitalOriginal = l.capitalOriginal || l.capital;
     const dureeOriginal   = l.dureeOriginal   || l.duree;
+    const debutOrigStr    = l.debutOriginal   || l.debut; // "2019-07" for BNP
     const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0);
-    const curCRD  = curRow.crd + curRow.capital;
-    const curFullIdx = allRows.findIndex(row=>Math.abs(row.crd - curCRD) < 10);
+    // Find current month: row where CRD ≈ curRow.crd (CRD AFTER this payment)
+    const curFullIdx = allRows.findIndex(row=>Math.abs(row.crd - curRow.crd) < 5);
+    const nPast = curFullIdx >= 0 ? curFullIdx : 0;
+    const nFuture = allRows.length - nPast - 1;
     const tableRows = allRows;
     
     return`<div class="loan-card ${l.active?"active-loan":""}">
@@ -4588,7 +4610,8 @@ function renderEmprunts(){
               const absIdx=i;
               const isCurrent=(curFullIdx>=0)?(absIdx===curFullIdx):(absIdx===curRowIdx);
               const isPast=(curFullIdx>=0)?(absIdx<curFullIdx):(absIdx<curRowIdx);
-              const rowDate=new Date(new Date(l.debut+'-01').getFullYear(), new Date(l.debut+'-01').getMonth()+absIdx, 1);
+              const debutParts=debutOrigStr.split("-");
+              const rowDate=new Date(parseInt(debutParts[0]), parseInt(debutParts[1])-1+absIdx, 1);
               const mLabel=rowDate.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"});
               return`<tr class="${isCurrent?"cur-row":""}" style="${isPast?"opacity:.45;font-style:italic":""}">
                 <td>${mLabel}${isCurrent?' <span style="font-size:9px;color:var(--blue);background:rgba(77,159,255,.1);padding:1px 5px;border-radius:3px">CE MOIS</span>':isPast?' <span style="font-size:9px;color:var(--text3);background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px">payé</span>':""}</td>
@@ -4646,21 +4669,28 @@ function updateLoanCode(id, field, value){
 
 function exportLoanTable(id){
   const l=LOANS.find(x=>x.id===id); if(!l) return;
-  const {rows}=calcAmortissement(l.capital,l.taux,l.duree,l.assurance||0,l.crd);
-  let csv=`Mois;Mensualité;Capital;Intérêts;Assurance;Total;Capital Restant Dû
-`;
-  const debutDate=new Date(l.debut+"-01");
-  rows.forEach((row,i)=>{
-    const dt=new Date(debutDate.getFullYear(),debutDate.getMonth()+i,1);
+  // Export FULL table from original capital (past + future)
+  const capitalOriginal = l.capitalOriginal || l.capital;
+  const dureeOriginal   = l.dureeOriginal   || l.duree;
+  const debutOrigStr    = l.debutOriginal   || l.debut;
+  const allRows = calcFullAmortissement(capitalOriginal, l.taux, dureeOriginal, l.assurance||0);
+  // Find current month index
+  const {rows:futureRows} = calcAmortissement(l.capital, l.taux, l.duree, l.assurance||0, l.crd);
+  const curCRD = futureRows[0]?.crd || 0;
+  const curIdx = allRows.findIndex(row=>Math.abs(row.crd-curCRD)<5);
+  let csv=`Mois;Statut;Mensualité;Capital;Intérêts;Assurance;Total;Capital Restant Dû\n`;
+  const debutParts=debutOrigStr.split("-");
+  allRows.forEach((row,i)=>{
+    const dt=new Date(parseInt(debutParts[0]), parseInt(debutParts[1])-1+i, 1);
     const m=dt.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
-    csv+=`${m};${row.mensualite.toFixed(2)};${row.capital.toFixed(2)};${row.interets.toFixed(2)};${(l.assurance||0).toFixed(2)};${row.total.toFixed(2)};${row.crd.toFixed(2)}
-`;
+    const statut=i<curIdx?"Payé":i===curIdx?"Mois courant":"À venir";
+    csv+=`${m};${statut};${row.mensualite.toFixed(2)};${row.capital.toFixed(2)};${row.interets.toFixed(2)};${(l.assurance||0).toFixed(2)};${row.total.toFixed(2)};${row.crd.toFixed(2)}\n`;
   });
-  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download=`Amortissement_${l.name.replace(/\s+/g,"_")}.csv`;
+  a.download=`Amortissement_complet_${l.name.replace(/\s+/g,"_")}.csv`;
   a.click(); URL.revokeObjectURL(a.href);
-  syncShow("ok","Tableau d'amortissement exporté ✓");
+  syncShow("ok",`Tableau d'amortissement complet exporté (${allRows.length} échéances) ✓`);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -5283,6 +5313,8 @@ function load(){
       updateClassSelectors();
       renderCustomClassesList();
       syncBudgetsFromLoans();
+      // Inject heading for default page
+      showTab("dashboard");
       syncShow("ok","Synchronisé ✓");
     });
   }
